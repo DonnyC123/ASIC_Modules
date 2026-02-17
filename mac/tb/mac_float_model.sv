@@ -24,7 +24,7 @@ module mac_float_model #(
   localparam BIAS       = (2 ** (EXP_W - 1)) - 1;
   localparam MANTISSA_W = FRAC_W + 1;
   localparam GUARD_W    = 2;
-
+  localparam SUM_W      = 3*MANTISSA_W + MANTISSA_W + GUARD_W;
   function automatic void unpack_float(input float_t float_i, output unpacked_float_t unpacked_o);
     unpacked_o.mantissa = longint'($unsigned({1'b1, float_i.frac}));
     unpacked_o.exp      = longint'($unsigned(float_i.exp));
@@ -96,38 +96,30 @@ module mac_float_model #(
       end
     end
   
-    unpacked_sum_guarded_shifted = unpacked_sum_guarded;
+
     if (unpacked_sum_guarded == 0) begin
         unpacked_sum.mantissa = 0;
-        unpacked_sum.exp      = -BIAS;
-    end 
-    else begin
-        if (unpacked_sum_guarded[FRAC_W + GUARD_W + 1]) begin
-            unpacked_sum_guarded >>= 1;
-            unpacked_sum.exp++;
-        end 
-        else begin
-            while (unpacked_sum_guarded[FRAC_W + GUARD_W] == 0) begin
-                unpacked_sum_guarded <<= 1;
-                unpacked_sum.exp--;
-            end
+        unpacked_sum.exp      = 0;
+    end else begin
+      unpacked_sum.exp = unpacked_sum.exp + MANTISSA_W + GUARD_W;
+      while (unpacked_sum_guarded[SUM_W-1] != 1) begin
+        unpacked_sum_guarded <<= 1;
+        unpacked_sum.exp--;
+      end
+
+      guard  = unpacked_sum_guarded[SUM_W-MANTISSA_W - 1];
+      sticky = |unpacked_sum_guarded[SUM_W-MANTISSA_W - 2 : 0];
+      lsb    = unpacked_sum_guarded[SUM_W-MANTISSA_W];
+
+      unpacked_sum.mantissa = unpacked_sum_guarded >> (SUM_W-MANTISSA_W);
+
+      if (guard && (sticky || lsb)) begin
+        unpacked_sum.mantissa++;
+        if (unpacked_sum.mantissa[FRAC_W + 1]) begin 
+          unpacked_sum.mantissa >>= 1;
+          unpacked_sum.exp++;
         end
-
-
-        guard  = unpacked_sum_guarded[GUARD_W - 1];
-        sticky = |unpacked_sum_guarded[GUARD_W - 2 : 0];
-        lsb    = unpacked_sum_guarded[GUARD_W];
-
-        unpacked_sum.mantissa = unpacked_sum_guarded >> GUARD_W;
-
-        if (guard && (sticky || lsb)) begin
-            unpacked_sum.mantissa++;
-
-            if (unpacked_sum.mantissa[FRAC_W + 1]) begin 
-                unpacked_sum.mantissa >>= 1;
-                unpacked_sum.exp++;
-            end
-        end
+      end
     end
 
     if (unpacked_sum.mantissa == 0) z = '0;
