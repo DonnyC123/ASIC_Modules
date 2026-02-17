@@ -22,7 +22,7 @@ module leading_zero_counter #(
     end
   end
 
-  assign contains_one_o       = !found_one;
+  assign contains_one_o       = found_one;
   assign leading_zero_count_o = leading_zero_count;
 
 endmodule
