@@ -17,7 +17,7 @@ module tb_mac_float;
   logic [FLOAT_W-1:0] a, b, c;
   logic [FLOAT_W-1:0] z;
 
-  mac_float_model #(
+  mac_float #(
       .EXP_W (EXP_W),
       .FRAC_W(FRAC_W)
   ) dut (

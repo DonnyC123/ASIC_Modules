@@ -120,7 +120,7 @@ module mac_float_model #(
 
       if (guard && (sticky || lsb)) begin
         unpacked_sum.mantissa++;
-        if (unpacked_sum.mantissa[FRAC_W + 1]) begin 
+        if (unpacked_sum.mantissa[FRAC_W + 1]) begin
           unpacked_sum.mantissa >>= 1;
           unpacked_sum.exp++;
         end

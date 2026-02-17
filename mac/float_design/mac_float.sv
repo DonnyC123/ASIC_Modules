@@ -91,7 +91,6 @@ module mac_float #(
     end
   endfunction
 
-  // Dropping demomalization would increase speed
   always_comb begin
     float_a = float_t'(a);
     float_b = float_t'(b);
