@@ -5,3 +5,4 @@
 ../float_design/mac_float.sv
 
 ../tb/sanity_test.sv
+../tb/mac_float_model.sv

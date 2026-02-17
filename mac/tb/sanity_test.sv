@@ -13,7 +13,7 @@ module tb_mac_float;
 
   real real_a, real_b, real_c, real_z_dut, real_z_ref;
 
-  mac_float #(
+  mac_float_model #(
       .EXP_W (EXP_W),
       .FRAC_W(FRAC_W)
   ) dut (
