@@ -62,7 +62,7 @@ module mac_float_model #(
     unpacked_product.sign     = unpacked_a.sign ^ unpacked_b.sign;
     unpacked_product.inf      = unpacked_a.inf || unpacked_b.inf;
 
-    exp_diff_product_shift    = unpacked_product.exp - unpacked_c.exp + MANTISSA_W + GUARD_W;
+    exp_diff_product_shift    = unpacked_c.exp - unpacked_product.exp + MANTISSA_W + GUARD_W;
     unpacked_c_shifted        = '{default:0};
 
     if (exp_diff_product_shift > 2*FRAC_W + GUARD_W) begin
@@ -99,7 +99,7 @@ module mac_float_model #(
     unpacked_sum_guarded_shifted = unpacked_sum_guarded;
     if (unpacked_sum_guarded == 0) begin
         unpacked_sum.mantissa = 0;
-        unpacked_sum.exp      = -BIAS; // Force Canonical Zero
+        unpacked_sum.exp      = -BIAS;
     end 
     else begin
         if (unpacked_sum_guarded[FRAC_W + GUARD_W + 1]) begin
