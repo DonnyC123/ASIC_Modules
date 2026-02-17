@@ -97,7 +97,7 @@ module mac_float_model #(
             unpacked_sum.exp++;
         end 
         else begin
-            while (unpacked_sum.mantissa[MANTISSA_W] == 0 && unpacked_sum.exp > 0) begin
+            while (unpacked_sum.mantissa[FRAC_W] == 0 && unpacked_sum.exp > 0) begin
                 unpacked_sum.mantissa <<= 1;
                 unpacked_sum.exp--;
             end
