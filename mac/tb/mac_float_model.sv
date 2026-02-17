@@ -58,7 +58,7 @@ module mac_float_model #(
     unpack_float(float_t'(c), unpacked_c);
 
     unpacked_product.exp      = unpacked_a.exp + unpacked_b.exp - BIAS;
-    unpacked_product.mantissa = (unpacked_a.mantissa * unpacked_b.mantissa) >> FRAC_W; 
+    unpacked_product.mantissa = (unpacked_a.mantissa * unpacked_b.mantissa);
     unpacked_product.sign     = unpacked_a.sign ^ unpacked_b.sign;
     unpacked_product.inf      = unpacked_a.inf || unpacked_b.inf;
 
