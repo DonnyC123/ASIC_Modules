@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 
 module tb_mac_float;
 
@@ -133,8 +134,8 @@ module tb_mac_float;
     end
 
     if (!check_pass) begin
-      $display("[%s] FAIL: A=%f B=%f C=%f | DUT=%f (0x%h) REF=%f (0x%h)", name, real_a, real_b,
-               real_c, real_z_dut, z, real_z_ref, expected_bits);
+      $error("[%s] FAIL: A=%f B=%f C=%f | DUT=%f (0x%h) REF=%f (0x%h)", name, real_a, real_b,
+             real_c, real_z_dut, z, real_z_ref, expected_bits);
       errors++;
     end else begin
       $display("[%s] PASS: %f", name, real_z_dut);

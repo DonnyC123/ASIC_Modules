@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 module mac_float_model #(
     parameter  EXP_W  = 5,
     parameter  FRAC_W = 10,
