@@ -149,24 +149,25 @@ module tb_mac_float;
     b = downscale_double(2.0);
     c = downscale_double(0.0);
 
-    #10;
     check_result("Simple Mult");
+
+    #10;
 
     a = downscale_double(1.0);
     b = downscale_double(1.0);
     c = downscale_double(3.5);
 
-    #10;
     check_result("Simple Add");
+
+    #10;
 
     $display("--- Random Stress Test ---");
     for (i = 0; i < 100; i++) begin
       void'(std::randomize(a, b, c));
 
       if (i % 10 == 0) c = 0;
-
-      #10;
       check_result($sformatf("Rand #%0d", i));
+      #10;
     end
 
     $display("=== TEST COMPLETED. Total Errors: %0d ===", errors);
