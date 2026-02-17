@@ -1,0 +1,24 @@
+//
+// File created by:  xrun
+// Do not modify this file
+//
+-XLMODE
+./xcelium.d/run.lnx8664.21.09.d
+-RUNMODE
+-sv
+../float_design/carry_save_adder.sv
+../float_design/leading_zero_counter.sv
+../float_design/leading_zero_counter_top.sv
+../float_design/wallace_tree_recursive.sv
+../float_design/mac_float.sv
+../tb/sanity_test.sv
+-CDSLIB
+./xcelium.d/run.lnx8664.21.09.d/cdsrun.lib
+-HDLVAR
+./xcelium.d/run.lnx8664.21.09.d/hdlrun.var
+-MESSAGES
+-UPDATE
+-XLLIBSTORE
+./xcelium.d/run.lnx8664.21.09.d/xllibs
+-ALLOWUNBOUND
+-hastop

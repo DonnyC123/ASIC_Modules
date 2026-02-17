@@ -1,0 +1,470 @@
+xrun(64): 21.09-s001: (c) Copyright 1995-2021 Cadence Design Systems, Inc.
+TOOL:	xrun(64)	21.09-s001: Started on Feb 16, 2026 at 22:50:52 CST
+xrun
+	-64bit
+	-sv
+	-f run.f
+		../float_design/carry_save_adder.sv
+		../float_design/leading_zero_counter.sv
+		../float_design/leading_zero_counter_top.sv
+		../float_design/wallace_tree_recursive.sv
+		../float_design/mac_float.sv
+		../tb/sanity_test.sv
+	-timescale 1ns/1ps
+	-access +rwc
+	-top tb_mac_float
+	-gui
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+Recompiling... reason: file '../float_design/mac_float.sv' is newer than expected.
+	expected: Mon Feb 16 22:22:24 2026
+	actual:   Mon Feb 16 22:50:39 2026
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xmvlog: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xmvlog: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xmvlog: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xmvlog: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+file: ../float_design/mac_float.sv
+	module worklib.mac_float:sv
+		errors: 0, warnings: 0
+	Total errors/warnings found outside modules and primitives:
+		errors: 0, warnings: 4
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xmelab: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xmelab: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xmelab: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xmelab: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+	Elaborating the design hierarchy:
+		Caching library 'worklib' ....... Done
+	Top level design units:
+		tb_mac_float
+xmelab: *W,DSEMEL: This SystemVerilog design will be simulated as per IEEE 1800-2009 SystemVerilog simulation semantics. Use -disable_sem2009 option for turning off SV 2009 simulation semantics.
+	Building instance overlay tables: .................... Done
+	Generating native compiled code:
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xmvlog_cg: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xmvlog_cg: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xmvlog_cg: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xmvlog_cg: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+		worklib.mac_float:sv <0x01ced3d6>
+			streams:  14, words: 14982
+	Building instance specific data structures.
+	Loading native compiled code:     .................... Done
+	Design hierarchy summary:
+		                 Instances  Unique
+		Modules:                29       6
+		Registers:             187      86
+		Scalar wires:           32       -
+		Vectored wires:        191       -
+		Always blocks:          18       9
+		Initial blocks:          2       2
+		Cont. assignments:      57      11
+		Pseudo assignments:    103      57
+		Simulation timescale:  1ps
+	Writing initial simulation snapshot: worklib.tb_mac_float:sv
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xmsim: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xmsim: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xmsim: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xmsim: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+SVSEED default: 1
+xmsim: *W,DSEM2009: This SystemVerilog design is simulated as per IEEE 1800-2009 SystemVerilog simulation semantics. Use -disable_sem2009 option for turning off SV 2009 simulation semantics.
+
+-------------------------------------
+Relinquished control to SimVision...
+xcelium> 
+xcelium> source /vol/cadence2018/XCELIUM2109/tools/xcelium/files/xmsimrc
+xcelium> database -open waves -into waves.shm -default
+Created default SHM database waves
+xcelium> probe -create -shm tb_mac_float.a tb_mac_float.b tb_mac_float.c tb_mac_float.errors tb_mac_float.i tb_mac_float.real_a tb_mac_float.real_b tb_mac_float.real_c tb_mac_float.real_z_dut tb_mac_float.real_z_ref tb_mac_float.z
+Created probe 1
+xcelium> run
+=== STARTING FLOATING POINT MAC TEST ===
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 10 NS).
+tb_mac_float.check_result
+[Simple Mult] Mismatch! A=1.500000 B=0.000000 C=0.000000 | DUT=0.000061 (0x0400) REF=0.000000 (0x0000)
+[Simple Add] PASS: 1.000000 * 1.000000 + 0.000000 = 1.000000
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 30 NS).
+tb_mac_float.check_result
+[Subtraction Pos] Mismatch! A=0.000000 B=1.500000 C=-1.000000 | DUT=0.000000 (0x0000) REF=-1.000000 (0xbc00)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 40 NS).
+tb_mac_float.check_result
+[Subtraction Neg] Mismatch! A=1.000000 B=1.000000 C=0.000000 | DUT=0.000000 (0x0000) REF=1.000000 (0x3c00)
+[Overflow] PASS: 0.000000 * 0.000000 + 0.000000 = 0.000000
+[Underflow] PASS: 0.000100 * 0.000100 + 0.000000 = 0.000000
+--- Starting Random Stress Test ---
+stop -create -name Randomize -randomize
+Created stop Randomize
+
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 70 NS).
+tb_mac_float.check_result
+[Rand #0] Mismatch! A=-155.125000 B=0.416992 C=-4.335938 | DUT=-32.000000 (0xd000) REF=-69.021851 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 80 NS).
+tb_mac_float.check_result
+[Rand #1] Mismatch! A=-27.093750 B=12.593750 C=-7.800781 | DUT=-128.000000 (0xd800) REF=-349.012695 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 90 NS).
+tb_mac_float.check_result
+[Rand #2] Mismatch! A=-0.379395 B=-32.437500 C=1.361328 | DUT=8.000000 (0x4800) REF=13.667938 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 100 NS).
+tb_mac_float.check_result
+[Rand #3] Mismatch! A=0.012543 B=0.335205 C=6.945312 | DUT=0.001953 (0x1800) REF=6.949517 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 110 NS).
+tb_mac_float.check_result
+[Rand #4] Mismatch! A=-422.750000 B=0.770020 C=-32.156250 | DUT=-128.000000 (0xd800) REF=-357.682007 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 120 NS).
+tb_mac_float.check_result
+[Rand #5] Mismatch! A=0.004730 B=-145.375000 C=-0.154053 | DUT=-0.500000 (0xb800) REF=-0.841709 (0xbabb)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 130 NS).
+tb_mac_float.check_result
+[Rand #6] Mismatch! A=-0.273438 B=0.008324 C=-0.059418 | DUT=-0.001953 (0x9800) REF=-0.061694 (0xabe5)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 140 NS).
+tb_mac_float.check_result
+[Rand #7] Mismatch! A=0.369141 B=831.000000 C=-0.021042 | DUT=0.000155 (0x0916) REF=306.734818 (0x0000)
+[Rand #8] PASS: 0.120239 * 3.341797 + -3.134766 = 0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 160 NS).
+tb_mac_float.check_result
+[Rand #9] Mismatch! A=73.125000 B=-778.000000 C=-0.765625 | DUT=-32768.000000 (0xf800) REF=-56892.015625 (0x8000)
+[Rand #10] PASS: -1.043945 * 0.043915 + 0.087097 = -0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 180 NS).
+tb_mac_float.check_result
+[Rand #11] Mismatch! A=-0.459229 B=-0.029068 C=-813.000000 | DUT=0.000000 (0x03ec) REF=-812.986651 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 190 NS).
+tb_mac_float.check_result
+[Rand #12] Mismatch! A=-0.048004 B=0.005917 C=-1.125000 | DUT=-0.000122 (0x8800) REF=-1.125284 (0xbc80)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 200 NS).
+tb_mac_float.check_result
+[Rand #13] Mismatch! A=0.087891 B=499.750000 C=0.055389 | DUT=16.000000 (0x4c00) REF=43.978729 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 210 NS).
+tb_mac_float.check_result
+[Rand #14] Mismatch! A=0.520508 B=-13.695312 C=-0.016922 | DUT=-4.000000 (0xc400) REF=-7.145439 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 220 NS).
+tb_mac_float.check_result
+[Rand #15] Mismatch! A=-37.156250 B=-1.953125 C=88.062500 | DUT=32.000000 (0x5000) REF=160.633301 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 230 NS).
+tb_mac_float.check_result
+[Rand #16] Mismatch! A=-0.257812 B=-0.014519 C=131.000000 | DUT=0.001953 (0x1800) REF=131.003743 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 240 NS).
+tb_mac_float.check_result
+[Rand #17] Mismatch! A=11.460938 B=0.214966 C=0.036285 | DUT=1.000000 (0x3c00) REF=2.499995 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 250 NS).
+tb_mac_float.check_result
+[Rand #18] Mismatch! A=349.000000 B=0.161621 C=7.289062 | DUT=32.000000 (0x5000) REF=63.694824 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 260 NS).
+tb_mac_float.check_result
+[Rand #19] Mismatch! A=-5.933594 B=0.017685 C=-0.002394 | DUT=-0.062500 (0xac00) REF=-0.107329 (0xaede)
+[Rand #20] PASS: 0.583008 * 0.075867 + -0.002079 = 0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 280 NS).
+tb_mac_float.check_result
+[Rand #21] Mismatch! A=-7.332031 B=-6.746094 C=70.187500 | DUT=16.000000 (0x4c00) REF=119.650070 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 290 NS).
+tb_mac_float.check_result
+[Rand #22] Mismatch! A=81.000000 B=-47.375000 C=-68.125000 | DUT=-2048.000000 (0xe800) REF=-3905.500000 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 300 NS).
+tb_mac_float.check_result
+[Rand #23] Mismatch! A=-0.684082 B=0.119446 C=-0.223389 | DUT=-0.031250 (0xa800) REF=-0.305099 (0xb4e1)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 310 NS).
+tb_mac_float.check_result
+[Rand #24] Mismatch! A=-1011.500000 B=0.013939 C=-0.060944 | DUT=-4.000000 (0xc400) REF=-14.160145 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 320 NS).
+tb_mac_float.check_result
+[Rand #25] Mismatch! A=-7.449219 B=-0.185425 C=0.245850 | DUT=0.500000 (0x3800) REF=1.627120 (0x3e82)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 330 NS).
+tb_mac_float.check_result
+[Rand #26] Mismatch! A=-0.008972 B=0.435303 C=-21.000000 | DUT=-0.001953 (0x9800) REF=-21.003906 (0x8000)
+[Rand #27] PASS: 6.378906 * -0.055634 + 12.945312 = -0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 350 NS).
+tb_mac_float.check_result
+[Rand #28] Mismatch! A=-593.000000 B=16.781250 C=0.002733 | DUT=0.002733 (0x1999) REF=-9951.278517 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 360 NS).
+tb_mac_float.check_result
+[Rand #29] Mismatch! A=942.000000 B=-0.521973 C=-61.875000 | DUT=-256.000000 (0xdc00) REF=-553.573242 (0x8000)
+[Rand #30] PASS: 5.308594 * -3.828125 + 0.310059 = -0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 380 NS).
+tb_mac_float.check_result
+[Rand #31] Mismatch! A=-0.002010 B=-124.312500 C=-0.247437 | DUT=0.000000 (0x001b) REF=0.002475 (0x1911)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 390 NS).
+tb_mac_float.check_result
+[Rand #32] Mismatch! A=0.027283 B=0.860840 C=1.974609 | DUT=0.007812 (0x2000) REF=1.998095 (0x3ffe)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 400 NS).
+tb_mac_float.check_result
+[Rand #33] Mismatch! A=0.025452 B=-0.291016 C=-0.051514 | DUT=-0.003906 (0x9c00) REF=-0.058921 (0xab8a)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 410 NS).
+tb_mac_float.check_result
+[Rand #34] Mismatch! A=-14.679688 B=-0.002291 C=107.562500 | DUT=107.562500 (0x56b9) REF=107.596127 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 420 NS).
+tb_mac_float.check_result
+[Rand #35] Mismatch! A=3.218750 B=15.437500 C=0.086853 | DUT=16.000000 (0x4c00) REF=49.776306 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 430 NS).
+tb_mac_float.check_result
+[Rand #36] Mismatch! A=0.223755 B=125.250000 C=-0.188110 | DUT=0.000000 (0x0178) REF=27.837189 (0x0000)
+[Rand #37] PASS: 30.593750 * 19.406250 + -0.004074 = 0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 450 NS).
+tb_mac_float.check_result
+[Rand #38] Mismatch! A=0.678711 B=-2.556641 C=-28.765625 | DUT=-1.000000 (0xbc00) REF=-30.500845 (0x8000)
+[Rand #39] PASS: -0.005684 * 1.088867 + 1.544922 = -0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 470 NS).
+tb_mac_float.check_result
+[Rand #40] Mismatch! A=54.500000 B=0.898438 C=-0.027390 | DUT=inf (0x7c00) REF=48.937454 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 480 NS).
+tb_mac_float.check_result
+[Rand #41] Mismatch! A=-0.018555 B=-40.062500 C=0.003643 | DUT=0.500000 (0x3800) REF=0.746990 (0x39f9)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 490 NS).
+tb_mac_float.check_result
+[Rand #42] Mismatch! A=0.027908 B=0.258301 C=414.500000 | DUT=0.003906 (0x1c00) REF=414.507209 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 500 NS).
+tb_mac_float.check_result
+[Rand #43] Mismatch! A=-0.173462 B=3.990234 C=-0.006836 | DUT=-0.250000 (0xb400) REF=-0.698990 (0xb997)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 510 NS).
+tb_mac_float.check_result
+[Rand #44] Mismatch! A=0.010620 B=-1.110352 C=-5.882812 | DUT=-0.007812 (0xa000) REF=-5.894605 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 520 NS).
+tb_mac_float.check_result
+[Rand #45] Mismatch! A=-0.239990 B=-0.112671 C=0.007446 | DUT=0.007812 (0x2000) REF=0.034486 (0x286a)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 530 NS).
+tb_mac_float.check_result
+[Rand #46] Mismatch! A=-0.781250 B=0.005299 C=-0.083008 | DUT=-0.001953 (0x9800) REF=-0.087147 (0xad93)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 540 NS).
+tb_mac_float.check_result
+[Rand #47] Mismatch! A=-0.106079 B=0.322998 C=5.554688 | DUT=0.000000 (0x83b5) REF=5.520424 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 550 NS).
+tb_mac_float.check_result
+[Rand #48] Mismatch! A=-10.937500 B=-0.031464 C=874.500000 | DUT=874.500000 (0x62d5) REF=874.844133 (0x0000)
+[Rand #49] PASS: 105.875000 * 781.500000 + -12.234375 = 0.000031
+[Rand #50] PASS: 453.500000 * 0.020905 + -0.008896 = 0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 580 NS).
+tb_mac_float.check_result
+[Rand #51] Mismatch! A=0.086365 B=0.060455 C=6.917969 | DUT=0.001953 (0x1800) REF=6.923190 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 590 NS).
+tb_mac_float.check_result
+[Rand #52] Mismatch! A=-1.895508 B=-1011.500000 C=0.413574 | DUT=512.000000 (0x6000) REF=1917.719727 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 600 NS).
+tb_mac_float.check_result
+[Rand #53] Mismatch! A=-0.806152 B=0.036957 C=2.181641 | DUT=0.000000 (0x83ad) REF=2.151848 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 610 NS).
+tb_mac_float.check_result
+[Rand #54] Mismatch! A=15.984375 B=-116.375000 C=-0.076721 | DUT=-512.000000 (0xe000) REF=-1860.258362 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 620 NS).
+tb_mac_float.check_result
+[Rand #55] Mismatch! A=-0.007153 B=5.292969 C=-32.812500 | DUT=-0.015625 (0xa400) REF=-32.850358 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 630 NS).
+tb_mac_float.check_result
+[Rand #56] Mismatch! A=83.750000 B=-0.292725 C=-17.515625 | DUT=-16.000000 (0xcc00) REF=-42.031311 (0x8000)
+[Rand #57] PASS: -0.332764 * -0.108643 + -0.047363 = 0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 650 NS).
+tb_mac_float.check_result
+[Rand #58] Mismatch! A=3.076172 B=-11.257812 C=-159.000000 | DUT=-16.000000 (0xcc00) REF=-193.630966 (0x8000)
+[Rand #59] PASS: -0.006721 * 190.375000 + 650.500000 = -0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 670 NS).
+tb_mac_float.check_result
+[Rand #60] Mismatch! A=-233.375000 B=-165.250000 C=-1.376953 | DUT=0.022659 (0x25cd) REF=38563.841797 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 680 NS).
+tb_mac_float.check_result
+[Rand #61] Mismatch! A=-0.006886 B=-33.250000 C=-0.008331 | DUT=0.000000 (0x000e) REF=0.220613 (0x330f)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 690 NS).
+tb_mac_float.check_result
+[Rand #62] Mismatch! A=-216.125000 B=0.215576 C=-12.148438 | DUT=-16.000000 (0xcc00) REF=-58.739838 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 700 NS).
+tb_mac_float.check_result
+[Rand #63] Mismatch! A=103.375000 B=191.000000 C=267.250000 | DUT=8192.000000 (0x7000) REF=20011.875000 (0x0000)
+[Rand #64] PASS: 0.044037 * -0.005821 + 0.695312 = -0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 720 NS).
+tb_mac_float.check_result
+[Rand #65] Mismatch! A=-0.826660 B=-0.872559 C=-498.250000 | DUT=0.000000 (0x001f) REF=-497.528691 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 730 NS).
+tb_mac_float.check_result
+[Rand #66] Mismatch! A=-52.093750 B=6.433594 C=-7.675781 | DUT=-128.000000 (0xd800) REF=-342.825806 (0x8000)
+[Rand #67] PASS: 0.011986 * -0.003519 + 639.500000 = -0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 750 NS).
+tb_mac_float.check_result
+[Rand #68] Mismatch! A=-8.679688 B=0.025146 C=-311.500000 | DUT=-311.500000 (0xdcde) REF=-311.718264 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 760 NS).
+tb_mac_float.check_result
+[Rand #69] Mismatch! A=0.015038 B=858.000000 C=0.464111 | DUT=4.000000 (0x4400) REF=13.366318 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 770 NS).
+tb_mac_float.check_result
+[Rand #70] Mismatch! A=100.750000 B=0.032745 C=0.130249 | DUT=2.000000 (0x4000) REF=3.429344 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 780 NS).
+tb_mac_float.check_result
+[Rand #71] Mismatch! A=-0.002087 B=0.012848 C=-0.010551 | DUT=0.000000 (0x8000) REF=-0.010578 (0xa16a)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 790 NS).
+tb_mac_float.check_result
+[Rand #72] Mismatch! A=6.207031 B=0.003145 C=1.202148 | DUT=0.007812 (0x2000) REF=1.221671 (0x3ce2)
+[Rand #73] PASS: -0.232178 * -13.585938 + -56.250000 = 0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 810 NS).
+tb_mac_float.check_result
+[Rand #74] Mismatch! A=-0.003607 B=-1.371094 C=-53.250000 | DUT=0.000000 (0x03fc) REF=-53.245055 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 820 NS).
+tb_mac_float.check_result
+[Rand #75] Mismatch! A=1.303711 B=0.013840 C=0.326660 | DUT=0.007812 (0x2000) REF=0.344703 (0x3583)
+[Rand #76] PASS: -1.685547 * 70.125000 + 997.500000 = -0.000031
+[Rand #77] PASS: -318.500000 * -11.429688 + -0.003344 = 0.000031
+[Rand #78] PASS: 5.351562 * 263.750000 + -6.679688 = 0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 860 NS).
+tb_mac_float.check_result
+[Rand #79] Mismatch! A=0.391846 B=6.867188 C=387.500000 | DUT=1.000000 (0x3c00) REF=390.190878 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 870 NS).
+tb_mac_float.check_result
+[Rand #80] Mismatch! A=-1.269531 B=6.707031 C=-0.599121 | DUT=-4.000000 (0xc400) REF=-9.113907 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 880 NS).
+tb_mac_float.check_result
+[Rand #81] Mismatch! A=-0.197388 B=0.269531 C=0.029129 | DUT=0.000000 (0x832e) REF=-0.024073 (0xa629)
+[Rand #82] PASS: -0.676758 * 7.109375 + 41.812500 = -0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 900 NS).
+tb_mac_float.check_result
+[Rand #83] Mismatch! A=38.531250 B=-5.359375 C=-302.250000 | DUT=-128.000000 (0xd800) REF=-508.753418 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 910 NS).
+tb_mac_float.check_result
+[Rand #84] Mismatch! A=-0.566406 B=39.437500 C=-88.312500 | DUT=-16.000000 (0xcc00) REF=-110.650146 (0x8000)
+[Rand #85] PASS: 0.384033 * -1.034180 + 0.274902 = -0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 930 NS).
+tb_mac_float.check_result
+[Rand #86] Mismatch! A=-4.488281 B=52.468750 C=0.251953 | DUT=-inf (0xfc00) REF=-235.242554 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 940 NS).
+tb_mac_float.check_result
+[Rand #87] Mismatch! A=579.500000 B=-213.625000 C=-0.472168 | DUT=-inf (0xfc00) REF=-123796.159668 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 950 NS).
+tb_mac_float.check_result
+[Rand #88] Mismatch! A=-11.023438 B=-52.093750 C=0.037109 | DUT=256.000000 (0x5c00) REF=574.289307 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 960 NS).
+tb_mac_float.check_result
+[Rand #89] Mismatch! A=0.854980 B=55.906250 C=3.351562 | DUT=16.000000 (0x4c00) REF=51.150314 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 970 NS).
+tb_mac_float.check_result
+[Rand #90] Mismatch! A=116.187500 B=-0.264893 C=-0.124573 | DUT=-16.000000 (0xcc00) REF=-30.901779 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 980 NS).
+tb_mac_float.check_result
+[Rand #91] Mismatch! A=-31.781250 B=-78.250000 C=15.000000 | DUT=1024.000000 (0x6400) REF=2501.882812 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 990 NS).
+tb_mac_float.check_result
+[Rand #92] Mismatch! A=0.006744 B=-0.063965 C=1013.000000 | DUT=0.000000 (0x83fd) REF=1012.999569 (0x0000)
+[Rand #93] PASS: 99.750000 * -25.078125 + 10.882812 = -0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 1010 NS).
+tb_mac_float.check_result
+[Rand #94] Mismatch! A=-0.213989 B=-7.687500 C=-209.625000 | DUT=0.000000 (0x011a) REF=-207.979958 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 1020 NS).
+tb_mac_float.check_result
+[Rand #95] Mismatch! A=346.000000 B=-954.000000 C=-4.804688 | DUT=-inf (0xfc00) REF=-330088.804688 (0x8000)
+[Rand #96] PASS: -0.006847 * 3.169922 + 31.906250 = -0.000031
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 1040 NS).
+tb_mac_float.check_result
+[Rand #97] Mismatch! A=947.000000 B=55.531250 C=70.937500 | DUT=16384.000000 (0x7400) REF=52659.031250 (0x0000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 1050 NS).
+tb_mac_float.check_result
+[Rand #98] Mismatch! A=0.209106 B=-254.000000 C=0.010002 | DUT=0.000000 (0x83ef) REF=-53.103035 (0x8000)
+xmsim: *E,ERRSEV (./sanity_test.sv,94): (time 1060 NS).
+tb_mac_float.check_result
+[Rand #99] Mismatch! A=724.000000 B=-0.008987 C=-733.000000 | DUT=-4.000000 (0xc400) REF=-739.506897 (0x8000)
+=== TEST COMPLETED. Total Errors: 82 ===
+Simulation complete via $finish(1) at time 1060 NS + 0
+./sanity_test.sv:168     $finish;
+xcelium> 
