@@ -70,8 +70,11 @@ module mac_float_model #(
     if (exp_diff_product_shift > 2*FRAC_W + GUARD_W) begin
        unpacked_sum = unpacked_c;
     end
-    else if (exp_diff_product_shift < 0) begin
+    else begin
+      if (exp_diff_product_shift < 0) begin
        unpacked_sum = unpacked_product;
+       unpacked_sum_guarded = unpacked_product.mantissa << GUARD_W;
+
     end
     else begin
 
@@ -97,7 +100,7 @@ module mac_float_model #(
         end
       end
     end
-  
+
     unpacked_sum_guarded_shifted = unpacked_sum_guarded;
     if (unpacked_sum_guarded_shifted == 0) begin
         unpacked_sum.mantissa = 0;
@@ -123,12 +126,13 @@ module mac_float_model #(
         end
       end
     end
+  end
 
-    if (unpacked_sum.mantissa == 0) z = '0;
-    else begin
+  if (unpacked_sum.mantissa == 0) z = '0;
+  else begin
         z[DATA_W-1]        = unpacked_sum.sign;
         z[DATA_W-2:FRAC_W] = unpacked_sum.exp[EXP_W-1:0];
         z[FRAC_W-1:0]      = unpacked_sum.mantissa[FRAC_W-1:0];
-    end
+  end
   end
 endmodule
