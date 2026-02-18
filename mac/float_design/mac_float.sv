@@ -10,11 +10,13 @@ module mac_float #(
 );
 
   localparam PROD_EXP_W          = EXP_W + 1;
+  localparam GUARD_W             = 1;
   localparam MANTISSA_W          = 1 + FRAC_W;
   localparam PRODUCT_MANTISSA_W  = 2 * MANTISSA_W;
   localparam PRODUCT_LOW_SUM_W   = PRODUCT_MANTISSA_W + 1;
   localparam C_SHIFTED_W         = 3 * MANTISSA_W;
-  localparam C_SHIFT_RAW_W       = 4 * MANTISSA_W;
+  localparam C_SHIFT_RAW_W       = 4 * MANTISSA_W + GUARD_W;
+  localparam C_SHIFT_MAX         = 3 * MANTISSA_W + GUARD_W;
   localparam C_SHIFT_FACTOR_W    = $clog2(C_SHIFT_RAW_W);
   localparam MANTISSA_SUM_W      = C_SHIFTED_W + 1;
   localparam SUM_EXP_ADD         = MANTISSA_SUM_W - PRODUCT_MANTISSA_W + 1;
@@ -23,9 +25,7 @@ module mac_float #(
   localparam NUM_PARTIAL_PRODUCT = MANTISSA_W;
   localparam MANTISSA_SUM_LZ_W   = $clog2(MANTISSA_SUM_W + 1);
   localparam NUM_CSA_TREE_ROWS   = NUM_PARTIAL_PRODUCT + 1;
-
-
-  localparam BIAS = (1 << (EXP_W - 1)) - 1;
+  localparam BIAS                = (1 << (EXP_W - 1)) - 1;
 
   typedef struct packed {
     logic                        msb;
@@ -116,15 +116,18 @@ module mac_float #(
 
     c_shift_amount = c_shift_factor_t'(float_c.exp) - c_shift_factor_t'(product_exp) + c_shift_factor_t'(FRAC_W) + c_shift_factor_t'(MANTISSA_W);
 
-    c_shift_ovfl = exp_a[EXP_W-1] && c_shift_amount.msb;
-    c_shift_unfl = !exp_a[EXP_W-1] && c_shift_amount.msb;
+    c_shift_ovfl = c_shift_amount > C_SHIFT_MAX || !exp_a[EXP_W-1] && c_shift_amount.msb;
+    c_shift_unfl = exp_a[EXP_W-1] && c_shift_amount.msb;
     subtract_c = (product_sign ^ float_c.sign) && !c_shift_unfl;
   end
 
 
   always_comb begin
     c_shifted_raw = (C_SHIFT_RAW_W'(mantissa_c) << c_shift_amount);
-    c_shifted_eff = (subtract_c ? ~c_shifted_raw[C_SHIFT_RAW_W-1:MANTISSA_W] : c_shifted_raw[C_SHIFT_RAW_W-1:MANTISSA_W]) & {~{C_SHIFTED_W{c_shift_unfl}}};
+    c_shifted_eff =  {~{C_SHIFTED_W{c_shift_unfl}}}
+                  & (subtract_c
+                  ? ~ c_shifted_raw[C_SHIFT_RAW_W-1:MANTISSA_W] 
+                  : c_shifted_raw[C_SHIFT_RAW_W-1:MANTISSA_W]);
 
     csa_c = {1'b0, c_shifted_eff[PRODUCT_MANTISSA_W-1:0]};
 
@@ -133,7 +136,7 @@ module mac_float #(
       logic [MANTISSA_W-1:0] partial_product;
 
       partial_product     = mantissa_a & {MANTISSA_W{mantissa_b[i]}};
-      partial_products[i] = {{MANTISSA_W{1'b0}}, partial_product} << i;
+      partial_products[i] = {{MANTISSA_W + 1{1'b0}}, partial_product} << i;  // get rid of + 1
     end
 
     for (int i = 0; i < NUM_PARTIAL_PRODUCT; i++) begin
@@ -154,8 +157,8 @@ module mac_float #(
 
   always_comb begin
     mantissa_sum_lower = csa_tree_sum + {csa_tree_carry[PRODUCT_MANTISSA_W-1:1], subtract_c};
-    mantissa_sum_upper = MANTISSA_SUM_HIGH_W'(c_shifted_eff[C_SHIFTED_W-1 : PRODUCT_MANTISSA_W]) 
-                        + MANTISSA_SUM_HIGH_W'(mantissa_sum_lower[MANTISSA_SUM_LOW_W-1]);
+    mantissa_sum_upper = MANTISSA_SUM_HIGH_W'(c_shifted_eff[C_SHIFTED_W-1 : PRODUCT_MANTISSA_W])
+                       + MANTISSA_SUM_HIGH_W'(mantissa_sum_lower[MANTISSA_SUM_LOW_W-1]);
 
     mantissa_sum = {mantissa_sum_upper, mantissa_sum_lower[PRODUCT_MANTISSA_W-1:0]};
   end
@@ -189,7 +192,7 @@ module mac_float #(
     float_z.exp  = sum_exp.exp[EXP_W-1:0];
     float_z.frac = normalized_mantissa[MANTISSA_SUM_W-2-:FRAC_W];
 
-    if (c_shift_unfl) begin
+    if (c_shift_ovfl) begin
       float_z = float_c;
     end else begin
       if (sum_exp_ovfl) begin  // Wanted to add unique0 here
