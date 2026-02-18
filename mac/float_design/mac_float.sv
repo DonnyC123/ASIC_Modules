@@ -72,7 +72,7 @@ module mac_float #(
   logic                                      subtract_c;
 
   logic            [      C_SHIFT_RAW_W-1:0] c_shifted_raw;
-  logic            [        C_SHIFTED_W-1:0] c_shifted_eff;
+  logic            [     MANTISSA_SUM_W-1:0] c_shifted_eff;
   logic            [  PRODUCT_LOW_SUM_W-1:0] csa_c;
   logic            [  PRODUCT_LOW_SUM_W-1:0] csa_summands        [  NUM_CSA_TREE_ROWS];
   logic            [  PRODUCT_LOW_SUM_W-1:0] csa_tree_sum;
@@ -124,7 +124,7 @@ module mac_float #(
 
   always_comb begin
     c_shifted_raw = (C_SHIFT_RAW_W'(mantissa_c) << c_shift_amount);
-    c_shifted_eff =  {~{C_SHIFTED_W{c_shift_unfl}}}
+    c_shifted_eff =  {~{MANTISSA_SUM_W{c_shift_unfl}}}
                   & (subtract_c
                   ? ~ c_shifted_raw[C_SHIFT_RAW_W-1:MANTISSA_W] 
                   : c_shifted_raw[C_SHIFT_RAW_W-1:MANTISSA_W]);
