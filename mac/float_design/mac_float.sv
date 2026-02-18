@@ -185,7 +185,7 @@ module mac_float #(
   );
 
   always_comb begin
-    sum_exp      = sum_exp_t'(product_exp) - sum_exp_t'(mantissa_sum_lz) + sum_exp_t'(SUM_EXP_ADD) + sum_exp_t'(MANTISSA_W-FRAC_W);
+    sum_exp      = sum_exp_t'(product_exp) - sum_exp_t'(mantissa_sum_lz) + sum_exp_t'(SUM_EXP_ADD);
     sum_exp_ovfl = exp_a[EXP_W-1] && |sum_exp.msb;
     sum_exp_unfl = !exp_a[EXP_W-1] && |sum_exp.msb;
   end
@@ -200,7 +200,7 @@ module mac_float #(
   end
 
   always_comb begin
-    float_z.sign = product_sign;
+    float_z.sign = sum_signed;
     float_z.exp  = sum_exp.exp[EXP_W-1:0];
     float_z.frac = normalized_mantissa[MANTISSA_SUM_W-2-:FRAC_W];
 
