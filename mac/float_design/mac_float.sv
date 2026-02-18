@@ -168,7 +168,7 @@ module mac_float #(
     unsigned_mantissa_sum = mantissa_sum_raw[MANTISSA_SUM_W-1:0];
 
     if (mantissa_sum_raw[MANTISSA_SUM_RAW_W-1]) begin
-      unsigned_mantissa_sum = {-mantissa_sum_raw}[MANTISSA_SUM_W-1:0];
+      unsigned_mantissa_sum = -mantissa_sum_raw[MANTISSA_SUM_W-1:0];
       sum_signed            = ~product_sign;
     end
   end
