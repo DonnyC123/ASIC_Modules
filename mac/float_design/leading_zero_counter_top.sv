@@ -55,7 +55,8 @@ module leading_zero_counter_top #(
       assign block_lz_count[NUM_LZC_UNITS-1][0] = !data_i[0];
       assign block_contains_one[0]              = data_i[0];
     end
-    if (LAST_LZC_DATA_BLOCK_W < LZC_DATA_BLOCK_W) begin
+
+    if (BLOCK_LZ_COUNT_W > LAST_BLOCK_LZ_COUNT_W) begin
       assign block_lz_count[NUM_LZC_UNITS-1][BLOCK_LZ_COUNT_W-1:LAST_BLOCK_LZ_COUNT_W] = '0;
     end
   endgenerate
