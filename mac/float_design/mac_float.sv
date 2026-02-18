@@ -134,8 +134,7 @@ module mac_float #(
     end
 
     c_shifted_eff = {~{C_SHIFTED_W{c_shift_unfl}}} & c_shifted_raw[C_SHIFT_RAW_W-1:MANTISSA_W];
-
-
+    csa_c         = {1'b0, c_shifted_eff[PRODUCT_MANTISSA_W-1:0]};
 
     foreach (partial_products[i]) begin
       logic [MANTISSA_W-1:0] partial_product;
