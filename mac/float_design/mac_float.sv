@@ -158,19 +158,19 @@ module mac_float #(
       .sum         (csa_tree_sum),
       .carry       (csa_tree_carry)
   );
-  logic [  MANTISSA_SUM_HIGH_W:0] upper_sum_temp;
-  logic [MANTISSA_SUM_HIGH_W-1:0] c_upper_slice;
+
+  logic [  MANTISSA_SUM_HIGH_W:0] upper_sum_temp;  // Width is W+1
+  logic [MANTISSA_SUM_HIGH_W-1:0] c_upper_slice;  // Width is W
 
   always_comb begin
     mantissa_sum_lower = csa_tree_sum + {csa_tree_carry[MANTISSA_SUM_LOW_W-2:1], 1'b0};
 
     c_upper_slice = c_shifted_eff[C_SHIFTED_W-1 : PRODUCT_MANTISSA_W];
 
-    upper_sum_temp = {c_upper_slice[MANTISSA_SUM_HIGH_W-2], c_upper_slice} 
-                     + (MANTISSA_SUM_HIGH_W + 1)'(mantissa_sum_lower[MANTISSA_SUM_LOW_W-1 : MANTISSA_SUM_LOW_W-2]);
+    upper_sum_temp = {c_upper_slice[MANTISSA_SUM_HIGH_W-1], c_upper_slice} 
+                   + (MANTISSA_SUM_HIGH_W + 1)'(mantissa_sum_lower[MANTISSA_SUM_LOW_W-1 : MANTISSA_SUM_LOW_W-2]);
 
-
-    mantissa_sum_upper = upper_sum_temp[MANTISSA_SUM_HIGH_W-1:0];
+    mantissa_sum_upper = upper_sum_temp[MANTISSA_SUM_HIGH_W : 1];
 
     mantissa_sum_raw = {
       mantissa_sum_upper, upper_sum_temp[0], mantissa_sum_lower[MANTISSA_SUM_LOW_W-3:0]
@@ -185,7 +185,6 @@ module mac_float #(
       sum_signed            = ~product_sign;
     end
   end
-
 
   leading_zero_counter_top #(
       .DATA_W          (MANTISSA_SUM_W),
