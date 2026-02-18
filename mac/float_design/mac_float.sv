@@ -18,9 +18,9 @@ module mac_float #(
   localparam C_SHIFT_RAW_W       = 4 * MANTISSA_W + GUARD_W;
   localparam C_SHIFT_MAX         = 3 * MANTISSA_W + GUARD_W;
   localparam C_SHIFT_FACTOR_W    = $clog2(C_SHIFT_RAW_W);
-  localparam MANTISSA_SUM_W      = C_SHIFTED_W;
-  localparam MANTISSA_SUM_RAW_W  = MANTISSA_SUM_W + OVFL_BIT;
-  localparam SUM_EXP_ADD         = MANTISSA_SUM_W - PRODUCT_MANTISSA_W + OVFL_BIT;
+  localparam MANTISSA_SUM_W      = C_SHIFTED_W + OVFL_BIT;
+  localparam MANTISSA_SUM_RAW_W  = MANTISSA_SUM_W;
+  localparam SUM_EXP_ADD         = MANTISSA_SUM_W - PRODUCT_MANTISSA_W;
   localparam MANTISSA_SUM_LOW_W  = PRODUCT_LOW_SUM_W + OVFL_BIT;
   localparam MANTISSA_SUM_HIGH_W = MANTISSA_SUM_RAW_W - MANTISSA_SUM_LOW_W + OVFL_BIT;
   localparam NUM_PARTIAL_PRODUCT = MANTISSA_W;
