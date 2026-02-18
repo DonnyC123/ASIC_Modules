@@ -17,7 +17,7 @@ module leading_zero_counter #(
     for (int idx = DATA_W - 1; idx >= 0; idx--) begin
       found_one |= data_i[idx];
       if (!found_one) begin
-        leading_zero_count += 1;
+        leading_zero_count++;
       end
     end
   end

@@ -1,7 +1,7 @@
 module leading_zero_counter_top #(
     parameter  DATA_W           = 29,
     parameter  LZC_DATA_BLOCK_W = 4,
-    localparam LZ_COUNT_W       = $clog2(DATA_W)
+    localparam LZ_COUNT_W       = $clog2(DATA_W + 1)
 ) (
     input  logic [    DATA_W-1:0] data_i,
     output logic [LZ_COUNT_W-1:0] leading_zero_count_o
@@ -38,7 +38,7 @@ module leading_zero_counter_top #(
       leading_zero_counter #(
           .DATA_W(LZC_DATA_BLOCK_W)
       ) leading_zero_counter_inst (
-          .data_i              (data_i[data_idx*LZC_DATA_BLOCK_W+:LZC_DATA_BLOCK_W]),
+          .data_i              (data_i[DATA_W-1-data_idx*LZC_DATA_BLOCK_W-:LZC_DATA_BLOCK_W]),
           .contains_one_o      (block_contains_one[data_idx]),
           .leading_zero_count_o(block_lz_count[data_idx])
       );
@@ -47,7 +47,7 @@ module leading_zero_counter_top #(
     leading_zero_counter #(
         .DATA_W(LAST_LZC_DATA_BLOCK_W)
     ) leading_zero_counter_inst_last (
-        .data_i              (data_i[DATA_W-1-:LAST_LZC_DATA_BLOCK_W]),
+        .data_i              (data_i[LAST_LZC_DATA_BLOCK_W-1:0]),
         .contains_one_o      (block_contains_one[NUM_LZC_UNITS-1]),
         .leading_zero_count_o(block_lz_count[NUM_LZC_UNITS-1][LAST_BLOCK_LZ_COUNT_W-1:0])
     );
@@ -63,8 +63,8 @@ module leading_zero_counter_top #(
   );
 
   always_comb begin
-    lower_lz_idx = $unsigned(UPPER_LZ_COUNT_W'(NUM_LZC_UNITS - 1)) - upper_lz_count;
-    leading_zero_count_o[BLOCK_LZ_COUNT_W-1:0] = block_lz_count[lower_lz_idx];
+    lower_lz_idx                                        = upper_lz_count;
+    leading_zero_count_o[BLOCK_LZ_COUNT_W-1:0]          = block_lz_count[lower_lz_idx];
     leading_zero_count_o[LZ_COUNT_W-1:BLOCK_LZ_COUNT_W] = upper_lz_count;
   end
 

@@ -17,7 +17,7 @@ module mac_float #(
   localparam MANTISSA_SUM_LOW_W  = PRODUCT_MANTISSA_W + 1;
   localparam MANTISSA_SUM_HIGH_W = MANTISSA_W + 1;
   localparam NUM_PARTIAL_PRODUCT = MANTISSA_W;
-  localparam MANTISSA_SUM_LZ_W   = $clog2(MANTISSA_SUM_W);
+  localparam MANTISSA_SUM_LZ_W   = $clog2(MANTISSA_SUM_W + 1);
   localparam NUM_CSA_TREE_ROWS   = NUM_PARTIAL_PRODUCT + 1;
 
 
