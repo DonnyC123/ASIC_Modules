@@ -120,7 +120,7 @@ module tb_mac_float;
     expected_bits = downscale_double(expected);
 
     real_z_dut    = upscale_to_double(z);
-    real_z_ref    = expected;
+    real_z_ref    = upscale_to_double(downscale_double(expected));
 
     check_pass    = 0;
 
