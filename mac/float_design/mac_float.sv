@@ -82,6 +82,8 @@ module mac_float #(
   logic            [MANTISSA_SUM_HIGH_W-1:0] mantissa_sum_upper;
   logic            [ MANTISSA_SUM_LOW_W-1:0] mantissa_sum_lower;
   logic            [ MANTISSA_SUM_RAW_W-1:0] mantissa_sum_raw;
+  logic            [ MANTISSA_SUM_RAW_W-1:0] mantissa_sum_raw_neg;
+
   logic            [     MANTISSA_SUM_W-1:0] unsigned_mantissa_sum;
   logic            [     MANTISSA_SUM_W-1:0] normalized_mantissa;
 
@@ -167,8 +169,9 @@ module mac_float #(
     sum_signed = product_sign;
     unsigned_mantissa_sum = mantissa_sum_raw[MANTISSA_SUM_W-1:0];
 
+    mantissa_sum_raw_neg = $unsigned(-$signed(mantissa_sum_raw));
     if (mantissa_sum_raw[MANTISSA_SUM_RAW_W-1]) begin
-      unsigned_mantissa_sum = -mantissa_sum_raw[MANTISSA_SUM_W-1:0];
+      unsigned_mantissa_sum = mantissa_sum_raw_neg[MANTISSA_SUM_W-1:0];
       sum_signed            = ~product_sign;
     end
   end
