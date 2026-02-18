@@ -133,9 +133,8 @@ module mac_float #(
       c_shifted_raw = ((~C_SHIFT_RAW_W'(mantissa_c) + 1'b1) << c_shift_amount);
     end
 
-    if (c_shift_unfl) c_shifted_eff = '0;
+    c_shifted_eff = {~{C_SHIFTED_W{c_shift_unfl}}} & c_shifted_raw[C_SHIFT_RAW_W-1:MANTISSA_W];
 
-    csa_c = {1'b0, c_shifted_eff[PRODUCT_MANTISSA_W-1:0]};
 
 
     foreach (partial_products[i]) begin
@@ -162,7 +161,7 @@ module mac_float #(
   );
 
   always_comb begin
-    mantissa_sum_lower = csa_tree_sum + {csa_tree_carry[MANTISSA_SUM_LOW_W-2:1], 1'b1};
+    mantissa_sum_lower = csa_tree_sum + {csa_tree_carry[MANTISSA_SUM_LOW_W-2:1], 1'b0};
     mantissa_sum_upper = ({c_shifted_eff[C_SHIFTED_W-1 : PRODUCT_MANTISSA_W]})
                        + MANTISSA_SUM_HIGH_W'(mantissa_sum_lower[MANTISSA_SUM_LOW_W-1]);
 
