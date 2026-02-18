@@ -162,7 +162,7 @@ module mac_float #(
   );
 
   always_comb begin
-    mantissa_sum_lower = csa_tree_sum + {csa_tree_carry[MANTISSA_SUM_LOW_W-2:1], subtract_c};
+    mantissa_sum_lower = csa_tree_sum + {csa_tree_carry[MANTISSA_SUM_LOW_W-2:1], 1'b1};
     mantissa_sum_upper = ({c_shifted_eff[C_SHIFTED_W-1 : PRODUCT_MANTISSA_W]})
                        + MANTISSA_SUM_HIGH_W'(mantissa_sum_lower[MANTISSA_SUM_LOW_W-1]);
 
