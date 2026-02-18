@@ -14,6 +14,7 @@ module mac_float #(
   localparam PRODUCT_MANTISSA_W  = 2 * MANTISSA_W;
   localparam C_SHIFTED_W         = 3 * MANTISSA_W;
   localparam MANTISSA_SUM_W      = C_SHIFTED_W + 1;
+  localparam SUM_EXP_ADD         = MANTISSA_SUM_W - PRODUCT_MANTISSA_W + 1;
   localparam MANTISSA_SUM_LOW_W  = PRODUCT_MANTISSA_W + 1;
   localparam MANTISSA_SUM_HIGH_W = MANTISSA_W + 1;
   localparam NUM_PARTIAL_PRODUCT = MANTISSA_W;
@@ -158,7 +159,7 @@ module mac_float #(
   );
 
   always_comb begin
-    sum_exp      = sum_exp_t'(product_exp) - sum_exp_t'(mantissa_sum_lz);
+    sum_exp      = sum_exp_t'(product_exp) - sum_exp_t'(mantissa_sum_lz) + sum_exp_t'(SUM_EXP_ADD);
     sum_exp_ovfl = exp_a[EXP_W-1] && |sum_exp.msb;
     sum_exp_unfl = !exp_a[EXP_W-1] && |sum_exp.msb;
   end
