@@ -115,7 +115,7 @@ module mac_float #(
 
 
   always_comb begin
-    c_shifted_raw = (C_SHIFTED_W'(mantissa_c) >> c_shift_amount) & {C_SHIFTED_W{c_shift_unfl}};
+    c_shifted_raw = (C_SHIFTED_W'(mantissa_c) >> c_shift_amount) & {~{C_SHIFTED_W{c_shift_unfl}}};
     c_shifted_eff = subtract_c ? ~c_shifted_raw : c_shifted_raw;
     csa_c         = c_shifted_eff[PRODUCT_MANTISSA_W-1:0];
 
