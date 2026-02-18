@@ -8,20 +8,21 @@ module mac_float #(
     input  logic [DATA_W-1:0] c,
     output logic [DATA_W-1:0] z
 );
-
-  localparam PROD_EXP_W          = EXP_W + 1;
+  localparam OVFL_BIT            = 1;
+  localparam PROD_EXP_W          = EXP_W + OVFL_BIT;
   localparam GUARD_W             = 1;
   localparam MANTISSA_W          = 1 + FRAC_W;
   localparam PRODUCT_MANTISSA_W  = 2 * MANTISSA_W;
-  localparam PRODUCT_LOW_SUM_W   = PRODUCT_MANTISSA_W + 1;
+  localparam PRODUCT_LOW_SUM_W   = PRODUCT_MANTISSA_W + OVFL_BIT;
   localparam C_SHIFTED_W         = 3 * MANTISSA_W;
   localparam C_SHIFT_RAW_W       = 4 * MANTISSA_W + GUARD_W;
   localparam C_SHIFT_MAX         = 3 * MANTISSA_W + GUARD_W;
   localparam C_SHIFT_FACTOR_W    = $clog2(C_SHIFT_RAW_W);
-  localparam MANTISSA_SUM_W      = C_SHIFTED_W + 1;
-  localparam SUM_EXP_ADD         = MANTISSA_SUM_W - PRODUCT_MANTISSA_W + 1;
+  localparam MANTISSA_SUM_W      = C_SHIFTED_W + GUARD_W;
+  localparam MANTISSA_SUM_RAW_W  = MANTISSA_SUM_W + OVFL_BIT;
+  localparam SUM_EXP_ADD         = MANTISSA_SUM_W - PRODUCT_MANTISSA_W + OVFL_BIT;
   localparam MANTISSA_SUM_LOW_W  = PRODUCT_MANTISSA_W + 1;
-  localparam MANTISSA_SUM_HIGH_W = MANTISSA_W + 1;
+  localparam MANTISSA_SUM_HIGH_W = MANTISSA_SUM_RAW_W - MANTISSA_SUM_LOW_W;
   localparam NUM_PARTIAL_PRODUCT = MANTISSA_W;
   localparam MANTISSA_SUM_LZ_W   = $clog2(MANTISSA_SUM_W + 1);
   localparam NUM_CSA_TREE_ROWS   = NUM_PARTIAL_PRODUCT + 1;
@@ -80,7 +81,7 @@ module mac_float #(
 
   logic            [MANTISSA_SUM_HIGH_W-1:0] mantissa_sum_upper;
   logic            [ MANTISSA_SUM_LOW_W-1:0] mantissa_sum_lower;
-  logic            [     MANTISSA_SUM_W-1:0] mantissa_sum;
+  logic            [ MANTISSA_SUM_RAW_W-1:0] mantissa_sum_raw;
   logic            [     MANTISSA_SUM_W-1:0] unsigned_mantissa_sum;
   logic            [     MANTISSA_SUM_W-1:0] normalized_mantissa;
 
@@ -159,15 +160,15 @@ module mac_float #(
 
   always_comb begin
     mantissa_sum_lower = csa_tree_sum + {csa_tree_carry[PRODUCT_MANTISSA_W-1:1], subtract_c};
-    mantissa_sum_upper = MANTISSA_SUM_HIGH_W'(c_shifted_eff[C_SHIFTED_W-1 : PRODUCT_MANTISSA_W])
+    mantissa_sum_upper = (c_shifted_eff[C_SHIFTED_W-1 : PRODUCT_MANTISSA_W])
                        + MANTISSA_SUM_HIGH_W'(mantissa_sum_lower[MANTISSA_SUM_LOW_W-1]);
 
-    mantissa_sum = {mantissa_sum_upper, mantissa_sum_lower[PRODUCT_MANTISSA_W-1:0]};
+    mantissa_sum_raw = {mantissa_sum_upper, mantissa_sum_lower[MANTISSA_SUM_LOW_W-1:0]};
     sum_signed = product_sign;
-    unsigned_mantissa_sum = mantissa_sum;
+    unsigned_mantissa_sum = mantissa_sum_raw[MANTISSA_SUM_W-1:0];
 
-    if (mantissa_sum[MANTISSA_SUM_W-1]) begin
-      unsigned_mantissa_sum = -mantissa_sum;
+    if (mantissa_sum_raw[MANTISSA_SUM_RAW_W-1]) begin
+      unsigned_mantissa_sum = {-mantissa_sum_raw}[MANTISSA_SUM_W-1:0];
       sum_signed            = ~product_sign;
     end
   end
