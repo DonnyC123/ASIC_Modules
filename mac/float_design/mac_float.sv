@@ -117,7 +117,7 @@ module mac_float #(
     c_shift_amount = c_shift_factor_t'(float_c.exp) - c_shift_factor_t'(product_exp) + c_shift_factor_t'(FRAC_W) + c_shift_factor_t'(MANTISSA_W);
 
     c_shift_unfl = product_exp[EXP_W-1] && c_shift_amount.msb;
-    c_shift_ovfl = c_shift_amount > C_SHIFT_MAX || !exp_a[EXP_W-1] && !c_shift_unfl;
+    c_shift_ovfl = (c_shift_amount > C_SHIFT_MAX) && !c_shift_unfl;
     subtract_c = (product_sign ^ float_c.sign) && !c_shift_unfl;
   end
 
