@@ -86,6 +86,7 @@ module mac_float #(
 
   logic            [  MANTISSA_SUM_LZ_W-1:0] mantissa_sum_lz;
   logic            [  MANTISSA_SUM_LZ_W-1:0] mantissa_sum_shift;
+  logic                                      sum_signed;
   sum_exp_t                                  sum_exp;
   logic                                      sum_exp_ovfl;
   logic                                      sum_exp_unfl;
@@ -162,11 +163,12 @@ module mac_float #(
                        + MANTISSA_SUM_HIGH_W'(mantissa_sum_lower[MANTISSA_SUM_LOW_W-1]);
 
     mantissa_sum = {mantissa_sum_upper, mantissa_sum_lower[PRODUCT_MANTISSA_W-1:0]};
-
+    sum_signed = product_sign;
     unsigned_mantissa_sum = mantissa_sum;
+
     if (mantissa_sum[MANTISSA_SUM_W-1]) begin
       unsigned_mantissa_sum = -mantissa_sum;
-      sum_exp               = ~sum_exp;
+      sum_signed            = ~product_sign;
     end
   end
 
@@ -190,7 +192,6 @@ module mac_float #(
     end else begin
       mantissa_sum_shift = mantissa_sum_lz;
     end
-
     normalized_mantissa = unsigned_mantissa_sum << mantissa_sum_shift;
   end
 
