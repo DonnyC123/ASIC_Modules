@@ -158,15 +158,17 @@ module mac_float #(
       .sum         (csa_tree_sum),
       .carry       (csa_tree_carry)
   );
-  logic [MANTISSA_SUM_HIGH_W:0] upper_sum_temp;
+  logic [  MANTISSA_SUM_HIGH_W:0] upper_sum_temp;
+  logic [MANTISSA_SUM_HIGH_W-1:0] c_upper_slice;
 
   always_comb begin
     mantissa_sum_lower = csa_tree_sum + {csa_tree_carry[MANTISSA_SUM_LOW_W-2:1], 1'b0};
 
+    c_upper_slice = c_shifted_eff[C_SHIFTED_W-1 : PRODUCT_MANTISSA_W];
 
-
-    upper_sum_temp = {1'b0, c_shifted_eff[C_SHIFTED_W-1 : PRODUCT_MANTISSA_W]} 
+    upper_sum_temp = {c_upper_slice[MANTISSA_SUM_HIGH_W-2], c_upper_slice} 
                      + (MANTISSA_SUM_HIGH_W + 1)'(mantissa_sum_lower[MANTISSA_SUM_LOW_W-1 : MANTISSA_SUM_LOW_W-2]);
+
 
     mantissa_sum_upper = upper_sum_temp[MANTISSA_SUM_HIGH_W-1:0];
 
