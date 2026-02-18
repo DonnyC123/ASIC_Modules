@@ -168,7 +168,7 @@ module mac_float #(
     upper_sum_temp = {1'b0, c_shifted_eff[C_SHIFTED_W-1 : PRODUCT_MANTISSA_W]} 
                      + (MANTISSA_SUM_HIGH_W + 1)'(mantissa_sum_lower[MANTISSA_SUM_LOW_W-1 : MANTISSA_SUM_LOW_W-2]);
 
-    mantissa_sum_upper = upper_sum_temp[MANTISSA_SUM_HIGH_W : 1];
+    mantissa_sum_upper = upper_sum_temp[MANTISSA_SUM_HIGH_W-1:0];
 
     mantissa_sum_raw = {
       mantissa_sum_upper, upper_sum_temp[0], mantissa_sum_lower[MANTISSA_SUM_LOW_W-3:0]
