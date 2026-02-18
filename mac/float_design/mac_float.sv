@@ -65,7 +65,7 @@ module mac_float #(
   c_shift_factor_t                           c_shift_amount;
 
   logic                                      product_sign;
-  logic            [  PRODUCT_LOW_SUM_W-1:0] partial_products    [NUM_PARTIAL_PRODUCT];
+  logic            [  PRODUCT_LOW_SUM_W-1:0] partial_products      [NUM_PARTIAL_PRODUCT];
 
   logic                                      c_shift_ovfl;
   logic                                      c_shift_unfl;
@@ -74,13 +74,14 @@ module mac_float #(
   logic            [      C_SHIFT_RAW_W-1:0] c_shifted_raw;
   logic            [     MANTISSA_SUM_W-1:0] c_shifted_eff;
   logic            [  PRODUCT_LOW_SUM_W-1:0] csa_c;
-  logic            [  PRODUCT_LOW_SUM_W-1:0] csa_summands        [  NUM_CSA_TREE_ROWS];
+  logic            [  PRODUCT_LOW_SUM_W-1:0] csa_summands          [  NUM_CSA_TREE_ROWS];
   logic            [  PRODUCT_LOW_SUM_W-1:0] csa_tree_sum;
   logic            [  PRODUCT_LOW_SUM_W-1:0] csa_tree_carry;
 
   logic            [MANTISSA_SUM_HIGH_W-1:0] mantissa_sum_upper;
   logic            [ MANTISSA_SUM_LOW_W-1:0] mantissa_sum_lower;
   logic            [     MANTISSA_SUM_W-1:0] mantissa_sum;
+  logic            [     MANTISSA_SUM_W-1:0] unsigned_mantissa_sum;
   logic            [     MANTISSA_SUM_W-1:0] normalized_mantissa;
 
   logic            [  MANTISSA_SUM_LZ_W-1:0] mantissa_sum_lz;
@@ -161,13 +162,19 @@ module mac_float #(
                        + MANTISSA_SUM_HIGH_W'(mantissa_sum_lower[MANTISSA_SUM_LOW_W-1]);
 
     mantissa_sum = {mantissa_sum_upper, mantissa_sum_lower[PRODUCT_MANTISSA_W-1:0]};
+
+    unsigned_mantissa_sum = mantissa_sum;
+    if (mantissa_sum[MANTISSA_SUM_W-1]) begin
+      unsigned_mantissa_sum = -mantissa_sum;
+      sum_exp               = ~sum_exp;
+    end
   end
 
   leading_zero_counter_top #(
       .DATA_W          (MANTISSA_SUM_W),
       .LZC_DATA_BLOCK_W(4)
   ) leading_zero_counter_top_inst (
-      .data_i              (mantissa_sum),
+      .data_i              (unsigned_mantissa_sum),
       .leading_zero_count_o(mantissa_sum_lz)
   );
 
@@ -184,7 +191,7 @@ module mac_float #(
       mantissa_sum_shift = mantissa_sum_lz;
     end
 
-    normalized_mantissa = mantissa_sum << mantissa_sum_shift;
+    normalized_mantissa = unsigned_mantissa_sum << mantissa_sum_shift;
   end
 
   always_comb begin
