@@ -52,7 +52,7 @@ module leading_zero_counter_top #(
           .leading_zero_count_o(block_lz_count[NUM_LZC_UNITS-1][LAST_BLOCK_LZ_COUNT_W-1:0])
       );
     end else begin
-      assign leading_zero_count_o[0] = !data_i[0];
+      assign block_lz_count[NUM_LZC_UNITS-1][0]] = !data_i[0];
       assign block_contains_one[0]   = data_i[0];
     end
     if (LAST_LZC_DATA_BLOCK_W < LZC_DATA_BLOCK_W) begin
