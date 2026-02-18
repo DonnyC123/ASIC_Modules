@@ -34,11 +34,11 @@ module leading_zero_counter_top #(
 
   genvar data_idx;
   generate
-    for (data_idx = (NUM_LZC_UNITS - 1); data_idx >= 1; data_idx--) begin
+    for (data_idx = NUM_LZC_UNITS - 1; data_idx >= 1; data_idx--) begin
       leading_zero_counter #(
           .DATA_W(LZC_DATA_BLOCK_W)
       ) leading_zero_counter_inst (
-          .data_i              (data_i[(data_idx*LZC_DATA_BLOCK_W)+:LZC_DATA_BLOCK_W]),
+          .data_i              (data_i[data_idx*LZC_DATA_BLOCK_W-:LZC_DATA_BLOCK_W]),
           .contains_one_o      (block_contains_one[data_idx]),
           .leading_zero_count_o(block_lz_count[NUM_LZC_UNITS-1-data_idx])
       );
