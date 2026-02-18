@@ -13,6 +13,8 @@ module mac_float #(
   localparam MANTISSA_W          = 1 + FRAC_W;
   localparam PRODUCT_MANTISSA_W  = 2 * MANTISSA_W;
   localparam C_SHIFTED_W         = 3 * MANTISSA_W;
+  localparam C_SHIFT_RAW_W       = 4 * MANTISSA_W;
+  localparam C_SHIFT_FACTOR_W    = $clog2(C_SHIFT_RAW_W);
   localparam MANTISSA_SUM_W      = C_SHIFTED_W + 1;
   localparam SUM_EXP_ADD         = MANTISSA_SUM_W - PRODUCT_MANTISSA_W + 1;
   localparam MANTISSA_SUM_LOW_W  = PRODUCT_MANTISSA_W + 1;
@@ -23,6 +25,11 @@ module mac_float #(
 
 
   localparam BIAS = (1 << (EXP_W - 1)) - 1;
+
+  typedef struct packed {
+    logic                        msb;
+    logic [C_SHIFT_FACTOR_W-1:0] exp;
+  } c_shift_factor_t;
 
   typedef struct packed {
     logic             msb;
@@ -40,46 +47,46 @@ module mac_float #(
     logic [FRAC_W-1:0] frac;
   } float_t;
 
-  float_t                             float_a;
-  float_t                             float_b;
-  float_t                             float_c;
-  float_t                             float_z;
+  float_t                                    float_a;
+  float_t                                    float_b;
+  float_t                                    float_c;
+  float_t                                    float_z;
 
-  logic     [         MANTISSA_W-1:0] mantissa_a;
-  logic     [         MANTISSA_W-1:0] mantissa_b;
-  logic     [         MANTISSA_W-1:0] mantissa_c;
+  logic            [         MANTISSA_W-1:0] mantissa_a;
+  logic            [         MANTISSA_W-1:0] mantissa_b;
+  logic            [         MANTISSA_W-1:0] mantissa_c;
 
-  logic     [              EXP_W-1:0] exp_a;
-  logic     [              EXP_W-1:0] exp_b;
-  logic     [              EXP_W-1:0] exp_c;
+  logic            [              EXP_W-1:0] exp_a;
+  logic            [              EXP_W-1:0] exp_b;
+  logic            [              EXP_W-1:0] exp_c;
 
-  ext_exp_t                           product_exp;
-  ext_exp_t                           c_shift_amount;
+  ext_exp_t                                  product_exp;
+  c_shift_factor_t                           c_shift_amount;
 
-  logic                               product_sign;
-  logic     [ PRODUCT_MANTISSA_W-1:0] partial_products    [NUM_PARTIAL_PRODUCT];
+  logic                                      product_sign;
+  logic            [ PRODUCT_MANTISSA_W-1:0] partial_products    [NUM_PARTIAL_PRODUCT];
 
-  logic                               c_shift_ovfl;
-  logic                               c_shift_unfl;
-  logic                               subtract_c;
+  logic                                      c_shift_ovfl;
+  logic                                      c_shift_unfl;
+  logic                                      subtract_c;
 
-  logic     [        C_SHIFTED_W-1:0] c_shifted_raw;
-  logic     [        C_SHIFTED_W-1:0] c_shifted_eff;
-  logic     [ PRODUCT_MANTISSA_W-1:0] csa_c;
-  logic     [ PRODUCT_MANTISSA_W-1:0] csa_summands        [  NUM_CSA_TREE_ROWS];
-  logic     [ PRODUCT_MANTISSA_W-1:0] csa_tree_sum;
-  logic     [ PRODUCT_MANTISSA_W-1:0] csa_tree_carry;
+  logic            [      C_SHIFT_RAW_W-1:0] c_shifted_raw;
+  logic            [        C_SHIFTED_W-1:0] c_shifted_eff;
+  logic            [ PRODUCT_MANTISSA_W-1:0] csa_c;
+  logic            [ PRODUCT_MANTISSA_W-1:0] csa_summands        [  NUM_CSA_TREE_ROWS];
+  logic            [ PRODUCT_MANTISSA_W-1:0] csa_tree_sum;
+  logic            [ PRODUCT_MANTISSA_W-1:0] csa_tree_carry;
 
-  logic     [MANTISSA_SUM_HIGH_W-1:0] mantissa_sum_upper;
-  logic     [ MANTISSA_SUM_LOW_W-1:0] mantissa_sum_lower;
-  logic     [     MANTISSA_SUM_W-1:0] mantissa_sum;
-  logic     [     MANTISSA_SUM_W-1:0] normalized_mantissa;
+  logic            [MANTISSA_SUM_HIGH_W-1:0] mantissa_sum_upper;
+  logic            [ MANTISSA_SUM_LOW_W-1:0] mantissa_sum_lower;
+  logic            [     MANTISSA_SUM_W-1:0] mantissa_sum;
+  logic            [     MANTISSA_SUM_W-1:0] normalized_mantissa;
 
-  logic     [  MANTISSA_SUM_LZ_W-1:0] mantissa_sum_lz;
-  logic     [  MANTISSA_SUM_LZ_W-1:0] mantissa_sum_shift;
-  sum_exp_t                           sum_exp;
-  logic                               sum_exp_ovfl;
-  logic                               sum_exp_unfl;
+  logic            [  MANTISSA_SUM_LZ_W-1:0] mantissa_sum_lz;
+  logic            [  MANTISSA_SUM_LZ_W-1:0] mantissa_sum_shift;
+  sum_exp_t                                  sum_exp;
+  logic                                      sum_exp_ovfl;
+  logic                                      sum_exp_unfl;
 
   function automatic void unpack_float(input float_t float_i, output logic [EXP_W-1:0] exp_o,
                                        output logic [MANTISSA_W-1:0] mantissa_o);
@@ -103,21 +110,22 @@ module mac_float #(
   end
 
   always_comb begin
-    product_sign   = float_a.sign ^ float_b.sign;
-    product_exp    = (exp_a + exp_b) - BIAS;
+    product_sign = float_a.sign ^ float_b.sign;
+    product_exp = (exp_a + exp_b) - $unsigned(EXP_W'(BIAS));
 
-    c_shift_amount = (product_exp - ext_exp_t'(float_c.exp) + ext_exp_t'(FRAC_W));
+    c_shift_amount = c_shift_factor_t'(float_c.exp) - c_shift_factor_t'(product_exp) + c_shift_factor_t'(FRAC_W) + c_shift_factor_t'(MANTISSA_W);
 
-    c_shift_ovfl   = exp_a[EXP_W-1] && c_shift_amount.msb;
-    c_shift_unfl   = !exp_a[EXP_W-1] && c_shift_amount.msb;
-    subtract_c     = (product_sign ^ float_c.sign) && !c_shift_unfl;
+    c_shift_ovfl = exp_a[EXP_W-1] && c_shift_amount.msb;
+    c_shift_unfl = !exp_a[EXP_W-1] && c_shift_amount.msb;
+    subtract_c = (product_sign ^ float_c.sign) && !c_shift_unfl;
   end
 
 
   always_comb begin
-    c_shifted_raw = (C_SHIFTED_W'(mantissa_c) >> c_shift_amount) & {~{C_SHIFTED_W{c_shift_unfl}}};
-    c_shifted_eff = subtract_c ? ~c_shifted_raw : c_shifted_raw;
-    csa_c         = c_shifted_eff[PRODUCT_MANTISSA_W-1:0];
+    c_shifted_raw = (C_SHIFT_RAW_W'(mantissa_c) << c_shift_amount);
+    c_shifted_eff = (subtract_c ? ~c_shifted_raw[C_SHIFT_RAW_W-1:MANTISSA_W] : c_shifted_raw[C_SHIFT_RAW_W-1:MANTISSA_W]) & {~{C_SHIFTED_W{c_shift_unfl}}};
+
+    csa_c = c_shifted_eff[PRODUCT_MANTISSA_W-1:0];
 
 
     foreach (partial_products[i]) begin
