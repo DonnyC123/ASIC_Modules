@@ -14,15 +14,15 @@ module mac_float #(
   localparam MANTISSA_W          = 1 + FRAC_W;
   localparam PRODUCT_MANTISSA_W  = 2 * MANTISSA_W;
   localparam PRODUCT_LOW_SUM_W   = PRODUCT_MANTISSA_W + OVFL_BIT;
-  localparam C_SHIFTED_W         = 3 * MANTISSA_W;
+  localparam C_SHIFTED_W         = 3 * MANTISSA_W + GUARD_W;
   localparam C_SHIFT_RAW_W       = 4 * MANTISSA_W + GUARD_W;
   localparam C_SHIFT_MAX         = 3 * MANTISSA_W + GUARD_W;
   localparam C_SHIFT_FACTOR_W    = $clog2(C_SHIFT_RAW_W);
-  localparam MANTISSA_SUM_W      = C_SHIFTED_W + GUARD_W;
+  localparam MANTISSA_SUM_W      = C_SHIFTED_W;
   localparam MANTISSA_SUM_RAW_W  = MANTISSA_SUM_W + OVFL_BIT;
   localparam SUM_EXP_ADD         = MANTISSA_SUM_W - PRODUCT_MANTISSA_W + OVFL_BIT;
-  localparam MANTISSA_SUM_LOW_W  = PRODUCT_MANTISSA_W + 1;
-  localparam MANTISSA_SUM_HIGH_W = MANTISSA_SUM_RAW_W - MANTISSA_SUM_LOW_W;
+  localparam MANTISSA_SUM_LOW_W  = PRODUCT_MANTISSA_W + OVFL_BIT;
+  localparam MANTISSA_SUM_HIGH_W = MANTISSA_SUM_RAW_W - MANTISSA_SUM_LOW_W + OVFL_BIT;
   localparam NUM_PARTIAL_PRODUCT = MANTISSA_W;
   localparam MANTISSA_SUM_LZ_W   = $clog2(MANTISSA_SUM_W + 1);
   localparam NUM_CSA_TREE_ROWS   = NUM_PARTIAL_PRODUCT + 1;
@@ -73,7 +73,7 @@ module mac_float #(
   logic                                      subtract_c;
 
   logic            [      C_SHIFT_RAW_W-1:0] c_shifted_raw;
-  logic            [     MANTISSA_SUM_W-1:0] c_shifted_eff;
+  logic            [        C_SHIFTED_W-1:0] c_shifted_eff;
   logic            [  PRODUCT_LOW_SUM_W-1:0] csa_c;
   logic            [  PRODUCT_LOW_SUM_W-1:0] csa_summands          [  NUM_CSA_TREE_ROWS];
   logic            [  PRODUCT_LOW_SUM_W-1:0] csa_tree_sum;
@@ -127,9 +127,9 @@ module mac_float #(
 
   always_comb begin
     c_shifted_raw = (C_SHIFT_RAW_W'(mantissa_c) << c_shift_amount);
-    c_shifted_eff =  {~{MANTISSA_SUM_W{c_shift_unfl}}}
+    c_shifted_eff =  {~{C_SHIFTED_W{c_shift_unfl}}} 
                   & (subtract_c
-                  ? ~ c_shifted_raw[C_SHIFT_RAW_W-1:MANTISSA_W] 
+                  ? ~c_shifted_raw[C_SHIFT_RAW_W-1:MANTISSA_W] 
                   : c_shifted_raw[C_SHIFT_RAW_W-1:MANTISSA_W]);
 
     csa_c = {1'b0, c_shifted_eff[PRODUCT_MANTISSA_W-1:0]};
@@ -163,7 +163,7 @@ module mac_float #(
     mantissa_sum_upper = ({subtract_c, c_shifted_eff[C_SHIFTED_W-1 : PRODUCT_MANTISSA_W]})
                        + MANTISSA_SUM_HIGH_W'(mantissa_sum_lower[MANTISSA_SUM_LOW_W-1]);
 
-    mantissa_sum_raw = {mantissa_sum_upper, mantissa_sum_lower[MANTISSA_SUM_LOW_W-1:0]};
+    mantissa_sum_raw = {mantissa_sum_upper, mantissa_sum_lower[MANTISSA_SUM_LOW_W-2:0]};
     sum_signed = product_sign;
     unsigned_mantissa_sum = mantissa_sum_raw[MANTISSA_SUM_W-1:0];
 
