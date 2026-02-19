@@ -18,9 +18,8 @@ module align_addend #(
     output logic            [        MANTISSA_W-1:0] c_upper_slice_o,
     output logic            [PRODUCT_MANTISSA_W-1:0] csa_c_o,
     output logic                                     c_lower_sticky_o,
-
-    output logic subtract_c_o,
-    output logic c_dominates_o
+    output logic                                     subtract_c_o,
+    output logic                                     c_dominates_o
 );
 
   localparam C_SHIFT_RAW_W    = 4 * MANTISSA_W;
@@ -54,7 +53,7 @@ module align_addend #(
     c_shift_amount  = c_shift_factor_t'(unpacked_c_i.exp) - c_shift_factor_t'(product_exp_i) + 
                      c_shift_factor_t'(PRODUCT_ZERO_POINT_OFFSET) + c_shift_factor_t'(SHIFT_ZERO_POINT_OFFSET);
 
-    c_shift_unfl = (|(product_exp_i[PRODUCT_EXP_W-1:EXP_W])) && c_shift_amount.msb;
+    c_shift_unfl = (|(product_exp_i[PRODUCT_EXP_W-1:EXP_W-1])) && c_shift_amount.msb;
     c_shift_ovfl = (c_shift_amount > C_SHIFT_MAX) && !c_shift_unfl;
 
     subtract_c_o = (product_sign_i ^ unpacked_c_i.sign) && !c_shift_unfl;
