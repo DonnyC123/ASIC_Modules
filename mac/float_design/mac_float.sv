@@ -73,7 +73,7 @@ module mac_float #(
   logic                                      c_dominates;
   logic                                      subtract_c;
 
-  logic            [ PRODUCT_MANTISSA_W-1:0] csa_c;
+  logic            [  PRODUCT_LOW_SUM_W-1:0] csa_c;
   logic            [  PRODUCT_LOW_SUM_W-1:0] csa_summands          [  NUM_CSA_TREE_ROWS];
   logic            [  PRODUCT_LOW_SUM_W-1:0] csa_tree_sum;
   logic            [  PRODUCT_LOW_SUM_W-1:0] csa_tree_carry;
@@ -170,7 +170,7 @@ module mac_float #(
       .c_dominates_o   (c_dominates)
   );
 
-  assign csa_summands[NUM_CSA_TREE_ROWS-1] = {OVFL_BIT'(1'b0), csa_c};
+  assign csa_summands[NUM_CSA_TREE_ROWS-1] = {csa_c};
 
   wallace_tree_recursive #(
       .DATA_W  (PRODUCT_LOW_SUM_W),
@@ -182,6 +182,7 @@ module mac_float #(
   );
 
   always_comb begin
+    mantissa_sum_lower = csa_tree_sum + {csa_tree_carry[MANTISSA_SUM_LOW_W-2:1], 1'b0};
     mantissa_sum_lower = csa_tree_sum + {csa_tree_carry, subtract_c};
     upper_sum_temp = {c_upper_slice[MANTISSA_SUM_HIGH_W-1], c_upper_slice} 
                    + (MANTISSA_SUM_HIGH_W + 1)'(mantissa_sum_lower[MANTISSA_SUM_LOW_W-1 : MANTISSA_SUM_LOW_W-2]);

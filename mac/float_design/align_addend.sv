@@ -2,7 +2,9 @@ module align_addend #(
     parameter EXP_W  = 5,
     parameter FRAC_W = 9,
 
+    localparam OVFL_BIT           = 1,
     localparam MANTISSA_W         = FRAC_W + 1,
+    localparam MANTISSA_SIGNED_W  = MANTISSA_W + OVFL_BIT,
     localparam PRODUCT_EXP_W      = EXP_W + 1,
     localparam PRODUCT_MANTISSA_W = 2 * MANTISSA_W,
 
@@ -15,14 +17,14 @@ module align_addend #(
     input  unpacked_float_t                          unpacked_c_i,
     input  logic            [     PRODUCT_EXP_W-1:0] product_exp_i,
     input  logic                                     product_sign_i,
-    output logic            [        MANTISSA_W-1:0] c_upper_slice_o,
+    output logic            [ MANTISSA_SIGNED_W-1:0] c_upper_slice_o,
     output logic            [PRODUCT_MANTISSA_W-1:0] csa_c_o,
     output logic                                     c_lower_sticky_o,
     output logic                                     subtract_c_o,
     output logic                                     c_dominates_o
 );
 
-  localparam C_SHIFT_RAW_W    = 4 * MANTISSA_W;
+  localparam C_SHIFT_RAW_W    = MANTISSA_W + PRODUCT_MANTISSA_W + MANTISSA_SIGNED_W;
   localparam C_SHIFT_MAX      = 3 * MANTISSA_W;
   localparam C_SHIFT_FACTOR_W = $clog2(C_SHIFT_RAW_W);
 
@@ -35,11 +37,10 @@ module align_addend #(
   } c_shift_factor_t;
 
   typedef struct packed {
-    logic [MANTISSA_W - 1:0]         upper_c;
-    logic [PRODUCT_MANTISSA_W - 1:0] product_aligned_c;
-    logic [MANTISSA_W - 1:0]         rounding_c;
+    logic [MANTISSA_SIGNED_W-1:0]  upper_c;
+    logic [PRODUCT_MANTISSA_W-1:0] product_aligned_c;
+    logic [MANTISSA_W - 1:0]       rounding_c;
   } shifted_c_t;
-
 
   c_shift_factor_t c_shift_amount;
   shifted_c_t      c_wide_prep;
@@ -60,7 +61,7 @@ module align_addend #(
     c_wide_prep = C_SHIFT_RAW_W'(unpacked_c_i.mantissa);
 
     if (subtract_c_o) begin
-      c_wide_prep = ~c_wide_prep;
+      c_wide_prep = $unsigned(-$signed(c_wide_prep));
     end
 
     c_shifted_raw    = c_wide_prep << c_shift_amount;
