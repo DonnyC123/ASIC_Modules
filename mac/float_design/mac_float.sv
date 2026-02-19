@@ -50,32 +50,30 @@ module mac_float #(
     logic [FRAC_W-1:0] frac;
   } float_t;
 
+  typedef struct packed {
+    logic                  sign;
+    logic [EXP_W-1:0]      exp;
+    logic [MANTISSA_W-1:0] mantissa;
+  } unpacked_float_t;
+
   float_t                                    float_a;
   float_t                                    float_b;
   float_t                                    float_c;
   float_t                                    float_z;
 
-  logic            [         MANTISSA_W-1:0] mantissa_a;
-  logic            [         MANTISSA_W-1:0] mantissa_b;
-  logic            [         MANTISSA_W-1:0] mantissa_c;
-
-  logic            [              EXP_W-1:0] exp_a;
-  logic            [              EXP_W-1:0] exp_b;
-  logic            [              EXP_W-1:0] exp_c;
+  unpacked_float_t                           unpacked_a;
+  unpacked_float_t                           unpacked_b;
+  unpacked_float_t                           unpacked_c;
 
   ext_exp_t                                  product_exp;
-  c_shift_factor_t                           c_shift_amount;
 
   logic                                      product_sign;
   logic            [  PRODUCT_LOW_SUM_W-1:0] partial_products      [NUM_PARTIAL_PRODUCT];
 
-  logic                                      c_shift_ovfl;
-  logic                                      c_shift_unfl;
+  logic                                      c_dominates;
   logic                                      subtract_c;
 
-  logic            [      C_SHIFT_RAW_W-1:0] c_shifted_raw;
-  logic            [        C_SHIFTED_W-1:0] c_shifted_eff;
-  logic            [  PRODUCT_LOW_SUM_W-1:0] csa_c;
+  logic            [ PRODUCT_MANTISSA_W-1:0] csa_c;
   logic            [  PRODUCT_LOW_SUM_W-1:0] csa_summands          [  NUM_CSA_TREE_ROWS];
   logic            [  PRODUCT_LOW_SUM_W-1:0] csa_tree_sum;
   logic            [  PRODUCT_LOW_SUM_W-1:0] csa_tree_carry;
@@ -103,25 +101,31 @@ module mac_float #(
   logic                                      sum_inf_sign;
   logic                                      sum_nan;
 
-  function automatic void unpack_float(input float_t float_i, output logic [EXP_W-1:0] exp_o,
-                                       output logic [MANTISSA_W-1:0] mantissa_o);
-    mantissa_o = {1'b1, float_i.frac};
-    exp_o      = float_i.exp;
+  shifted_c_t                                c_shifted_struct;
+
+  function automatic unpacked_float_t unpack_float(input float_t float_i);
+    unpacked_float_t unpacked_o;
+
+    unpacked_o.sign     = float_i.sign;
+    unpacked_o.exp      = float_i.exp;
+    unpacked_o.mantissa = {1'b1, float_i.frac};
 
     if (float_i.exp == '0) begin
-      exp_o[0]                 = 1'b1;
-      mantissa_o[MANTISSA_W-1] = 1'b0;
+      unpacked_o.exp[0]                 = 1'b1;
+      unpacked_o.mantissa[MANTISSA_W-1] = 1'b0;
     end
+
+    return unpacked_o;
   endfunction
 
   always_comb begin
-    float_a = float_t'(a);
-    float_b = float_t'(b);
-    float_c = float_t'(c);
+    float_a    = float_t'(a);
+    float_b    = float_t'(b);
+    float_c    = float_t'(c);
 
-    unpack_float(float_a, exp_a, mantissa_a);
-    unpack_float(float_b, exp_b, mantissa_b);
-    unpack_float(float_c, exp_c, mantissa_c);
+    unpacked_a = unpack_float(float_a);
+    unpacked_b = unpack_float(float_b);
+    unpacked_c = unpack_float(float_c);
   end
 
   special_float_handler #(
@@ -137,38 +141,37 @@ module mac_float #(
 
   always_comb begin
     product_sign = float_a.sign ^ float_b.sign;
-    product_exp = (exp_a + exp_b) - $unsigned(EXP_W'(BIAS));
-
-    c_shift_amount = c_shift_factor_t'(float_c.exp) - c_shift_factor_t'(product_exp) + c_shift_factor_t'(FRAC_W) + c_shift_factor_t'(MANTISSA_W);
-
-    c_shift_unfl = product_exp[EXP_W-1] && c_shift_amount.msb;
-    c_shift_ovfl = (c_shift_amount > C_SHIFT_MAX) && !c_shift_unfl;
-    subtract_c = (product_sign ^ float_c.sign) && !c_shift_unfl;
-  end
-
-
-  always_comb begin
-    c_shifted_raw = (C_SHIFT_RAW_W'(mantissa_c) << c_shift_amount);
-    if (subtract_c) begin
-      c_shifted_raw = ((~C_SHIFT_RAW_W'(mantissa_c) + 1'b1) << c_shift_amount);
-    end
-
-    c_shifted_eff = {~{C_SHIFTED_W{c_shift_unfl}}} & c_shifted_raw[C_SHIFT_RAW_W-1:MANTISSA_W];
-    csa_c         = {1'b0, c_shifted_eff[PRODUCT_MANTISSA_W-1:0]};
+    product_exp  = (unpacked_a.exp + unpacked_b.exp) - $unsigned(EXP_W'(BIAS));
 
     foreach (partial_products[i]) begin
       logic [MANTISSA_W-1:0] partial_product;
 
-      partial_product     = mantissa_a & {MANTISSA_W{mantissa_b[i]}};
+      partial_product     = unpacked_a.mantissa & {MANTISSA_W{unpacked_b.mantissa[i]}};
       partial_products[i] = {{MANTISSA_W + 1{1'b0}}, partial_product} << i;
     end
+  end
 
+  always_comb begin
     for (int i = 0; i < NUM_PARTIAL_PRODUCT; i++) begin
       csa_summands[i] = partial_products[i];
     end
-
-    csa_summands[NUM_CSA_TREE_ROWS-1] = csa_c;
   end
+
+  align_addend #(
+      .EXP_W (EXP_W),
+      .FRAC_W(FRAC_W)
+  ) align_addend_inst (
+      .unpacked_c_i    (unpacked_c),
+      .product_exp_i   (product_exp),
+      .product_sign_i  (product_sign),
+      .c_upper_slice_o (c_upper_slice),
+      .csa_c_o         (csa_c),
+      .c_lower_sticky_o(),
+      .subtract_c_o    (subtract_c),
+      .c_dominates     (c_dominates)
+  );
+
+  assign csa_summands[NUM_CSA_TREE_ROWS-1] = {OVFL_BIT'(1'b0), csa_c};
 
   wallace_tree_recursive #(
       .DATA_W  (PRODUCT_LOW_SUM_W),
@@ -179,17 +182,12 @@ module mac_float #(
       .carry       (csa_tree_carry)
   );
 
-
   always_comb begin
-    mantissa_sum_lower = csa_tree_sum + {csa_tree_carry[MANTISSA_SUM_LOW_W-2:1], 1'b0};
-
-    c_upper_slice = c_shifted_eff[C_SHIFTED_W-1 : PRODUCT_MANTISSA_W];
-
+    mantissa_sum_lower = csa_tree_sum + {csa_tree_carry[MANTISSA_SUM_LOW_W-2:1], subtract_c};
     upper_sum_temp = {c_upper_slice[MANTISSA_SUM_HIGH_W-1], c_upper_slice} 
                    + (MANTISSA_SUM_HIGH_W + 1)'(mantissa_sum_lower[MANTISSA_SUM_LOW_W-1 : MANTISSA_SUM_LOW_W-2]);
 
-    mantissa_sum_upper = upper_sum_temp[MANTISSA_SUM_HIGH_W : 1];
-
+    mantissa_sum_upper = upper_sum_temp[MANTISSA_SUM_HIGH_W:1];
     mantissa_sum_raw = {
       mantissa_sum_upper, upper_sum_temp[0], mantissa_sum_lower[MANTISSA_SUM_LOW_W-3:0]
     };
@@ -214,11 +212,10 @@ module mac_float #(
 
   always_comb begin
     sum_exp      = sum_exp_t'(product_exp) - sum_exp_t'(mantissa_sum_lz) + sum_exp_t'(SUM_EXP_ADD) + sum_exp_t'(MANTISSA_W-FRAC_W);
-    sum_exp_ovfl = exp_a[EXP_W-1] && |sum_exp.msb;
-    sum_exp_unfl = !exp_a[EXP_W-1] && |sum_exp.msb;
+    sum_exp_ovfl = unpacked_a.exp[EXP_W-1] && |sum_exp.msb;
+    sum_exp_unfl = !unpacked_a.exp[EXP_W-1] && |sum_exp.msb;
   end
 
-  // I don't think this handles the underflow correctly
 
   always_comb begin
     if (sum_exp_unfl) begin
@@ -241,7 +238,7 @@ module mac_float #(
       float_z.sign = sum_inf_sign;
       float_z.exp  = '1;
       float_z.frac = '0;
-    end else if (c_shift_ovfl) begin
+    end else if (c_dominates) begin
       float_z = float_c;
     end else begin
       if (sum_exp_ovfl) begin  // Wanted to add unique0 here

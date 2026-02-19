@@ -1,3 +1,4 @@
+
 module special_float_handler #(
     parameter type float_t = struct packed {
       logic sign;
