@@ -101,7 +101,6 @@ module mac_float #(
   logic                                      sum_inf_sign;
   logic                                      sum_nan;
 
-  shifted_c_t                                c_shifted_struct;
 
   function automatic unpacked_float_t unpack_float(input float_t float_i);
     unpacked_float_t unpacked_o;
