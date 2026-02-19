@@ -167,7 +167,7 @@ module mac_float #(
       .csa_c_o         (csa_c),
       .c_lower_sticky_o(),
       .subtract_c_o    (subtract_c),
-      .c_dominates     (c_dominates)
+      .c_dominates_o   (c_dominates)
   );
 
   assign csa_summands[NUM_CSA_TREE_ROWS-1] = {OVFL_BIT'(1'b0), csa_c};
