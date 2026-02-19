@@ -20,7 +20,6 @@ module align_addend #(
     output logic            [ MANTISSA_SIGNED_W-1:0] c_upper_slice_o,
     output logic            [PRODUCT_MANTISSA_W-1:0] csa_c_o,
     output logic                                     c_lower_sticky_o,
-    output logic                                     subtract_c_o,
     output logic                                     c_dominates_o
 );
 
@@ -49,6 +48,7 @@ module align_addend #(
 
   logic            c_shift_unfl;
   logic            c_shift_ovfl;
+  logic            subtract_c;
 
   always_comb begin
     c_shift_amount  = c_shift_factor_t'(unpacked_c_i.exp) - c_shift_factor_t'(product_exp_i) + 
@@ -57,10 +57,10 @@ module align_addend #(
     c_shift_unfl = (|(product_exp_i[PRODUCT_EXP_W-1:EXP_W-1])) && c_shift_amount.msb;
     c_shift_ovfl = (c_shift_amount > C_SHIFT_MAX) && !c_shift_unfl;
 
-    subtract_c_o = (product_sign_i ^ unpacked_c_i.sign) && !c_shift_unfl;
+    subtract_c = (product_sign_i ^ unpacked_c_i.sign) && !c_shift_unfl;
     c_wide_prep = C_SHIFT_RAW_W'(unpacked_c_i.mantissa);
 
-    if (subtract_c_o) begin
+    if (subtract_c) begin
       c_wide_prep = $unsigned(-$signed(c_wide_prep));
     end
 
@@ -69,7 +69,6 @@ module align_addend #(
 
     c_upper_slice_o  = '0;
     csa_c_o          = '0;
-
 
     if (c_shift_unfl) begin
       c_lower_sticky_o = |unpacked_c_i.mantissa;

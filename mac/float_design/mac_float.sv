@@ -8,31 +8,25 @@ module mac_float #(
     input  logic [DATA_W-1:0] c,
     output logic [DATA_W-1:0] z
 );
+  localparam CARRY_W              = 1;  // Previously OVFL_BI
+  localparam MANTISSA_INT_W       = 1;
+  localparam MANTISSA_W           = FRAC_W + MANTISSA_INT_W;
+  localparam BIAS                 = (1 << (EXP_W - 1)) - 1;
+  localparam NUM_PARTIAL_PRODUCTS = MANTISSA_W;
+  localparam NUM_WALLACE_INPUTS   = NUM_PARTIAL_PRODUCTS + 1;
 
-  localparam OVFL_BIT            = 1;
-  localparam PROD_EXP_W          = EXP_W + OVFL_BIT;
-  localparam GUARD_W             = 1;
-  localparam MANTISSA_W          = 1 + FRAC_W;
-  localparam PRODUCT_MANTISSA_W  = 2 * MANTISSA_W;
-  localparam PRODUCT_LOW_SUM_W   = PRODUCT_MANTISSA_W + OVFL_BIT;
-  localparam C_SHIFTED_W         = 3 * MANTISSA_W + GUARD_W;
-  localparam C_SHIFT_RAW_W       = 4 * MANTISSA_W + GUARD_W;
-  localparam C_SHIFT_MAX         = 3 * MANTISSA_W + GUARD_W;
-  localparam C_SHIFT_FACTOR_W    = $clog2(C_SHIFT_RAW_W);
-  localparam MANTISSA_SUM_W      = C_SHIFTED_W;
-  localparam MANTISSA_SUM_RAW_W  = MANTISSA_SUM_W + OVFL_BIT;
-  localparam SUM_EXP_ADD         = MANTISSA_SUM_W - PRODUCT_MANTISSA_W;
-  localparam MANTISSA_SUM_LOW_W  = PRODUCT_LOW_SUM_W + OVFL_BIT;
-  localparam MANTISSA_SUM_HIGH_W = MANTISSA_SUM_RAW_W - MANTISSA_SUM_LOW_W + OVFL_BIT;
-  localparam NUM_PARTIAL_PRODUCT = MANTISSA_W;
-  localparam MANTISSA_SUM_LZ_W   = $clog2(MANTISSA_SUM_W + 1);
-  localparam NUM_CSA_TREE_ROWS   = NUM_PARTIAL_PRODUCT + 1;
-  localparam BIAS                = (1 << (EXP_W - 1)) - 1;
+  localparam PRODUCT_MANTISSA_W = 2 * MANTISSA_W;
+  localparam LOW_SUM_W          = PRODUCT_MANTISSA_W + CARRY_W;  // Previously LOW_SUM_W
 
-  typedef struct packed {
-    logic                        msb;
-    logic [C_SHIFT_FACTOR_W-1:0] exp;
-  } c_shift_factor_t;
+  localparam FULL_SUM_W       = 3 * MANTISSA_W + CARRY_W;  // Previously FULL_SUM_W
+  localparam FULL_SUM_CARRY_W = FULL_SUM_W + CARRY_W;  // Previously FULL_SUM_CARRY_W
+
+  localparam PARTIAL_SUM_LOW_W    = LOW_SUM_W + CARRY_W;
+  localparam PARTIAL_SUM_HIGH_W   = FULL_SUM_CARRY_W - PARTIAL_SUM_LOW_W + CARRY_W; // Prev PARTIAL_SUM_HIGH
+
+  localparam LZC_COUNT_W        = $clog2(FULL_SUM_W + 1);  // Previously LZC_COUNT_W
+  localparam SUM_EXP_ADD_OFFSET = FULL_SUM_W - PRODUCT_MANTISSA_W;  // Previously SUM_EXP_ADD_OFFSET
+
 
   typedef struct packed {
     logic             msb;
@@ -56,51 +50,46 @@ module mac_float #(
     logic [MANTISSA_W-1:0] mantissa;
   } unpacked_float_t;
 
-  float_t                                    float_a;
-  float_t                                    float_b;
-  float_t                                    float_c;
-  float_t                                    float_z;
+  float_t                                   float_a;
+  float_t                                   float_b;
+  float_t                                   float_c;
+  float_t                                   float_z;
 
-  unpacked_float_t                           unpacked_a;
-  unpacked_float_t                           unpacked_b;
-  unpacked_float_t                           unpacked_c;
+  unpacked_float_t                          unpacked_a;
+  unpacked_float_t                          unpacked_b;
+  unpacked_float_t                          unpacked_c;
 
-  ext_exp_t                                  product_exp;
+  ext_exp_t                                 product_exp;
 
-  logic                                      product_sign;
-  logic            [  PRODUCT_LOW_SUM_W-1:0] partial_products      [NUM_PARTIAL_PRODUCT];
+  logic                                     product_sign;
+  logic            [         LOW_SUM_W-1:0] partial_products      [NUM_PARTIAL_PRODUCTS];
+  logic            [PRODUCT_MANTISSA_W-1:0] csa_c;
+  logic                                     c_dominates;
 
-  logic                                      c_dominates;
-  logic                                      subtract_c;
+  logic            [         LOW_SUM_W-1:0] csa_summands          [  NUM_WALLACE_INPUTS];
+  logic            [         LOW_SUM_W-1:0] csa_tree_sum;
+  logic            [         LOW_SUM_W-1:0] csa_tree_carry;
+  logic            [  PARTIAL_SUM_HIGH_W:0] upper_sum_temp;
+  logic            [PARTIAL_SUM_HIGH_W-1:0] c_upper_slice;
+  logic            [PARTIAL_SUM_HIGH_W-1:0] mantissa_sum_upper;
+  logic            [ PARTIAL_SUM_LOW_W-1:0] mantissa_sum_lower;
+  logic            [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw;
+  logic            [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_neg;
 
-  logic            [  PRODUCT_LOW_SUM_W-1:0] csa_c;
-  logic            [  PRODUCT_LOW_SUM_W-1:0] csa_summands          [  NUM_CSA_TREE_ROWS];
-  logic            [  PRODUCT_LOW_SUM_W-1:0] csa_tree_sum;
-  logic            [  PRODUCT_LOW_SUM_W-1:0] csa_tree_carry;
+  logic            [        FULL_SUM_W-1:0] unsigned_mantissa_sum;
+  logic            [        FULL_SUM_W-1:0] normalized_mantissa;
 
-  logic            [MANTISSA_SUM_HIGH_W-1:0] mantissa_sum_upper;
-  logic            [ MANTISSA_SUM_LOW_W-1:0] mantissa_sum_lower;
-  logic            [ MANTISSA_SUM_RAW_W-1:0] mantissa_sum_raw;
-  logic            [ MANTISSA_SUM_RAW_W-1:0] mantissa_sum_raw_neg;
+  logic            [       LZC_COUNT_W-1:0] mantissa_sum_lz;
+  logic            [       LZC_COUNT_W-1:0] mantissa_sum_shift;
 
-  logic            [     MANTISSA_SUM_W-1:0] unsigned_mantissa_sum;
-  logic            [     MANTISSA_SUM_W-1:0] normalized_mantissa;
+  sum_exp_t                                 sum_exp;
+  logic                                     sum_signed;
+  logic                                     sum_exp_ovfl;
+  logic                                     sum_exp_unfl;
 
-  logic            [  MANTISSA_SUM_LZ_W-1:0] mantissa_sum_lz;
-  logic            [  MANTISSA_SUM_LZ_W-1:0] mantissa_sum_shift;
-  logic                                      sum_signed;
-  sum_exp_t                                  sum_exp;
-  logic                                      sum_exp_ovfl;
-  logic                                      sum_exp_unfl;
-
-  logic            [  MANTISSA_SUM_HIGH_W:0] upper_sum_temp;
-  logic            [MANTISSA_SUM_HIGH_W-1:0] c_upper_slice;
-
-
-  logic                                      sum_inf;
-  logic                                      sum_inf_sign;
-  logic                                      sum_nan;
-
+  logic                                     sum_inf;
+  logic                                     sum_inf_sign;
+  logic                                     sum_nan;
 
   function automatic unpacked_float_t unpack_float(input float_t float_i);
     unpacked_float_t unpacked_o;
@@ -150,11 +139,7 @@ module mac_float #(
     end
   end
 
-  always_comb begin
-    for (int i = 0; i < NUM_PARTIAL_PRODUCT; i++) begin
-      csa_summands[i] = partial_products[i];
-    end
-  end
+
 
   align_addend #(
       .EXP_W (EXP_W),
@@ -166,15 +151,19 @@ module mac_float #(
       .c_upper_slice_o (c_upper_slice),
       .csa_c_o         (csa_c),
       .c_lower_sticky_o(),
-      .subtract_c_o    (subtract_c),
       .c_dominates_o   (c_dominates)
   );
 
-  assign csa_summands[NUM_CSA_TREE_ROWS-1] = {csa_c};
+  always_comb begin
+    for (int i = 0; i < NUM_PARTIAL_PRODUCTS; i++) begin
+      csa_summands[i] = partial_products[i];
+    end
+    csa_summands[NUM_WALLACE_INPUTS-1] = {1'b0, csa_c};
+  end
 
   wallace_tree_recursive #(
-      .DATA_W  (PRODUCT_LOW_SUM_W),
-      .NUM_ROWS(NUM_CSA_TREE_ROWS)
+      .DATA_W  (LOW_SUM_W),
+      .NUM_ROWS(NUM_WALLACE_INPUTS)
   ) wallace_tree_inst (
       .partial_sums(csa_summands),
       .sum         (csa_tree_sum),
@@ -182,27 +171,27 @@ module mac_float #(
   );
 
   always_comb begin
-    mantissa_sum_lower = csa_tree_sum + {csa_tree_carry[MANTISSA_SUM_LOW_W-2:1], 1'b0};
-    upper_sum_temp = {c_upper_slice[MANTISSA_SUM_HIGH_W-1], c_upper_slice} 
-                   + (MANTISSA_SUM_HIGH_W + 1)'(mantissa_sum_lower[MANTISSA_SUM_LOW_W-1 : MANTISSA_SUM_LOW_W-2]);
+    mantissa_sum_lower = csa_tree_sum + {csa_tree_carry[PARTIAL_SUM_LOW_W-2:1], 1'b0};
+    upper_sum_temp = {c_upper_slice[PARTIAL_SUM_HIGH_W-1], c_upper_slice} 
+                   + (PARTIAL_SUM_HIGH_W + 1)'(mantissa_sum_lower[PARTIAL_SUM_LOW_W-1 : PARTIAL_SUM_LOW_W-2]);
 
-    mantissa_sum_upper = upper_sum_temp[MANTISSA_SUM_HIGH_W:1];
+    mantissa_sum_upper = upper_sum_temp[PARTIAL_SUM_HIGH_W:1];
     mantissa_sum_raw = {
-      mantissa_sum_upper, upper_sum_temp[0], mantissa_sum_lower[MANTISSA_SUM_LOW_W-3:0]
+      mantissa_sum_upper, upper_sum_temp[0], mantissa_sum_lower[PARTIAL_SUM_LOW_W-3:0]
     };
 
     sum_signed = product_sign;
-    unsigned_mantissa_sum = mantissa_sum_raw[MANTISSA_SUM_W-1:0];
+    unsigned_mantissa_sum = mantissa_sum_raw[FULL_SUM_W-1:0];
 
     mantissa_sum_raw_neg = $unsigned(-$signed(mantissa_sum_raw));
-    if (mantissa_sum_raw[MANTISSA_SUM_RAW_W-1]) begin
-      unsigned_mantissa_sum = mantissa_sum_raw_neg[MANTISSA_SUM_W-1:0];
+    if (mantissa_sum_raw[FULL_SUM_CARRY_W-1]) begin
+      unsigned_mantissa_sum = mantissa_sum_raw_neg[FULL_SUM_W-1:0];
       sum_signed            = ~product_sign;
     end
   end
 
   leading_zero_counter_top #(
-      .DATA_W          (MANTISSA_SUM_W),
+      .DATA_W          (FULL_SUM_W),
       .LZC_DATA_BLOCK_W(4)
   ) leading_zero_counter_top_inst (
       .data_i              (unsigned_mantissa_sum),
@@ -210,7 +199,7 @@ module mac_float #(
   );
 
   always_comb begin
-    sum_exp      = sum_exp_t'(product_exp) - sum_exp_t'(mantissa_sum_lz) + sum_exp_t'(SUM_EXP_ADD) + sum_exp_t'(MANTISSA_W-FRAC_W);
+    sum_exp      = sum_exp_t'(product_exp) - sum_exp_t'(mantissa_sum_lz) + sum_exp_t'(SUM_EXP_ADD_OFFSET) + sum_exp_t'(MANTISSA_W-FRAC_W);
     sum_exp_ovfl = unpacked_a.exp[EXP_W-1] && |sum_exp.msb;
     sum_exp_unfl = !unpacked_a.exp[EXP_W-1] && |sum_exp.msb;
   end
@@ -218,7 +207,7 @@ module mac_float #(
 
   always_comb begin
     if (sum_exp_unfl) begin
-      mantissa_sum_shift = product_exp[MANTISSA_SUM_LZ_W-1:0];
+      mantissa_sum_shift = product_exp[LZC_COUNT_W-1:0];
     end else begin
       mantissa_sum_shift = mantissa_sum_lz;
     end
@@ -228,7 +217,7 @@ module mac_float #(
   always_comb begin
     float_z.sign = sum_signed;
     float_z.exp  = sum_exp.exp[EXP_W-1:0];
-    float_z.frac = normalized_mantissa[MANTISSA_SUM_W-2-:FRAC_W];
+    float_z.frac = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_W];
 
     if (sum_nan) begin
       float_z.exp  = '1;
@@ -245,12 +234,11 @@ module mac_float #(
         float_z.frac = '0;
       end else if (sum_exp_unfl) begin  // This is the normalization case. Figure out if its incorrect
         float_z.exp  = '0;
-        float_z.frac = normalized_mantissa[MANTISSA_SUM_W-2-:FRAC_W];
+        float_z.frac = normalized_mantissa[FULL_SUM_W-2-:FRAC_W];
       end
     end
   end
 
   assign z = float_z;
-
 endmodule
 
