@@ -59,10 +59,11 @@ module tb_mac_float;
     if (int'(double_bits.exp) - DOUBLE_BIAS + BIAS <= 0) begin
       float_o = '0;
     end else if (int'(double_bits.exp) - DOUBLE_BIAS + BIAS >= (1 << EXP_W) - 1) begin
-      float_o      = '0;
-      float_o.exp  = '1;
-      float_o.frac = FRAC_W'(|(double_bits.frac));
-
+      float_o     = '0;
+      float_o.exp = '1;
+      if (double_bits.exp == '1) begin
+        float_o.frac = FRAC_W'(|(double_bits.frac));
+      end
     end else begin
       float_o.exp   = double_bits.exp - DOUBLE_BIAS + BIAS;
 
