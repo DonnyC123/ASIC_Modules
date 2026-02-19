@@ -218,7 +218,7 @@ module mac_float #(
     float_z.sign = sum_signed;
     float_z.exp  = sum_exp.exp[EXP_W-1:0];
     float_z.frac = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_W];
-    if (float_z.frac == '1) begin
+    if (float_z.exp == '1) begin
       float_z.frac = '0;
     end
 
