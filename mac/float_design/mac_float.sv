@@ -25,7 +25,9 @@ module mac_float #(
   localparam PARTIAL_SUM_LOW_W    = LOW_SUM_W + CARRY_W;
   localparam PARTIAL_SUM_HIGH_W   = FULL_SUM_CARRY_W - PARTIAL_SUM_LOW_W + CARRY_W; // Prev PARTIAL_SUM_HIGH
 
-  localparam LZC_COUNT_W        = $clog2(FULL_SUM_W + 1);  // Previously LZC_COUNT_W
+  localparam LZC_COUNT_W      = $clog2(FULL_SUM_W + 1);  // Previously LZC_COUNT_W
+  localparam LZC_COUNT_OVFL_W = LZC_COUNT_W + 1;
+
   localparam SUM_EXP_ADD_OFFSET = FULL_SUM_W - PRODUCT_MANTISSA_W;  // Previously SUM_EXP_ADD_OFFSET
 
   localparam DENORMALIZED_IDX    = PRODUCT_MANTISSA_W + 2;
@@ -66,11 +68,11 @@ module mac_float #(
   ext_exp_t                                 product_exp;
 
   logic                                     product_sign;
-  logic            [         LOW_SUM_W-1:0] partial_products      [NUM_PARTIAL_PRODUCTS];
+  logic            [         LOW_SUM_W-1:0] partial_products        [NUM_PARTIAL_PRODUCTS];
   logic            [PRODUCT_MANTISSA_W-1:0] csa_c;
   logic                                     c_dominates;
 
-  logic            [         LOW_SUM_W-1:0] csa_summands          [  NUM_WALLACE_INPUTS];
+  logic            [         LOW_SUM_W-1:0] csa_summands            [  NUM_WALLACE_INPUTS];
   logic            [         LOW_SUM_W-1:0] csa_tree_sum;
   logic            [         LOW_SUM_W-1:0] csa_tree_carry;
   logic            [  PARTIAL_SUM_HIGH_W:0] upper_sum_temp;
@@ -89,6 +91,7 @@ module mac_float #(
 
   logic            [       LZC_COUNT_W-1:0] mantissa_sum_lz;
   logic            [       LZC_COUNT_W-1:0] mantissa_sum_shift;
+  logic            [  LZC_COUNT_OVFL_W-1:0] mantissa_sum_shift_ovfl;
 
   sum_exp_t                                 sum_exp;
   logic                                     sum_signed;
@@ -107,6 +110,7 @@ module mac_float #(
   logic                                     guard;
   logic                                     round_mantissa;
 
+  logic                                     sum_zero;
   function automatic unpacked_float_t unpack_float(input float_t float_i);
     unpacked_float_t unpacked_o;
 
@@ -221,8 +225,11 @@ module mac_float #(
   end
 
   always_comb begin
+    sum_zero                = 0;
+    mantissa_sum_shift_ovfl = mantissa_sum_lz + sum_exp;  // Check for underflow
     if (sum_exp_unfl) begin
-      mantissa_sum_shift = mantissa_sum_lz + sum_exp;  // Check for underflow
+      mantissa_sum_shift = mantissa_sum_shift_ovfl[LZC_COUNT_W-1:0];  // Check for underflow
+      sum_zero           = mantissa_sum_shift_ovfl[LZC_COUNT_OVFL_W-1];
     end else begin
       mantissa_sum_shift = mantissa_sum_lz;
     end
@@ -265,6 +272,9 @@ module mac_float #(
     end else begin
       if (sum_rounded_exp_ovfl) begin
         float_z.exp  = '1;
+        float_z.frac = '0;
+      end else if (sum_zero) begin
+        float_z.exp  = '0;
         float_z.frac = '0;
       end else if (c_dominates) begin
         float_z = float_c;
