@@ -95,7 +95,6 @@ module mac_float #(
   logic                                     sum_exp_unfl;
 
   sum_exp_t                                 sum_rounded_exp;
-  logic                                     sum_rounded_signed;
   logic                                     sum_rounded_exp_ovfl;
   logic                                     sum_rounded_exp_unfl;
 
@@ -105,7 +104,6 @@ module mac_float #(
   logic                                     sticky_c;
   logic                                     sticky_sum;
   logic                                     guard;
-  logic                                     sum_lsb;
   logic                                     round_mantissa;
 
   function automatic unpacked_float_t unpack_float(input float_t float_i);
@@ -216,7 +214,7 @@ module mac_float #(
   );
 
   always_comb begin
-    sum_exp      = sum_exp_t'(product_exp) - sum_exp_t'(mantissa_sum_lz) + sum_exp_t'(SUM_EXP_ADD_OFFSET) + sum_exp_t'(MANTISSA_W-FRAC_W);
+    sum_exp      = sum_exp_t'({product_exp.msb, product_exp}) - sum_exp_t'(mantissa_sum_lz) + sum_exp_t'(SUM_EXP_ADD_OFFSET) + sum_exp_t'(MANTISSA_W-FRAC_W);
     sum_exp_ovfl = unpacked_a.exp[EXP_W-1] && |sum_exp.msb;
     sum_exp_unfl = !unpacked_a.exp[EXP_W-1] && |sum_exp.msb;
   end
@@ -224,7 +222,7 @@ module mac_float #(
 
   always_comb begin
     if (sum_exp_unfl) begin
-      mantissa_sum_shift = product_exp[LZC_COUNT_W-1:0];
+      mantissa_sum_shift = 0;
     end else begin
       mantissa_sum_shift = mantissa_sum_lz;
     end
