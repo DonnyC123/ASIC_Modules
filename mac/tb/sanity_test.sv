@@ -63,7 +63,6 @@ module tb_mac_float;
 
     // Pull the implicit '1' into reality for shifting
     full_frac = (double_bits.exp == '0) ? {1'b0, double_bits.frac} : {1'b1, double_bits.frac};
-
     if (new_exp <= 0) begin
       // --- SUBNORMAL ---
       float_o.exp = '0;
@@ -75,8 +74,17 @@ module tb_mac_float;
       end else begin
         logic [DOUBLE_FRAC_W:0] shifted_frac = full_frac >> shift_dist;
         rounding_frac = shifted_frac[DOUBLE_FRAC_W-1-:(FRAC_W+1)];
-        sticky        = (full_frac << (DOUBLE_FRAC_W + 1 - shift_dist)) != '0;
+
+        // Include BOTH the bits left in shifted_frac below the guard bit 
+        // AND the bits that fell completely off the edge during the right-shift!
+        if (FRAC_W < DOUBLE_FRAC_W) begin
+          sticky = (|shifted_frac[DOUBLE_FRAC_W - FRAC_W - 2 : 0]) | 
+                   ((full_frac << (DOUBLE_FRAC_W + 1 - shift_dist)) != '0);
+        end else begin
+          sticky = ((full_frac << (DOUBLE_FRAC_W + 1 - shift_dist)) != '0);
+        end
       end
+
 
     end else if (new_exp >= (1 << EXP_W) - 1) begin
       // --- OVERFLOW / NaN / Inf ---
@@ -172,7 +180,7 @@ module tb_mac_float;
     expected_bits = downscale_double(expected);
 
     real_z_dut    = upscale_to_double(z);
-    real_z_ref    = upscale_to_double(downscale_double(expected));
+    real_z_ref    = upscale_to_double(expected_bits);
 
     check_pass    = 0;
 
