@@ -28,6 +28,7 @@ module mac_float #(
   localparam LZC_COUNT_W        = $clog2(FULL_SUM_W + 1);  // Previously LZC_COUNT_W
   localparam SUM_EXP_ADD_OFFSET = FULL_SUM_W - PRODUCT_MANTISSA_W;  // Previously SUM_EXP_ADD_OFFSET
 
+  localparam DENORMALIZED_IDX    = PRODUCT_MANTISSA_W + 2;
   localparam NORMAL_FRAC_LSB_IDX = FULL_SUM_W - 1 - FRAC_W;
   localparam GUARD_IDX           = NORMAL_FRAC_LSB_IDX - 1;
 
@@ -234,9 +235,9 @@ module mac_float #(
     guard               = normalized_mantissa[GUARD_IDX];
 
     if (sum_exp_unfl) begin
-      sum_frac_raw = normalized_mantissa[FULL_SUM_W-FRAC_W+1:FRAC_W];
-      sticky_sum   = |normalized_mantissa[FULL_SUM_W-FRAC_W+1-FRAC_W-2:0];
-      guard        = normalized_mantissa[FULL_SUM_W-FRAC_W+1-FRAC_W-1];
+      sum_frac_raw = normalized_mantissa[DENORMALIZED_IDX-1:FRAC_W];
+      sticky_sum   = |normalized_mantissa[DENORMALIZED_IDX-1-FRAC_W-2:0];
+      guard        = normalized_mantissa[DENORMALIZED_IDX-1-FRAC_W-1];
     end
 
     round_mantissa       = guard && (sticky_sum || sticky_c || sum_frac_raw[0]);
