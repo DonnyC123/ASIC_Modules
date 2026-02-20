@@ -88,12 +88,26 @@ module tb_mac_float;
   endfunction
 
   function automatic real upscale_to_double(input float_t float_i);
+    int             lz;
     double_fields_t double_bits;
 
     double_bits      = '0;
     double_bits.sign = float_i.sign;
 
     if (float_i.exp == '0) begin
+      if (float_i.frac == '0) begin
+        return $bitstoreal(double_bits);
+      end else begin
+        lz = 0;
+        for (int i = FRAC_W - 1; i >= 0; i--) begin
+          if (float_i.frac[i] == 1'b1) break;
+          lz++;
+        end
+
+        double_bits.exp  = DOUBLE_EXP_W'($unsigned(DOUBLE_BIAS - BIAS - lz));
+        double_bits.frac = {float_i.frac << (lz + 1), {(DOUBLE_FRAC_W - FRAC_W) {1'b0}}};
+
+      end
       double_bits.exp = '0;
     end else if (float_i.exp == '1) begin
       double_bits.exp = '1;
