@@ -220,8 +220,8 @@ module mac_float #(
 
   always_comb begin
     sum_exp      = sum_exp_t'({product_exp.msb, product_exp}) - sum_exp_t'(mantissa_sum_lz) + sum_exp_t'(SUM_EXP_ADD_OFFSET) + sum_exp_t'(MANTISSA_W-FRAC_W);
-    sum_exp_ovfl = unpacked_a.exp[EXP_W-1] && |sum_exp.msb;
-    sum_exp_unfl = !unpacked_a.exp[EXP_W-1] && |sum_exp.msb;
+    sum_exp_ovfl = ^sum_exp.msb;
+    sum_exp_unfl = &sum_exp.msb;
   end
 
   always_comb begin
@@ -249,9 +249,9 @@ module mac_float #(
     sum_frac_carry       = sum_frac_raw + FRAC_W'(round_mantissa);
 
     sum_rounded_exp      = sum_exp + sum_exp_t'((sum_frac_carry[MANTISSA_W-1] && !sum_exp_ovfl));
-    sum_rounded_exp_ovfl = unpacked_a.exp[EXP_W-1] && |sum_rounded_exp.msb;
-    sum_rounded_exp_unfl = !unpacked_a.exp[EXP_W-1] && |sum_rounded_exp.msb;
-    sum_frac_rounded     = sum_frac_carry[FRAC_W-1:0];
+    sum_rounded_exp_ovfl = ^sum_rounded_exp.msb;
+    sum_rounded_exp_unfl = &sum_rounded_exp.msb;
+    sum_frac_rounded     = sum_frac_carry;
   end
 
   always_comb begin
