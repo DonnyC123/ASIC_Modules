@@ -220,34 +220,49 @@ module mac_float #(
     sum_exp_unfl = !unpacked_a.exp[EXP_W-1] && |sum_exp.msb;
   end
 
+  logic signed [EXP_W+1:0] pre_norm_exp;
+  logic signed [EXP_W+1:0] allowed_shift;
 
   always_comb begin
-    if (sum_exp_unfl) begin
-      mantissa_sum_shift = 0;
+    pre_norm_exp = sum_exp_t'({product_exp.msb, product_exp}) + sum_exp_t'(SUM_EXP_ADD_OFFSET) + sum_exp_t'(MANTISSA_W-FRAC_W);
+
+    sum_exp = pre_norm_exp - sum_exp_t'(mantissa_sum_lz);
+
+    if (sum_exp <= 0) begin
+      allowed_shift = pre_norm_exp - 1;
+
+      if (allowed_shift <= 0) begin
+        mantissa_sum_shift = '0;
+      end else begin
+        mantissa_sum_shift = allowed_shift[LZC_COUNT_W-1:0];
+      end
+
+      sum_exp      = '0;
+      sum_exp_unfl = 1'b1;
+
     end else begin
       mantissa_sum_shift = mantissa_sum_lz;
+      sum_exp_unfl       = 1'b0;
     end
 
-    normalized_mantissa = unsigned_mantissa_sum << mantissa_sum_shift;
+    normalized_mantissa  = unsigned_mantissa_sum << mantissa_sum_shift;
+    sum_frac_raw         = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_W];
+    guard                = normalized_mantissa[GUARD_IDX];
+    sticky_sum           = |normalized_mantissa[GUARD_IDX-1:0];
 
-    sum_frac_raw        = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_W];
-    sticky_sum          = |normalized_mantissa[GUARD_IDX-1:0];
-    guard               = normalized_mantissa[GUARD_IDX];
-
-    if (sum_exp_unfl || sum_exp == '0) begin
-      sum_frac_raw = normalized_mantissa[DENORMALIZED_IDX-1-:FRAC_W];
-      sticky_sum   = |normalized_mantissa[DENORMALIZED_IDX-FRAC_W-2:0];
-      guard        = normalized_mantissa[DENORMALIZED_IDX-FRAC_W-1];
-    end
-
+    // 6. Rounding Logic (remains identical)
     round_mantissa       = guard && (sticky_sum || sticky_c || sum_frac_raw[0]);
     sum_frac_carry       = sum_frac_raw + FRAC_W'(round_mantissa);
 
+    // 7. Check if rounding pushed a denormal back into normal range
     sum_rounded_exp      = sum_exp + sum_exp_t'((sum_frac_carry[MANTISSA_W-1] && !sum_exp_ovfl));
-    sum_rounded_exp_ovfl = unpacked_a.exp[EXP_W-1] && |sum_rounded_exp.msb;
-    sum_rounded_exp_unfl = !unpacked_a.exp[EXP_W-1] && |sum_rounded_exp.msb;
+
+    // Check overflow based on the max exponent value (all 1s)
+    sum_rounded_exp_ovfl = (sum_rounded_exp >= ((1 << EXP_W) - 1));
     sum_frac_rounded     = sum_frac_carry[FRAC_W-1:0];
   end
+
+
 
   always_comb begin
     float_z.sign = sum_signed;
