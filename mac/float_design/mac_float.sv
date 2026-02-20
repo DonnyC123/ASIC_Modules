@@ -144,7 +144,7 @@ module mac_float #(
   );
 
   always_comb begin
-    product_sign = float_a.sign ^ float_b.sign;
+    product_sign = unpacked_a.sign ^ unpacked_b.sign;
     product_exp  = (unpacked_a.exp + unpacked_b.exp) - $unsigned(EXP_W'(BIAS));
 
     foreach (partial_products[i]) begin
@@ -236,8 +236,8 @@ module mac_float #(
 
     if (sum_exp_unfl) begin
       sum_frac_raw = normalized_mantissa[DENORMALIZED_IDX-1-:FRAC_W];
-      sticky_sum   = |normalized_mantissa[DENORMALIZED_IDX-1-FRAC_W-2:0];
-      guard        = normalized_mantissa[DENORMALIZED_IDX-1-FRAC_W-1];
+      sticky_sum   = |normalized_mantissa[DENORMALIZED_IDX-FRAC_W-2:0];
+      guard        = normalized_mantissa[DENORMALIZED_IDX-FRAC_W-1];
     end
 
     round_mantissa       = guard && (sticky_sum || sticky_c || sum_frac_raw[0]);
