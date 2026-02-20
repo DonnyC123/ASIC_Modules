@@ -234,7 +234,7 @@ module mac_float #(
     sticky_sum          = |normalized_mantissa[GUARD_IDX-1:0];
     guard               = normalized_mantissa[GUARD_IDX];
 
-    if (sum_exp_unfl) begin
+    if (sum_exp_unfl || sum_exp == '0) begin
       sum_frac_raw = normalized_mantissa[DENORMALIZED_IDX-1-:FRAC_W];
       sticky_sum   = |normalized_mantissa[DENORMALIZED_IDX-FRAC_W-2:0];
       guard        = normalized_mantissa[DENORMALIZED_IDX-FRAC_W-1];
