@@ -39,16 +39,19 @@ module tb_mac_float;
     logic [DOUBLE_FRAC_W-1:0] frac;
   } double_fields_t;
 
-
   function automatic float_t downscale_double(input real val);
+    logic           [DOUBLE_FRAC_W:0] full_frac;
+    logic           [       FRAC_W:0] rounding_frac;
+    logic                             sticky;
+    logic                             round_up;
 
-    logic           [FRAC_W:0] rounding_frac;
-    logic                      sticky;
-
-    double_fields_t            double_bits;
-    float_t                    float_o;
+    double_fields_t                   double_bits;
+    float_t                           float_o;
+    int                               shift_dist;
+    int                               new_exp;
 
     double_bits = double_fields_t'($realtobits(val));
+    new_exp     = int'(double_bits.exp) - DOUBLE_BIAS + BIAS;
 
     if (val == 0.0) begin
       float_o      = '0;
@@ -56,17 +59,34 @@ module tb_mac_float;
       return float_o;
     end
 
-    if (int'(double_bits.exp) - DOUBLE_BIAS + BIAS <= 0) begin
-      float_o = '0;
-    end else if (int'(double_bits.exp) - DOUBLE_BIAS + BIAS >= (1 << EXP_W) - 1) begin
-      float_o     = '0;
-      float_o.exp = '1;
-      if (double_bits.exp == '1) begin
-        float_o.frac = FRAC_W'(|(double_bits.frac));
-      end
-    end else begin
-      float_o.exp   = double_bits.exp - DOUBLE_BIAS + BIAS;
+    // FIX 1: Populate full_frac! 
+    // (We check double_bits.exp == '0 just in case the input real is itself a subnormal)
+    full_frac = (double_bits.exp == '0) ? {1'b0, double_bits.frac} : {1'b1, double_bits.frac};
 
+    if (new_exp <= 0) begin
+      // --- SUBNORMAL ---
+      float_o.exp = '0;
+      shift_dist  = 1 - new_exp;
+
+      if (shift_dist > DOUBLE_FRAC_W + 1) begin
+        rounding_frac = '0;
+        sticky        = 1'b1;
+      end else begin
+        logic [DOUBLE_FRAC_W:0] shifted_frac = full_frac >> shift_dist;
+        rounding_frac = shifted_frac[DOUBLE_FRAC_W-1-:(FRAC_W+1)];
+        sticky        = (full_frac << (DOUBLE_FRAC_W + 1 - shift_dist)) != '0;
+      end
+
+    end else if (new_exp >= (1 << EXP_W) - 1) begin
+      // --- OVERFLOW / NaN / Inf ---
+      float_o.sign = double_bits.sign;
+      float_o.exp  = '1;
+      float_o.frac = (double_bits.exp == '1) ? FRAC_W'(|(double_bits.frac)) : '0;
+      return float_o;  // Return early to skip rounding!
+
+    end else begin
+      // --- NORMAL ---
+      float_o.exp   = new_exp[EXP_W-1:0];
       rounding_frac = double_bits.frac[DOUBLE_FRAC_W-1-:(FRAC_W+1)];
 
       if (FRAC_W < DOUBLE_FRAC_W) begin
@@ -74,18 +94,20 @@ module tb_mac_float;
       end else begin
         sticky = 1'b0;
       end
-
-      float_o.frac = rounding_frac[FRAC_W:1] + (rounding_frac[0] & (rounding_frac[1] | sticky));
-
-      if (float_o.frac == 0 && rounding_frac[FRAC_W:1] == '1) begin
-        float_o.exp = float_o.exp + 1;
-      end
     end
 
-    float_o.sign = double_bits.sign;
+    // FIX 2: Move the rounding logic here so both Normal and Subnormal paths use it!
+    round_up                    = rounding_frac[0] & (rounding_frac[1] | sticky);
+
+    // By concatenating exp and frac, if a subnormal rounds up and overflows
+    // its fraction (e.g. 0.1111 + 1), it naturally promotes float_o.exp to 1!
+    {float_o.exp, float_o.frac} = {float_o.exp, rounding_frac[FRAC_W:1]} + round_up;
+
+    float_o.sign                = double_bits.sign;
     return float_o;
 
   endfunction
+
 
   function automatic real upscale_to_double(input float_t float_i);
     int             lz;
