@@ -263,8 +263,6 @@ module mac_float #(
       float_z.sign = sum_inf_sign;
       float_z.exp  = '1;
       float_z.frac = '0;
-    end else if (c_dominates) begin
-      float_z = float_c;
     end else begin
       if (sum_rounded_exp_ovfl) begin
         float_z.exp  = '1;
@@ -272,6 +270,8 @@ module mac_float #(
       end else if (sum_rounded_exp_unfl) begin  // This is the normalization case. Figure out if its incorrect
         float_z.exp  = '0;
         float_z.frac = sum_frac_rounded;
+      end else if (c_dominates) begin
+        float_z = float_c;
       end
     end
   end
