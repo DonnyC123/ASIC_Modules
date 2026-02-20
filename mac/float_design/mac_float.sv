@@ -241,12 +241,12 @@ module mac_float #(
       guard        = normalized_mantissa[FULL_SUM_W-2-FRAC_W-1];
     end
 
-    round_mantissa       = guard && (sticky_sum || normalized_mantissa[NORMAL_FRAC_LSB_IDX]);
+    round_mantissa       = guard && (sticky_sum || sticky_c || sum_frac_raw[0]);
     sum_frac_carry       = sum_frac_raw + FRAC_W'(round_mantissa);
 
     sum_rounded_exp      = sum_exp + sum_exp_t'((sum_frac_carry[MANTISSA_W-1] && !sum_exp_ovfl));
-    sum_rounded_exp_ovfl = unpacked_a.exp[EXP_W-1] && |sum_exp.msb;
-    sum_rounded_exp_unfl = !unpacked_a.exp[EXP_W-1] && |sum_exp.msb;
+    sum_rounded_exp_ovfl = unpacked_a.exp[EXP_W-1] && |sum_rounded_exp.msb;
+    sum_rounded_exp_unfl = !unpacked_a.exp[EXP_W-1] && |sum_rounded_exp.msb;
     sum_frac_rounded     = sum_frac_carry[FRAC_W-1:0];
   end
 
