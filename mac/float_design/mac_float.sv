@@ -222,21 +222,21 @@ module mac_float #(
 
   always_comb begin
     if (sum_exp_unfl) begin
-      mantissa_sum_shift = mantissa_sum_lz + sum_exp;
+      mantissa_sum_shift = mantissa_sum_lz + sum_exp;  // Check for underflow
     end else begin
       mantissa_sum_shift = mantissa_sum_lz;
     end
 
-    normalized_mantissa  = unsigned_mantissa_sum << mantissa_sum_shift;
-    sum_frac_raw         = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_W];
-    sticky_sum           = |normalized_mantissa[GUARD_IDX-1:0];
-    guard                = normalized_mantissa[GUARD_IDX];
+    normalized_mantissa = unsigned_mantissa_sum << mantissa_sum_shift;
+    sum_frac_raw        = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_W];
+    sticky_sum          = |normalized_mantissa[GUARD_IDX-1:0];
+    guard               = normalized_mantissa[GUARD_IDX];
 
-    //if (sum_exp_unfl || sum_exp == 0) begin
-    //  sum_frac_raw = normalized_mantissa[DENORMALIZED_IDX-1-:FRAC_W];
-    //  sticky_sum   = |normalized_mantissa[DENORMALIZED_IDX-FRAC_W-2:0];
-    //  guard        = normalized_mantissa[DENORMALIZED_IDX-FRAC_W-1];
-    //end
+    if (sum_exp_unfl || sum_exp == 0) begin
+      sum_frac_raw = normalized_mantissa[FULL_SUM_W-1-:FRAC_W];
+      sticky_sum   = |normalized_mantissa[GUARD_IDX:0];
+      guard        = normalized_mantissa[GUARD_IDX+1];
+    end
 
     round_mantissa       = guard && (sticky_sum || sticky_c || sum_frac_raw[0]);
     sum_frac_carry       = sum_frac_raw + FRAC_W'(round_mantissa);
