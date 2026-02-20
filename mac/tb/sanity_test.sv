@@ -106,16 +106,15 @@ module tb_mac_float;
 
         double_bits.exp  = DOUBLE_EXP_W'($unsigned(DOUBLE_BIAS - BIAS - lz));
         double_bits.frac = {float_i.frac << (lz + 1), {(DOUBLE_FRAC_W - FRAC_W) {1'b0}}};
-
       end
-      double_bits.exp = '0;
     end else if (float_i.exp == '1) begin
-      double_bits.exp = '1;
+      double_bits.exp  = '1;
+      double_bits.frac = {float_i.frac, {(DOUBLE_FRAC_W - FRAC_W) {1'b0}}};
     end else begin
-      double_bits.exp = DOUBLE_EXP_W'(float_i.exp) + DOUBLE_EXP_W'($unsigned(DOUBLE_BIAS - BIAS));
+      double_bits.exp  = DOUBLE_EXP_W'(float_i.exp) + DOUBLE_EXP_W'($unsigned(DOUBLE_BIAS - BIAS));
+      double_bits.frac = {float_i.frac, {(DOUBLE_FRAC_W - FRAC_W) {1'b0}}};
     end
 
-    double_bits.frac = {float_i.frac, {(DOUBLE_FRAC_W - FRAC_W) {1'b0}}};
     return $bitstoreal(double_bits);
   endfunction
 
