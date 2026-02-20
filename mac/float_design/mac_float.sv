@@ -28,6 +28,8 @@ module mac_float #(
   localparam LZC_COUNT_W        = $clog2(FULL_SUM_W + 1);  // Previously LZC_COUNT_W
   localparam SUM_EXP_ADD_OFFSET = FULL_SUM_W - PRODUCT_MANTISSA_W;  // Previously SUM_EXP_ADD_OFFSET
 
+  localparam NORMAL_FRAC_LSB_IDX = FULL_SUM_W - 1 - FRAC_W;
+  localparam GUARD_IDX           = NORMAL_FRAC_LSB_IDX - 1;
 
   typedef struct packed {
     logic             msb;
@@ -225,10 +227,12 @@ module mac_float #(
     end
 
     normalized_mantissa = unsigned_mantissa_sum << mantissa_sum_shift;
-    sticky_sum = |normalized_mantissa[FULL_SUM_W-MANTISSA_INT_W-FRAC_W-GUARD_W-2:0] || sticky_c;
-    guard = |normalized_mantissa[FULL_SUM_W-MANTISSA_INT_W-FRAC_W-GUARD_W-1];
-    round_mantissa = guard && (sticky_sum || normalized_mantissa[FULL_SUM_W-MANTISSA_INT_W-FRAC_W-1]);
+
+    sticky_sum = |normalized_mantissa[GUARD_IDX-1:0] || sticky_c;
+    guard = |normalized_mantissa[GUARD_IDX];
+    round_mantissa = guard && (sticky_sum || normalized_mantissa[NORMAL_FRAC_LSB_IDX]);
     roounded_normalized_mantissa = normalized_mantissa + FULL_SUM_W'(round_mantissa);
+
     sum_rounded_exp = sum_exp + sum_exp_t'(roounded_normalized_mantissa[FULL_SUM_CARRY_W-1]);
     sum_rounded_exp_ovfl = unpacked_a.exp[EXP_W-1] && |sum_exp.msb;
     sum_rounded_exp_unfl = !unpacked_a.exp[EXP_W-1] && |sum_exp.msb;
