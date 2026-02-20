@@ -39,71 +39,111 @@ module tb_mac_float;
     logic [DOUBLE_FRAC_W-1:0] frac;
   } double_fields_t;
 
-
   function automatic float_t downscale_double(input real val);
+    double_fields_t                     double_bits;
+    float_t                             float_o;
+    int                                 e_c;
+    int                                 shift_amount;
+    logic           [DOUBLE_FRAC_W+1:0] full_frac;
+    logic           [DOUBLE_FRAC_W+1:0] shifted_frac;
+    logic           [         FRAC_W:0] rounding_frac;
+    logic                               sticky;
+    logic                               round_up;
 
-    logic           [FRAC_W:0] rounding_frac;
-    logic                      sticky;
+    double_bits  = double_fields_t'($realtobits(val));
+    float_o      = '0;
+    float_o.sign = double_bits.sign;
 
-    double_fields_t            double_bits;
-    float_t                    float_o;
-
-    double_bits = double_fields_t'($realtobits(val));
-
-    if (val == 0.0) begin
-      float_o      = '0;
-      float_o.sign = double_bits.sign;
+    if (double_bits.exp == '0 && double_bits.frac == '0) begin
       return float_o;
     end
 
-    if (int'(double_bits.exp) - DOUBLE_BIAS + BIAS <= 0) begin
-      float_o = '0;
-    end else if (int'(double_bits.exp) - DOUBLE_BIAS + BIAS >= (1 << EXP_W) - 1) begin
-      float_o     = '0;
+    if (double_bits.exp == '1) begin
       float_o.exp = '1;
-      if (double_bits.exp == '1) begin
-        float_o.frac = FRAC_W'(|(double_bits.frac));
-      end
-    end else begin
-      float_o.exp   = double_bits.exp - DOUBLE_BIAS + BIAS;
+      if (double_bits.frac != '0) float_o.frac = FRAC_W'(|(double_bits.frac));
+      return float_o;
+    end
 
+    e_c = int'(double_bits.exp) - DOUBLE_BIAS + BIAS;
+
+    full_frac = (double_bits.exp == 0) ? {2'b00, double_bits.frac} : {1'b0, 1'b1, double_bits.frac};
+
+    if (e_c <= 0) begin
+      // --- SUBNORMAL OR UNDERFLOW ---
+      float_o.exp  = '0;
+      shift_amount = 1 - e_c;
+      if (shift_amount > DOUBLE_FRAC_W + 2) begin
+        shifted_frac = '0;
+        sticky       = |full_frac;
+      end else begin
+        shifted_frac = full_frac >> shift_amount;
+        sticky       = (full_frac << (DOUBLE_FRAC_W + 2 - shift_amount)) != '0;
+      end
+
+      rounding_frac = shifted_frac[DOUBLE_FRAC_W-1-:(FRAC_W+1)];
+
+      if (FRAC_W < DOUBLE_FRAC_W) begin
+        sticky = sticky | (|shifted_frac[DOUBLE_FRAC_W-FRAC_W-2 : 0]);
+      end
+
+    end else if (e_c >= (1 << EXP_W) - 1) begin
+      float_o.exp  = '1;
+      float_o.frac = '0;
+      return float_o;
+
+    end else begin
+      float_o.exp   = e_c;
       rounding_frac = double_bits.frac[DOUBLE_FRAC_W-1-:(FRAC_W+1)];
 
       if (FRAC_W < DOUBLE_FRAC_W) begin
-        sticky = |double_bits.frac[(DOUBLE_FRAC_W-FRAC_W-2) : 0];
+        sticky = |double_bits.frac[DOUBLE_FRAC_W-FRAC_W-2 : 0];
       end else begin
         sticky = 1'b0;
       end
-
-      float_o.frac = rounding_frac[FRAC_W:1] + (rounding_frac[0] & (rounding_frac[1] | sticky));
-
-      if (float_o.frac == 0 && rounding_frac[FRAC_W:1] == '1) begin
-        float_o.exp = float_o.exp + 1;
-      end
     end
 
-    float_o.sign = double_bits.sign;
-    return float_o;
+    round_up                    = rounding_frac[0] & (rounding_frac[1] | sticky);
+    {float_o.exp, float_o.frac} = {float_o.exp, rounding_frac[FRAC_W:1]} + round_up;
 
+    return float_o;
   endfunction
 
   function automatic real upscale_to_double(input float_t float_i);
-    double_fields_t double_bits;
+    double_fields_t              double_bits;
+    int                          lz;
+    logic           [FRAC_W-1:0] norm_frac;
 
     double_bits      = '0;
     double_bits.sign = float_i.sign;
 
-    if (float_i.exp == '0) begin
-      double_bits.exp = '0;
+    if (float_i.exp == '0 && float_i.frac == '0) begin
+      double_bits.exp  = '0;
+      double_bits.frac = '0;
+
     end else if (float_i.exp == '1) begin
-      double_bits.exp = '1;
+      double_bits.exp  = '1;
+      double_bits.frac = {float_i.frac, {(DOUBLE_FRAC_W - FRAC_W) {1'b0}}};
+
+    end else if (float_i.exp == '0) begin
+      lz = 0;
+      for (int i = FRAC_W - 1; i >= 0; i--) begin
+        if (float_i.frac[i]) break;
+        lz++;
+      end
+
+      double_bits.exp  = DOUBLE_EXP_W'($unsigned(DOUBLE_BIAS - BIAS - lz));
+
+      norm_frac        = float_i.frac << (lz + 1);
+      double_bits.frac = {norm_frac, {(DOUBLE_FRAC_W - FRAC_W) {1'b0}}};
+
     end else begin
-      double_bits.exp = DOUBLE_EXP_W'(float_i.exp) + DOUBLE_EXP_W'($unsigned(DOUBLE_BIAS - BIAS));
+      double_bits.exp  = DOUBLE_EXP_W'(float_i.exp) + DOUBLE_EXP_W'($unsigned(DOUBLE_BIAS - BIAS));
+      double_bits.frac = {float_i.frac, {(DOUBLE_FRAC_W - FRAC_W) {1'b0}}};
     end
 
-    double_bits.frac = {float_i.frac, {(DOUBLE_FRAC_W - FRAC_W) {1'b0}}};
     return $bitstoreal(double_bits);
   endfunction
+
 
   real real_a, real_b, real_c, real_z_dut, real_z_ref;
   integer i;

@@ -233,7 +233,7 @@ module mac_float #(
 
     sum_frac_raw        = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_W];
     sticky_sum          = |normalized_mantissa[GUARD_IDX-1:0];
-    guard               = |normalized_mantissa[GUARD_IDX];
+    guard               = normalized_mantissa[GUARD_IDX];
 
     if (sum_exp_unfl) begin
       sum_frac_raw = normalized_mantissa[FULL_SUM_W-2-:FRAC_W];
