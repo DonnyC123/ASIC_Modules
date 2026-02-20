@@ -42,6 +42,7 @@ module tb_mac_float;
   function automatic float_t downscale_double(input real val);
     logic           [DOUBLE_FRAC_W:0] full_frac;
     logic           [       FRAC_W:0] rounding_frac;
+    logic           [       FRAC_W:0] frac_carry_adder;  // Explicit adder to catch overflow!
     logic                             sticky;
     logic                             round_up;
 
@@ -53,14 +54,14 @@ module tb_mac_float;
     double_bits = double_fields_t'($realtobits(val));
     new_exp     = int'(double_bits.exp) - DOUBLE_BIAS + BIAS;
 
-    if (val == 0.0) begin
+    // Early exit for exactly 0.0 or -0.0
+    if (double_bits.exp == '0 && double_bits.frac == '0) begin
       float_o      = '0;
       float_o.sign = double_bits.sign;
       return float_o;
     end
 
-    // FIX 1: Populate full_frac! 
-    // (We check double_bits.exp == '0 just in case the input real is itself a subnormal)
+    // Pull the implicit '1' into reality for shifting
     full_frac = (double_bits.exp == '0) ? {1'b0, double_bits.frac} : {1'b1, double_bits.frac};
 
     if (new_exp <= 0) begin
@@ -82,13 +83,16 @@ module tb_mac_float;
       float_o.sign = double_bits.sign;
       float_o.exp  = '1;
       float_o.frac = (double_bits.exp == '1) ? FRAC_W'(|(double_bits.frac)) : '0;
-      return float_o;  // Return early to skip rounding!
+      return float_o;  // Return early, no rounding needed!
 
     end else begin
-      // --- NORMAL ---
+      // --- NORMALIZED ---
       float_o.exp   = new_exp[EXP_W-1:0];
+
+      // Extract the 10 fraction bits + 1 Guard bit
       rounding_frac = double_bits.frac[DOUBLE_FRAC_W-1-:(FRAC_W+1)];
 
+      // OR all the remaining lower bits together to create the Sticky bit
       if (FRAC_W < DOUBLE_FRAC_W) begin
         sticky = |double_bits.frac[(DOUBLE_FRAC_W-FRAC_W-2) : 0];
       end else begin
@@ -96,18 +100,25 @@ module tb_mac_float;
       end
     end
 
-    // FIX 2: Move the rounding logic here so both Normal and Subnormal paths use it!
-    round_up                    = rounding_frac[0] & (rounding_frac[1] | sticky);
+    // --- EXPLICIT ROUNDING BLOCK ---
+    // IEEE 754 Tie-To-Even: Guard & (LSB | Sticky)
+    round_up         = rounding_frac[0] & (rounding_frac[1] | sticky);
 
-    // By concatenating exp and frac, if a subnormal rounds up and overflows
-    // its fraction (e.g. 0.1111 + 1), it naturally promotes float_o.exp to 1!
-    {float_o.exp, float_o.frac} = {float_o.exp, rounding_frac[FRAC_W:1]} + round_up;
+    // Add the round bit to the fraction, padded with a 0 to catch the carry-out
+    frac_carry_adder = {1'b0, rounding_frac[FRAC_W:1]} + round_up;
 
-    float_o.sign                = double_bits.sign;
+    // Assign the rounded fraction
+    float_o.frac     = frac_carry_adder[FRAC_W-1:0];
+
+    // Check if the rounding caused the fraction to overflow (e.g., 11.11 -> 100.00)
+    if (frac_carry_adder[FRAC_W]) begin
+      float_o.exp = float_o.exp + 1'b1;
+    end
+
+    float_o.sign = double_bits.sign;
     return float_o;
 
   endfunction
-
 
   function automatic real upscale_to_double(input float_t float_i);
     int             lz;
