@@ -237,7 +237,7 @@ module mac_float #(
   always_comb begin
     float_z.sign = sum_signed;
     float_z.exp  = sum_rounded_exp[EXP_W-1:0];
-    float_z.frac = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_W];
+    float_z.frac = roounded_normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_W];
     if (float_z.exp == '1) begin
       float_z.frac = '0;
     end
@@ -257,7 +257,7 @@ module mac_float #(
         float_z.frac = '0;
       end else if (sum_rounded_exp_unfl) begin  // This is the normalization case. Figure out if its incorrect
         float_z.exp  = '0;
-        float_z.frac = normalized_mantissa[FULL_SUM_W-2-:FRAC_W];
+        float_z.frac = roounded_normalized_mantissa[FULL_SUM_W-2-:FRAC_W];
       end
     end
   end
