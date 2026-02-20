@@ -234,9 +234,9 @@ module mac_float #(
     guard               = normalized_mantissa[GUARD_IDX];
 
     if (sum_exp_unfl) begin
-      sum_frac_raw = normalized_mantissa[FULL_SUM_W-1-:FRAC_W];
-      sticky_sum   = |normalized_mantissa[FULL_SUM_W-1-FRAC_W-2:0];
-      guard        = normalized_mantissa[FULL_SUM_W-1-FRAC_W-1];
+      sum_frac_raw = normalized_mantissa[FULL_SUM_W-2-:FRAC_W];
+      sticky_sum   = |normalized_mantissa[FULL_SUM_W-2-FRAC_W-2:0];
+      guard        = normalized_mantissa[FULL_SUM_W-2-FRAC_W-1];
     end
 
     round_mantissa       = guard && (sticky_sum || sticky_c || sum_frac_raw[0]);
@@ -269,7 +269,7 @@ module mac_float #(
         float_z.frac = '0;
       end else if (c_dominates) begin
         float_z = float_c;
-      end else if (sum_rounded_exp_unfl) begin  // This is the normalization case. Figure out if its incorrect
+      end else if (sum_rounded_exp_unfl || sum_exp_unfl) begin  // This is the normalization case. Figure out if its incorrect
         float_z.exp  = '0;
         float_z.frac = sum_frac_rounded;
       end
