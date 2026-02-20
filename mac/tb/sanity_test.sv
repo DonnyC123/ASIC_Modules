@@ -117,6 +117,9 @@ module tb_mac_float;
 
     return $bitstoreal(double_bits);
   endfunction
+  function automatic logic is_nan(input real val);
+    return (val != val);
+  endfunction
 
   real real_a, real_b, real_c, real_z_dut, real_z_ref;
   integer i;
@@ -140,13 +143,14 @@ module tb_mac_float;
 
     check_pass    = 0;
 
-    if (real_z_dut == 0.0 && real_z_ref == 0.0) begin
+    if ((real_z_dut == 0.0 && real_z_ref == 0.0) || (real_z_dut == real_z_ref) || (is_nan(
+            real_z_dut
+        ) && is_nan(
+            real_z_ref
+        ))) begin
       check_pass = 1;
-    end else if (z != expected_bits) begin
-      check_pass = 0;
     end else begin
-      diff = (z > expected_bits) ? (z - expected_bits) : (expected_bits - z);
-      if (diff <= 1) check_pass = 1;
+      check_pass = 0;
     end
 
     if (!check_pass) begin
