@@ -10,6 +10,7 @@ module mac_float #(
 );
   localparam CARRY_W              = 1;  // Previously OVFL_BI
   localparam MANTISSA_INT_W       = 1;
+  localparam GUARD_W              = 1;
   localparam MANTISSA_W           = FRAC_W + MANTISSA_INT_W;
   localparam BIAS                 = (1 << (EXP_W - 1)) - 1;
   localparam NUM_PARTIAL_PRODUCTS = MANTISSA_W;
@@ -62,11 +63,11 @@ module mac_float #(
   ext_exp_t                                 product_exp;
 
   logic                                     product_sign;
-  logic            [         LOW_SUM_W-1:0] partial_products      [NUM_PARTIAL_PRODUCTS];
+  logic            [         LOW_SUM_W-1:0] partial_products             [NUM_PARTIAL_PRODUCTS];
   logic            [PRODUCT_MANTISSA_W-1:0] csa_c;
   logic                                     c_dominates;
 
-  logic            [         LOW_SUM_W-1:0] csa_summands          [  NUM_WALLACE_INPUTS];
+  logic            [         LOW_SUM_W-1:0] csa_summands                 [  NUM_WALLACE_INPUTS];
   logic            [         LOW_SUM_W-1:0] csa_tree_sum;
   logic            [         LOW_SUM_W-1:0] csa_tree_carry;
   logic            [  PARTIAL_SUM_HIGH_W:0] upper_sum_temp;
@@ -78,6 +79,7 @@ module mac_float #(
 
   logic            [        FULL_SUM_W-1:0] unsigned_mantissa_sum;
   logic            [        FULL_SUM_W-1:0] normalized_mantissa;
+  logic            [  FULL_SUM_CARRY_W-1:0] roounded_normalized_mantissa;
 
   logic            [       LZC_COUNT_W-1:0] mantissa_sum_lz;
   logic            [       LZC_COUNT_W-1:0] mantissa_sum_shift;
@@ -87,9 +89,19 @@ module mac_float #(
   logic                                     sum_exp_ovfl;
   logic                                     sum_exp_unfl;
 
+  sum_exp_t                                 sum_rounded_exp;
+  logic                                     sum_rounded_signed;
+  logic                                     sum_rounded_exp_ovfl;
+  logic                                     sum_rounded_exp_unfl;
+
   logic                                     sum_inf;
   logic                                     sum_inf_sign;
   logic                                     sum_nan;
+  logic                                     sticky_c;
+  logic                                     sticky_sum;
+  logic                                     guard;
+  logic                                     sum_lsb;
+  logic                                     round_mantissa;
 
   function automatic unpacked_float_t unpack_float(input float_t float_i);
     unpacked_float_t unpacked_o;
@@ -150,7 +162,7 @@ module mac_float #(
       .product_sign_i  (product_sign),
       .c_upper_slice_o (c_upper_slice),
       .csa_c_o         (csa_c),
-      .c_lower_sticky_o(),
+      .c_lower_sticky_o(sticky_c),
       .c_dominates_o   (c_dominates)
   );
 
@@ -211,12 +223,20 @@ module mac_float #(
     end else begin
       mantissa_sum_shift = mantissa_sum_lz;
     end
+
     normalized_mantissa = unsigned_mantissa_sum << mantissa_sum_shift;
+    sticky_sum = |normalized_mantissa[FULL_SUM_W-MANTISSA_INT_W-FRAC_W-GUARD_W-2:0] || sticky_c;
+    guard = |normalized_mantissa[FULL_SUM_W-MANTISSA_INT_W-FRAC_W-GUARD_W-1];
+    round_mantissa = guard && (sticky_sum || normalized_mantissa[FULL_SUM_W-MANTISSA_INT_W-FRAC_W-1]);
+    roounded_normalized_mantissa = normalized_mantissa + FULL_SUM_W'(round_mantissa);
+    sum_rounded_exp = sum_exp + sum_exp_t'(roounded_normalized_mantissa[FULL_SUM_CARRY_W-1]);
+    sum_rounded_exp_ovfl = unpacked_a.exp[EXP_W-1] && |sum_exp.msb;
+    sum_rounded_exp_unfl = !unpacked_a.exp[EXP_W-1] && |sum_exp.msb;
   end
 
   always_comb begin
     float_z.sign = sum_signed;
-    float_z.exp  = sum_exp.exp[EXP_W-1:0];
+    float_z.exp  = sum_rounded_exp[EXP_W-1:0];
     float_z.frac = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_W];
     if (float_z.exp == '1) begin
       float_z.frac = '0;
@@ -232,10 +252,10 @@ module mac_float #(
     end else if (c_dominates) begin
       float_z = float_c;
     end else begin
-      if (sum_exp_ovfl) begin
+      if (sum_rounded_exp_ovfl) begin
         float_z.exp  = '1;
         float_z.frac = '0;
-      end else if (sum_exp_unfl) begin  // This is the normalization case. Figure out if its incorrect
+      end else if (sum_rounded_exp_unfl) begin  // This is the normalization case. Figure out if its incorrect
         float_z.exp  = '0;
         float_z.frac = normalized_mantissa[FULL_SUM_W-2-:FRAC_W];
       end
