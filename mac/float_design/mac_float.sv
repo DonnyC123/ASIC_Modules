@@ -240,8 +240,8 @@ module mac_float #(
 
     if (c_dominates) begin
       sum_frac_raw       = float_c.frac;
-      sticky_sum         = |normalized_mantissa[FULL_SUM_W-2:0];
-      guard              = unsigned_mantissa_sum[FULL_SUM_W-1] && c_round_prod;
+      sticky_sum         = |mantissa_sum_lower[PRODUCT_MANTISSA_W-2:0];
+      guard              = unsigned_mantissa_sum[PRODUCT_MANTISSA_W-1] && c_round_prod;
       sum_exp            = $signed({2'b0, float_c.exp});
       sum_rounded_signed = float_c.sign;
     end else if (sum_exp_unfl || sum_exp == 0) begin
