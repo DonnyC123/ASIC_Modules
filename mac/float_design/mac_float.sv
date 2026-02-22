@@ -107,7 +107,7 @@ module mac_float #(
   logic                                     sum_zero;
   logic                                     c_round_prod;
   logic                                     cancel_round_even;
-
+  logic                                     product_zero;
   function automatic unpacked_float_t unpack_float(input float_t float_i);
     unpacked_float_t unpacked_o;
 
@@ -180,7 +180,7 @@ module mac_float #(
     // Pre-normalize B
     if (float_b.exp == '0 && float_b.frac != '0) begin
       lz_b        = count_leading_zeros(float_b.frac);
-      true_exp_b  = $signed(SIGNED_EXP_W'(0)) - $signed({1'b0, lz_b});
+      true_exp_b  = $signed(SIGNED_EXP_W'()) - $signed({1'b0, lz_b});
       norm_mant_b = {float_b.frac << lz_b, 1'b0};
     end else begin
       true_exp_b  = float_b.exp == '0 ? '0 : $signed({1'b0, unpacked_b.exp});
@@ -280,7 +280,7 @@ module mac_float #(
     sticky_sum          = |normalized_mantissa[GUARD_IDX-1:0];
     guard               = normalized_mantissa[GUARD_IDX];
 
-    if (c_dominates) begin
+    if (c_dominates || product_zero) begin
       sum_frac_raw       = float_c.frac;
       sticky_sum         = '0;
       guard              = '0;

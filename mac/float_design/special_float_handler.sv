@@ -9,6 +9,7 @@ module special_float_handler #(
     input  float_t float_a_i,
     input  float_t float_b_i,
     input  float_t float_c_i,
+    output logic   product_zero,
     output logic   inf_o,
     output logic   inf_sign_o,
     output logic   nan_o
@@ -77,6 +78,7 @@ module special_float_handler #(
       inf_o      = sum_flags.inf;
       inf_sign_o = sum_flags.sign;
     end
+    product_zero_o = product_flags.zero;
   end
 
 endmodule
