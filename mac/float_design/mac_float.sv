@@ -248,7 +248,7 @@ module mac_float #(
       guard        = normalized_mantissa[GUARD_IDX+1];
     end
 
-    round_mantissa       = guard && (sticky_sum || sticky_c);
+    round_mantissa       = guard && (sticky_sum || sticky_c || sum_frac_raw[0]);
     sum_frac_carry       = sum_frac_raw + FRAC_W'(round_mantissa);
 
     sum_rounded_exp      = (sum_frac_carry[MANTISSA_W-1] && !sum_exp_ovfl) ? sum_exp + 1 : sum_exp;
