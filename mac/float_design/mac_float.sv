@@ -106,7 +106,7 @@ module mac_float #(
   logic                                     round_mantissa;
   logic                                     sum_zero;
   logic                                     c_round_prod;
-
+  logic                                     cancel_round_even;
   function automatic unpacked_float_t unpack_float(input float_t float_i);
     unpacked_float_t unpacked_o;
 
@@ -159,13 +159,14 @@ module mac_float #(
       .EXP_W (EXP_W),
       .FRAC_W(FRAC_W)
   ) align_addend_inst (
-      .unpacked_c_i    (unpacked_c),
-      .product_exp_i   (product_exp),
-      .product_sign_i  (product_sign),
-      .c_upper_slice_o (c_upper_slice),
-      .csa_c_o         (csa_c),
-      .c_lower_sticky_o(sticky_c),
-      .c_dominates_o   (c_dominates)
+      .unpacked_c_i       (unpacked_c),
+      .product_exp_i      (product_exp),
+      .product_sign_i     (product_sign),
+      .c_upper_slice_o    (c_upper_slice),
+      .csa_c_o            (csa_c),
+      .c_lower_sticky_o   (sticky_c),
+      .c_dominates_o      (c_dominates),
+      .cancel_round_even_o(cancel_round_even)
   );
 
   always_comb begin
@@ -248,14 +249,14 @@ module mac_float #(
       guard        = normalized_mantissa[GUARD_IDX+1];
     end
 
-    round_mantissa       = guard && (sticky_sum || sticky_c || sum_frac_raw[0]);
-    sum_frac_carry       = sum_frac_raw + FRAC_W'(round_mantissa);
+    round_mantissa = guard && (sticky_sum || sticky_c || (sum_frac_raw[0] && !cancel_round_even));
+    sum_frac_carry = sum_frac_raw + FRAC_W'(round_mantissa);
 
-    sum_rounded_exp      = (sum_frac_carry[MANTISSA_W-1] && !sum_exp_ovfl) ? sum_exp + 1 : sum_exp;
+    sum_rounded_exp = (sum_frac_carry[MANTISSA_W-1] && !sum_exp_ovfl) ? sum_exp + 1 : sum_exp;
 
     sum_rounded_exp_ovfl = sum_rounded_exp[EXP_OVFL_IDX] && !sum_exp[EXP_SIGN_IDX];
     sum_rounded_exp_unfl = sum_rounded_exp[EXP_OVFL_IDX] && sum_exp[EXP_SIGN_IDX];
-    sum_frac_rounded     = sum_frac_carry[FRAC_W-1:0];
+    sum_frac_rounded = sum_frac_carry[FRAC_W-1:0];
   end
 
   always_comb begin
