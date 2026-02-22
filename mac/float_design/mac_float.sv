@@ -218,9 +218,7 @@ module mac_float #(
         (MANTISSA_W - FRAC_W);
     sum_exp_ovfl = sum_exp[EXP_OVFL_IDX] && !sum_exp[EXP_SIGN_IDX];
     sum_exp_unfl = sum_exp[EXP_OVFL_IDX] && sum_exp[EXP_SIGN_IDX];
-  end
 
-  always_comb begin
     sum_zero = 0;
     mantissa_sum_shift_ovfl = $unsigned(product_exp + LZC_COUNT_OVFL_W'(SUM_EXP_ADD_OFFSET) +
                                         LZC_COUNT_OVFL_W'(MANTISSA_W - FRAC_W));
