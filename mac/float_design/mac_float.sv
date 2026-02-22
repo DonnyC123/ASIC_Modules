@@ -108,6 +108,8 @@ module mac_float #(
   logic                                     c_round_prod;
   logic                                     cancel_round_even;
   logic                                     product_zero;
+  
+
   function automatic unpacked_float_t unpack_float(input float_t float_i);
     unpacked_float_t unpacked_o;
 
@@ -139,6 +141,7 @@ module mac_float #(
       .float_a_i (float_a),
       .float_b_i (float_b),
       .float_c_i (float_c),
+      .product_zero_o(product_zero),
       .inf_o     (sum_inf),
       .inf_sign_o(sum_inf_sign),
       .nan_o     (sum_nan)

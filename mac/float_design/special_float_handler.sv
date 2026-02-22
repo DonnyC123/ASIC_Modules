@@ -9,7 +9,7 @@ module special_float_handler #(
     input  float_t float_a_i,
     input  float_t float_b_i,
     input  float_t float_c_i,
-    output logic   product_zero,
+    output logic   product_zero_o,
     output logic   inf_o,
     output logic   inf_sign_o,
     output logic   nan_o
