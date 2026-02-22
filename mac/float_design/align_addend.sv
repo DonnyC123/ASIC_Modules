@@ -6,7 +6,7 @@ module align_addend #(
     localparam ROUND_BITS         = 2,
     localparam MANTISSA_W         = FRAC_W + 1,
     localparam UPPER_SLICE_W      = MANTISSA_W + SIGN_BIT + ROUND_BITS,
-    localparam PRODUCT_EXP_W      = EXP_W + 2,
+    localparam PRODUCT_EXP_W      = EXP_W + 3,
     localparam PRODUCT_MANTISSA_W = 2 * MANTISSA_W,
 
     parameter type unpacked_float_t = struct packed {
@@ -33,7 +33,7 @@ module align_addend #(
   localparam SHIFT_ZERO_POINT_OFFSET   = MANTISSA_W;
 
   typedef struct packed {
-    logic [1:0]                  ovfl;
+    logic [2:0]                  ovfl;
     logic [C_SHIFT_FACTOR_W-1:0] exp;
   } c_shift_factor_t;
 
@@ -56,7 +56,7 @@ module align_addend #(
     c_shift_amount = c_shift_factor_t'(unpacked_c_i.exp) - c_shift_factor_t'(product_exp_i)
         + c_shift_factor_t'(PRODUCT_ZERO_POINT_OFFSET) + c_shift_factor_t'(SHIFT_ZERO_POINT_OFFSET);
 
-    c_shift_unfl = &c_shift_amount.ovfl;
+    c_shift_unfl = &c_shift_amount.ovfl[2:1];
     c_shift_ovfl = (c_shift_amount > C_SHIFT_MAX) && !c_shift_unfl;
 
     subtract_c = (product_sign_i ^ unpacked_c_i.sign);

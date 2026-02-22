@@ -33,7 +33,7 @@ module mac_float #(
   localparam NORMAL_FRAC_LSB_IDX = FULL_SUM_W - 1 - FRAC_W;
   localparam GUARD_IDX           = NORMAL_FRAC_LSB_IDX - 1;
 
-  localparam SIGNED_EXP_W = EXP_W + SIGN_W + CARRY_W;
+  localparam SIGNED_EXP_W = EXP_W + SIGN_W + 2 * CARRY_W;
   localparam EXP_OVFL_IDX = EXP_W + CARRY_W - 1;
   localparam EXP_SIGN_IDX = EXP_W + SIGN_W + CARRY_W - 1;
 
