@@ -108,7 +108,7 @@ module mac_float #(
   logic                                     c_round_prod;
   logic                                     cancel_round_even;
   logic                                     product_zero;
-  
+
 
   function automatic unpacked_float_t unpack_float(input float_t float_i);
     unpacked_float_t unpacked_o;
@@ -138,13 +138,13 @@ module mac_float #(
   special_float_handler #(
       .float_t(float_t)
   ) special_float_handler_inst (
-      .float_a_i (float_a),
-      .float_b_i (float_b),
-      .float_c_i (float_c),
+      .float_a_i     (float_a),
+      .float_b_i     (float_b),
+      .float_c_i     (float_c),
       .product_zero_o(product_zero),
-      .inf_o     (sum_inf),
-      .inf_sign_o(sum_inf_sign),
-      .nan_o     (sum_nan)
+      .inf_o         (sum_inf),
+      .inf_sign_o    (sum_inf_sign),
+      .nan_o         (sum_nan)
   );
 
   function automatic logic [3:0] count_leading_zeros(logic [FRAC_W-1:0] frac);
@@ -172,7 +172,7 @@ module mac_float #(
     if (float_a.exp == '0 && float_a.frac != '0) begin
       lz_a        = count_leading_zeros(float_a.frac);
       // Denormals have a mathematical exponent of 1. We subtract lz_a to get the true exponent.
-      true_exp_a  = $signed(SIGNED_EXP_W'(0)) - $signed({1'b0, lz_a});
+      true_exp_a  = -$signed({1'b0, lz_a});
       // Shift left to place the first '1' at the implicit bit (bit 10), pad with 0 at LSB
       norm_mant_a = {float_a.frac << lz_a, 1'b0};
     end else begin
@@ -183,7 +183,7 @@ module mac_float #(
     // Pre-normalize B
     if (float_b.exp == '0 && float_b.frac != '0) begin
       lz_b        = count_leading_zeros(float_b.frac);
-      true_exp_b  = $signed(SIGNED_EXP_W'()) - $signed({1'b0, lz_b});
+      true_exp_b  = -$signed({1'b0, lz_b});
       norm_mant_b = {float_b.frac << lz_b, 1'b0};
     end else begin
       true_exp_b  = float_b.exp == '0 ? '0 : $signed({1'b0, unpacked_b.exp});
