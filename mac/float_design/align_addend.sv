@@ -74,15 +74,15 @@ module align_addend #(
 
     if (c_shift_unfl) begin
       c_lower_sticky_o = |unpacked_c_i.mantissa;
-      csa_c_o[0] = ($signed(c_shift_amount) == -1) && unpacked_c_i.mantissa[MANTISSA_W-1] &&
-          c_lower_sticky_o;
-      if (csa_c_o[0]) begin
-        c_lower_sticky_o = 0;
-        if (subtract_c) begin
-          csa_c_o         = $unsigned(-$signed(csa_c_o));
-          c_upper_slice_o = '1;
-        end
-      end
+      //csa_c_o[0] = ($signed(c_shift_amount) == -1) && unpacked_c_i.mantissa[MANTISSA_W-1] &&
+      //    c_lower_sticky_o;
+      //if (csa_c_o[0]) begin
+      //  c_lower_sticky_o = 0;
+      //  if (subtract_c) begin
+      //    csa_c_o         = $unsigned(-$signed(csa_c_o));
+      //    c_upper_slice_o = '1;
+      //  end
+      //end
       c_lower_sticky_o = c_lower_sticky_o && !subtract_c;
     end else if (c_shift_ovfl) begin
       c_lower_sticky_o = '0;
@@ -92,6 +92,8 @@ module align_addend #(
       c_lower_sticky_o = |c_shifted_struct.rounding_c;
     end
   end
-  assign c_dominates_o       = c_shift_ovfl;
-  assign cancel_round_even_o = (c_shift_amount == 'b1) && subtract_c && unpacked_c_i.mantissa != 0;
+  assign c_dominates_o = c_shift_ovfl;
+  assign cancel_round_even_o = ($signed(
+      c_shift_amount
+  ) == -1) && subtract_c && unpacked_c_i.mantissa != 0;
 endmodule
