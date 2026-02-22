@@ -92,6 +92,6 @@ module align_addend #(
       c_lower_sticky_o = |c_shifted_struct.rounding_c;
     end
   end
-  assign c_dominates_o = c_shift_ovfl;
-  assign cancel_round_even_o = (c_shift_amount.ovfl == '1) && (c_shift_amount.exp == '1) && subtract_c && unpacked_c_i.mantissa != 0;
+  assign c_dominates_o       = c_shift_ovfl;
+  assign cancel_round_even_o = c_shift_unfl && subtract_c && unpacked_c_i.mantissa != 0;
 endmodule
