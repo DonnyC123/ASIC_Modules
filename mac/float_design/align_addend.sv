@@ -93,5 +93,5 @@ module align_addend #(
     end
   end
   assign c_dominates_o       = c_shift_ovfl;
-  assign cancel_round_even_o = c_shift_unfl && subtract_c;
+  assign cancel_round_even_o = ($signed(c_shift_amount) == -1) && subtract_c;
 endmodule
