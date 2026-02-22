@@ -31,7 +31,7 @@ module align_addend #(
   localparam SHIFT_ZERO_POINT_OFFSET   = MANTISSA_W;
 
   typedef struct packed {
-    logic                        msb;
+    logic [1:0]                  ovfl;
     logic [C_SHIFT_FACTOR_W-1:0] exp;
   } c_shift_factor_t;
 
@@ -54,7 +54,7 @@ module align_addend #(
     c_shift_amount = c_shift_factor_t'(unpacked_c_i.exp) - c_shift_factor_t'(product_exp_i)
         + c_shift_factor_t'(PRODUCT_ZERO_POINT_OFFSET) + c_shift_factor_t'(SHIFT_ZERO_POINT_OFFSET);
 
-    c_shift_unfl = (|(product_exp_i[PRODUCT_EXP_W-1:EXP_W-1])) && c_shift_amount.msb;
+    c_shift_unfl = &c_shift_amount.ovfl;
     c_shift_ovfl = (c_shift_amount > C_SHIFT_MAX) && !c_shift_unfl;
 
     subtract_c = (product_sign_i ^ unpacked_c_i.sign) && !c_shift_unfl;
