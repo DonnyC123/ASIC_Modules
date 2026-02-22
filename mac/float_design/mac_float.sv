@@ -169,7 +169,7 @@ module mac_float #(
     if (float_a.exp == '0 && float_a.frac != '0) begin
       lz_a        = count_leading_zeros(float_a.frac);
       // Denormals have a mathematical exponent of 1. We subtract lz_a to get the true exponent.
-      true_exp_a  = $signed(SIGNED_EXP_W'(-1)) - $signed({1'b0, lz_a});
+      true_exp_a  = $signed(SIGNED_EXP_W'(0)) - $signed({1'b0, lz_a});
       // Shift left to place the first '1' at the implicit bit (bit 10), pad with 0 at LSB
       norm_mant_a = {float_a.frac << lz_a, 1'b0};
     end else begin
