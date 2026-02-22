@@ -104,6 +104,7 @@ module mac_float #(
   logic                                     guard;
   logic                                     round_mantissa;
   logic                                     sum_zero;
+  logic                                     c_round_prod;
 
   function automatic unpacked_float_t unpack_float(input float_t float_i);
     unpacked_float_t unpacked_o;
@@ -164,7 +165,8 @@ module mac_float #(
       .c_upper_slice_o (c_upper_slice),
       .csa_c_o         (csa_c),
       .c_lower_sticky_o(sticky_c),
-      .c_dominates_o   (c_dominates)
+      .c_dominates_o   (c_dominates),
+      .c_round_prod_o  (c_round_prod)
   );
 
   always_comb begin
@@ -197,7 +199,7 @@ module mac_float #(
     unsigned_mantissa_sum = mantissa_sum_raw[FULL_SUM_W-1:0];
 
     mantissa_sum_raw_neg = $unsigned(-$signed(mantissa_sum_raw));
-    if (mantissa_sum_raw[FULL_SUM_CARRY_W-1]) begin
+    if (mantissa_sum_raw[FULL_SUM_CARRY_W-1] || c_round_prod) begin
       unsigned_mantissa_sum = mantissa_sum_raw_neg[FULL_SUM_W-1:0];
       sum_signed            = ~product_sign;
     end
@@ -235,7 +237,12 @@ module mac_float #(
     sticky_sum          = |normalized_mantissa[GUARD_IDX-1:0];
     guard               = normalized_mantissa[GUARD_IDX];
 
-    if (sum_exp_unfl || sum_exp == 0) begin
+    if (c_dominates) begin
+      sum_frac_raw = float_c.frac;
+      sticky_sum   = |normalized_mantissa[FULL_SUM_W-2:0];
+      guard        = normalized_mantissa[FULL_SUM_W-1] && c_round_prod;
+      sum_exp      = $signed({2'b0, float_c.exp});
+    end else if (sum_exp_unfl || sum_exp == 0) begin
       sum_frac_raw = normalized_mantissa[FULL_SUM_W-1-:FRAC_W];
       sticky_sum   = |normalized_mantissa[GUARD_IDX:0];
       guard        = normalized_mantissa[GUARD_IDX+1];
@@ -270,8 +277,8 @@ module mac_float #(
       if (sum_rounded_exp_ovfl) begin
         float_z.exp  = '1;
         float_z.frac = '0;
-      end else if (c_dominates) begin
-        float_z = float_c;
+      end else
+      if (c_dominates) begin
       end else if (sum_zero) begin
         float_z.exp  = '0;
         float_z.frac = '0;

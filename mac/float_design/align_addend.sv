@@ -20,11 +20,12 @@ module align_addend #(
     output logic            [ MANTISSA_SIGNED_W-1:0] c_upper_slice_o,
     output logic            [PRODUCT_MANTISSA_W-1:0] csa_c_o,
     output logic                                     c_lower_sticky_o,
-    output logic                                     c_dominates_o
+    output logic                                     c_dominates_o,
+    output logic                                     c_round_prod_o
 );
 
   localparam C_SHIFT_RAW_W    = MANTISSA_W + PRODUCT_MANTISSA_W + MANTISSA_SIGNED_W;
-  localparam C_SHIFT_MAX      = PRODUCT_MANTISSA_W + MANTISSA_SIGNED_W;
+  localparam C_SHIFT_MAX      = 3 * MANTISSA_W;
   localparam C_SHIFT_FACTOR_W = $clog2(C_SHIFT_RAW_W);
 
   localparam PRODUCT_ZERO_POINT_OFFSET = FRAC_W;
@@ -89,6 +90,6 @@ module align_addend #(
       c_lower_sticky_o = |c_shifted_struct.rounding_c;
     end
   end
-
+  assign c_round_prod  = (c_shift_amount == C_SHIFT_MAX + 1) && c_shift_unfl;
   assign c_dominates_o = c_shift_ovfl;
 endmodule
