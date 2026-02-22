@@ -34,8 +34,8 @@ module mac_float #(
   localparam GUARD_IDX           = NORMAL_FRAC_LSB_IDX - 1;
 
   localparam SIGNED_EXP_W = EXP_W + SIGN_W + CARRY_W;
-  localparam EXP_OVFL_IDX = EXP_W + SIGN_W - 1;
-  localparam EXP_UNFL_IDX = EXP_W + SIGN_W + CARRY_W - 1;
+  localparam EXP_OVFL_IDX = EXP_W + CARRY_W - 1;
+  localparam EXP_SIGN_IDX = EXP_W + SIGN_W + CARRY_W - 1;
 
 
   typedef struct packed {
@@ -214,8 +214,8 @@ module mac_float #(
   always_comb begin
     sum_exp = product_exp - $signed({1'b0, mantissa_sum_lz}) + (SUM_EXP_ADD_OFFSET) +
         (MANTISSA_W - FRAC_W);
-    sum_exp_ovfl = sum_exp[EXP_OVFL_IDX];
-    sum_exp_unfl = sum_exp[EXP_UNFL_IDX];
+    sum_exp_ovfl = sum_exp[EXP_OVFL_IDX] && !sum_exp[EXP_SIGN_IDX];
+    sum_exp_unfl = sum_exp[EXP_OVFL_IDX] && sum_exp[EXP_SIGN_IDX];
   end
 
   always_comb begin
