@@ -244,8 +244,9 @@ module mac_float #(
     sum_frac_carry       = sum_frac_raw + FRAC_W'(round_mantissa);
 
     sum_rounded_exp      = (sum_frac_carry[MANTISSA_W-1] && !sum_exp_ovfl) ? sum_exp + 1 : sum_exp;
-    sum_rounded_exp_ovfl = sum_exp[EXP_OVFL_IDX];
-    sum_rounded_exp_unfl = sum_exp[EXP_UNFL_IDX];
+
+    sum_rounded_exp_ovfl = sum_rounded_exp[EXP_OVFL_IDX] && !sum_exp[EXP_SIGN_IDX];
+    sum_rounded_exp_unfl = sum_rounded_exp[EXP_OVFL_IDX] && sum_exp[EXP_SIGN_IDX];
     sum_frac_rounded     = sum_frac_carry[FRAC_W-1:0];
   end
 
