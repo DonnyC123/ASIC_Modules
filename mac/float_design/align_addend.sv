@@ -24,7 +24,7 @@ module align_addend #(
 );
 
   localparam C_SHIFT_RAW_W    = MANTISSA_W + PRODUCT_MANTISSA_W + MANTISSA_SIGNED_W;
-  localparam C_SHIFT_MAX      = 3 * MANTISSA_W;
+  localparam C_SHIFT_MAX      = PRODUCT_MANTISSA_W + MANTISSA_SIGNED_W;
   localparam C_SHIFT_FACTOR_W = $clog2(C_SHIFT_RAW_W);
 
   localparam PRODUCT_ZERO_POINT_OFFSET = FRAC_W;
