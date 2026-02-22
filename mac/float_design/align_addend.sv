@@ -72,7 +72,7 @@ module align_addend #(
     csa_c_o          = '0;
 
     if (c_shift_unfl) begin
-      c_lower_sticky_o = |unpacked_c_i.mantissa && !subtract_c;
+      c_lower_sticky_o = |unpacked_c_i.mantissa;
       csa_c_o[0] = ($signed(c_shift_amount) == -1) && unpacked_c_i.mantissa[MANTISSA_W-1] &&
           c_lower_sticky_o;
       if (csa_c_o[0]) begin
