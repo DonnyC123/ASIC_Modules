@@ -8,41 +8,35 @@ module mac_float #(
     input  logic [DATA_W-1:0] c,
     output logic [DATA_W-1:0] z
 );
-  localparam CARRY_W              = 1;  // Previously OVFL_BI
+  localparam CARRY_W = 1;
+  localparam SIGN_W  = 1;
+
   localparam MANTISSA_INT_W       = 1;
-  localparam GUARD_W              = 1;
   localparam MANTISSA_W           = FRAC_W + MANTISSA_INT_W;
   localparam BIAS                 = (1 << (EXP_W - 1)) - 1;
   localparam NUM_PARTIAL_PRODUCTS = MANTISSA_W;
   localparam NUM_WALLACE_INPUTS   = NUM_PARTIAL_PRODUCTS + 1;
 
   localparam PRODUCT_MANTISSA_W = 2 * MANTISSA_W;
-  localparam LOW_SUM_W          = PRODUCT_MANTISSA_W + CARRY_W;  // Previously LOW_SUM_W
+  localparam LOW_SUM_W          = PRODUCT_MANTISSA_W + CARRY_W;
+  localparam FULL_SUM_W         = 3 * MANTISSA_W + CARRY_W;
+  localparam FULL_SUM_CARRY_W   = FULL_SUM_W + CARRY_W;
 
-  localparam FULL_SUM_W       = 3 * MANTISSA_W + CARRY_W;  // Previously FULL_SUM_W
-  localparam FULL_SUM_CARRY_W = FULL_SUM_W + CARRY_W;  // Previously FULL_SUM_CARRY_W
+  localparam PARTIAL_SUM_LOW_W  = LOW_SUM_W + CARRY_W;
+  localparam PARTIAL_SUM_HIGH_W = FULL_SUM_CARRY_W - PARTIAL_SUM_LOW_W + CARRY_W;
 
-  localparam PARTIAL_SUM_LOW_W    = LOW_SUM_W + CARRY_W;
-  localparam PARTIAL_SUM_HIGH_W   = FULL_SUM_CARRY_W - PARTIAL_SUM_LOW_W + CARRY_W; // Prev PARTIAL_SUM_HIGH
-
-  localparam LZC_COUNT_W      = $clog2(FULL_SUM_W + 1);  // Previously LZC_COUNT_W
-  localparam LZC_COUNT_OVFL_W = LZC_COUNT_W + 1;
-
-  localparam SUM_EXP_ADD_OFFSET = FULL_SUM_W - PRODUCT_MANTISSA_W;  // Previously SUM_EXP_ADD_OFFSET
+  localparam LZC_COUNT_W        = $clog2(FULL_SUM_W + 1);
+  localparam LZC_COUNT_OVFL_W   = LZC_COUNT_W + 1;
+  localparam SUM_EXP_ADD_OFFSET = FULL_SUM_W - PRODUCT_MANTISSA_W;
 
   localparam DENORMALIZED_IDX    = PRODUCT_MANTISSA_W + 2;
   localparam NORMAL_FRAC_LSB_IDX = FULL_SUM_W - 1 - FRAC_W;
   localparam GUARD_IDX           = NORMAL_FRAC_LSB_IDX - 1;
 
-  typedef struct packed {
-    logic             msb;
-    logic [EXP_W-1:0] exp;
-  } ext_exp_t;
+  localparam SIGNED_EXP_W = EXP_W + SIGN_W + CARRY_W;
+  localparam EXP_OVFL_IDX = EXP_W + SIGN_W - 1;
+  localparam EXP_UNFL_IDX = EXP_W + SIGN_W + CARRY_W - 1;
 
-  typedef struct packed {
-    logic [1:0]       msb;
-    logic [EXP_W-1:0] exp;
-  } sum_exp_t;
 
   typedef struct packed {
     logic sign;
@@ -65,7 +59,7 @@ module mac_float #(
   unpacked_float_t                          unpacked_b;
   unpacked_float_t                          unpacked_c;
 
-  ext_exp_t                                 product_exp;
+  logic signed     [      SIGNED_EXP_W-1:0] product_exp;
 
   logic                                     product_sign;
   logic            [         LOW_SUM_W-1:0] partial_products        [NUM_PARTIAL_PRODUCTS];
@@ -93,12 +87,12 @@ module mac_float #(
   logic            [       LZC_COUNT_W-1:0] mantissa_sum_shift;
   logic            [  LZC_COUNT_OVFL_W-1:0] mantissa_sum_shift_ovfl;
 
-  sum_exp_t                                 sum_exp;
+  logic signed     [      SIGNED_EXP_W-1:0] sum_exp;
   logic                                     sum_signed;
   logic                                     sum_exp_ovfl;
   logic                                     sum_exp_unfl;
 
-  sum_exp_t                                 sum_rounded_exp;
+  logic signed     [      SIGNED_EXP_W-1:0] sum_rounded_exp;
   logic                                     sum_rounded_exp_ovfl;
   logic                                     sum_rounded_exp_unfl;
 
@@ -109,8 +103,8 @@ module mac_float #(
   logic                                     sticky_sum;
   logic                                     guard;
   logic                                     round_mantissa;
-
   logic                                     sum_zero;
+
   function automatic unpacked_float_t unpack_float(input float_t float_i);
     unpacked_float_t unpacked_o;
 
@@ -149,17 +143,16 @@ module mac_float #(
 
   always_comb begin
     product_sign = unpacked_a.sign ^ unpacked_b.sign;
-    product_exp  = (unpacked_a.exp + unpacked_b.exp) - $unsigned(EXP_W'(BIAS));
+    product_exp = $signed({1'b0, unpacked_a.exp}) + $signed({1'b0, unpacked_b.exp}) -
+        (EXP_W'(BIAS));
 
     foreach (partial_products[i]) begin
       logic [MANTISSA_W-1:0] partial_product;
 
       partial_product     = unpacked_a.mantissa & {MANTISSA_W{unpacked_b.mantissa[i]}};
-      partial_products[i] = {{MANTISSA_W + 1{1'b0}}, partial_product} << i;
+      partial_products[i] = {{(MANTISSA_W + 1) {1'b0}}, partial_product} << i;
     end
   end
-
-
 
   align_addend #(
       .EXP_W (EXP_W),
@@ -219,14 +212,16 @@ module mac_float #(
   );
 
   always_comb begin
-    sum_exp      = sum_exp_t'({product_exp.msb, product_exp}) - sum_exp_t'(mantissa_sum_lz) + sum_exp_t'(SUM_EXP_ADD_OFFSET) + sum_exp_t'(MANTISSA_W-FRAC_W);
-    sum_exp_ovfl = ^sum_exp.msb;
-    sum_exp_unfl = &sum_exp.msb;
+    sum_exp = product_exp - $signed({1'b0, mantissa_sum_lz}) + (SUM_EXP_ADD_OFFSET) +
+        (MANTISSA_W - FRAC_W);
+    sum_exp_ovfl = sum_exp[EXP_OVFL_IDX];
+    sum_exp_unfl = sum_exp[EXP_UNFL_IDX];
   end
 
   always_comb begin
     sum_zero                = 0;
-    mantissa_sum_shift_ovfl = mantissa_sum_lz + sum_exp;  // Check for underflow
+    mantissa_sum_shift_ovfl = mantissa_sum_lz + {1'b0, sum_exp[EXP_W-1:0]};
+
     if (sum_exp_unfl) begin
       mantissa_sum_shift = mantissa_sum_shift_ovfl[LZC_COUNT_W-1:0];  // Check for underflow
       sum_zero           = mantissa_sum_shift_ovfl[LZC_COUNT_OVFL_W-1];
@@ -248,10 +243,10 @@ module mac_float #(
     round_mantissa       = guard && (sticky_sum || sticky_c || sum_frac_raw[0]);
     sum_frac_carry       = sum_frac_raw + FRAC_W'(round_mantissa);
 
-    sum_rounded_exp      = sum_exp + sum_exp_t'((sum_frac_carry[MANTISSA_W-1] && !sum_exp_ovfl));
-    sum_rounded_exp_ovfl = ^sum_rounded_exp.msb;
-    sum_rounded_exp_unfl = &sum_rounded_exp.msb;
-    sum_frac_rounded     = sum_frac_carry;
+    sum_rounded_exp      = (sum_frac_carry[MANTISSA_W-1] && !sum_exp_ovfl) ? sum_exp + 1 : sum_exp;
+    sum_rounded_exp_ovfl = sum_exp[EXP_OVFL_IDX];
+    sum_rounded_exp_unfl = sum_exp[EXP_UNFL_IDX];
+    sum_frac_rounded     = sum_frac_carry[FRAC_W-1:0];
   end
 
   always_comb begin
@@ -278,7 +273,7 @@ module mac_float #(
         float_z.frac = '0;
       end else if (c_dominates) begin
         float_z = float_c;
-      end else if (sum_rounded_exp_unfl) begin  // This is the normalization case. Figure out if its incorrect
+      end else if (sum_rounded_exp_unfl) begin
         float_z.exp  = '0;
         float_z.frac = sum_frac_rounded;
       end

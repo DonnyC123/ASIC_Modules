@@ -5,7 +5,7 @@ module align_addend #(
     localparam OVFL_BIT           = 1,
     localparam MANTISSA_W         = FRAC_W + 1,
     localparam MANTISSA_SIGNED_W  = MANTISSA_W + OVFL_BIT,
-    localparam PRODUCT_EXP_W      = EXP_W + 1,
+    localparam PRODUCT_EXP_W      = EXP_W + 2,
     localparam PRODUCT_MANTISSA_W = 2 * MANTISSA_W,
 
     parameter type unpacked_float_t = struct packed {
@@ -15,7 +15,7 @@ module align_addend #(
     }
 ) (
     input  unpacked_float_t                          unpacked_c_i,
-    input  logic            [     PRODUCT_EXP_W-1:0] product_exp_i,
+    input  logic signed     [     PRODUCT_EXP_W-1:0] product_exp_i,
     input  logic                                     product_sign_i,
     output logic            [ MANTISSA_SIGNED_W-1:0] c_upper_slice_o,
     output logic            [PRODUCT_MANTISSA_W-1:0] csa_c_o,
@@ -51,7 +51,7 @@ module align_addend #(
   logic            subtract_c;
 
   always_comb begin
-    c_shift_amount = c_shift_factor_t'(unpacked_c_i.exp) - c_shift_factor_t'($signed(product_exp_i))
+    c_shift_amount = c_shift_factor_t'(unpacked_c_i.exp) - c_shift_factor_t'(product_exp_i)
         + c_shift_factor_t'(PRODUCT_ZERO_POINT_OFFSET) + c_shift_factor_t'(SHIFT_ZERO_POINT_OFFSET);
 
     c_shift_unfl = (|(product_exp_i[PRODUCT_EXP_W-1:EXP_W-1])) && c_shift_amount.msb;
