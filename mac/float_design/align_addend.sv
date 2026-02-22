@@ -57,7 +57,7 @@ module align_addend #(
     c_shift_unfl = &c_shift_amount.ovfl;
     c_shift_ovfl = (c_shift_amount > C_SHIFT_MAX) && !c_shift_unfl;
 
-    subtract_c = (product_sign_i ^ unpacked_c_i.sign);
+    subtract_c = (product_sign_i ^ unpacked_c_i.sign) && !c_shift_unfl;
     c_wide_prep = C_SHIFT_RAW_W'(unpacked_c_i.mantissa);
 
     if (subtract_c) begin
@@ -77,7 +77,8 @@ module align_addend #(
       if (csa_c_o[0]) begin
         c_lower_sticky_o = 0;
         if (subtract_c) begin
-          csa_c_o = $unsigned(-$signed(csa_c_o));
+          csa_c_o         = $unsigned(-$signed(csa_c_o));
+          c_upper_slice_o = '1;
         end
       end
     end else if (c_shift_ovfl) begin
