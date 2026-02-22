@@ -219,8 +219,9 @@ module mac_float #(
   end
 
   always_comb begin
-    sum_zero                = 0;
-    mantissa_sum_shift_ovfl = mantissa_sum_lz + {1'b0, sum_exp[EXP_W-1:0]};
+    sum_zero = 0;
+    mantissa_sum_shift_ovfl = $unsigned(product_exp + LZC_COUNT_OVFL_W'(SUM_EXP_ADD_OFFSET) +
+                                        LZC_COUNT_OVFL_W'(MANTISSA_W - FRAC_W));
 
     if (sum_exp_unfl) begin
       mantissa_sum_shift = mantissa_sum_shift_ovfl[LZC_COUNT_W-1:0];  // Check for underflow
@@ -275,8 +276,7 @@ module mac_float #(
       end else if (c_dominates) begin
         float_z = float_c;
       end else if (sum_rounded_exp_unfl) begin
-        float_z.exp  = '0;
-        float_z.frac = sum_frac_rounded;
+        float_z.exp = '0;
       end
     end
   end
