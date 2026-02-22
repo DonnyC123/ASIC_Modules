@@ -185,7 +185,7 @@ module mac_float #(
 
   always_comb begin
     mantissa_sum_lower = csa_tree_sum + {csa_tree_carry[PARTIAL_SUM_LOW_W-2:1], 1'b0};
-    upper_sum_temp = {c_upper_slice[PARTIAL_SUM_HIGH_W-1], c_upper_slice} 
+    upper_sum_temp = {c_upper_slice[PARTIAL_SUM_HIGH_W-1], c_upper_slice}
                    + (PARTIAL_SUM_HIGH_W + 1)'(mantissa_sum_lower[PARTIAL_SUM_LOW_W-1 : PARTIAL_SUM_LOW_W-2]);
 
     mantissa_sum_upper = upper_sum_temp[PARTIAL_SUM_HIGH_W:1];
