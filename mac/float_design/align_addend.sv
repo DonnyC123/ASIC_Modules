@@ -72,6 +72,13 @@ module align_addend #(
 
     if (c_shift_unfl) begin
       c_lower_sticky_o = |unpacked_c_i.mantissa;
+      csa_c_o[0]       = c_shifted_struct.rounding_c[MANTISSA_W-1] & c_lower_sticky_o;
+      if (csa_c_o[0]) begin
+        c_lower_sticky_o = 0;
+        if (subtract_c) begin
+          csa_c_o = $unsigned(-$signed(csa_c_o));
+        end
+      end
     end else if (c_shift_ovfl) begin
       c_lower_sticky_o = '0;
     end else begin
