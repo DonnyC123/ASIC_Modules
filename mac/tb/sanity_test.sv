@@ -220,6 +220,21 @@ module tb_mac_float;
     #10;
     check_result("Simple Add");
 
+    a = 16'h6B6b;
+    b = 16'h0801;
+    c = 16'h01AB;
+
+    #10;
+    check_result("Simple Add");
+
+
+    a = 16'hEDCD;
+    b = 16'h8000;
+    c = 16'h0679;
+
+    #10;
+    check_result("Simple Add");
+
     $display("--- Random Stress Test ---");
     for (i = 0; i < 10000; i++) begin
       void'(std::randomize(a, b, c));
