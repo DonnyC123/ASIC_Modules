@@ -88,7 +88,7 @@ module align_addend #(
     end else begin
       c_upper_slice_o  = c_shifted_struct.upper_c;
       csa_c_o          = c_shifted_struct.product_aligned_c;
-      c_lower_sticky_o = |c_shifted_struct.rounding_c && !subtract_c;
+      c_lower_sticky_o = |c_shifted_struct.rounding_c;
     end
   end
   assign c_dominates_o = c_shift_ovfl;
