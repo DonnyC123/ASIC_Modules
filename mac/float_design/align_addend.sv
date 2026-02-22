@@ -82,6 +82,7 @@ module align_addend #(
           c_upper_slice_o = '1;
         end
       end
+      c_lower_sticky_o = c_lower_sticky_o && !subtract_c;
     end else if (c_shift_ovfl) begin
       c_lower_sticky_o = '0;
     end else begin
