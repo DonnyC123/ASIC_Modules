@@ -107,6 +107,7 @@ module mac_float #(
   logic                                     sum_zero;
   logic                                     c_round_prod;
   logic                                     cancel_round_even;
+
   function automatic unpacked_float_t unpack_float(input float_t float_i);
     unpacked_float_t unpacked_o;
 
@@ -143,14 +144,49 @@ module mac_float #(
       .nan_o     (sum_nan)
   );
 
+  function automatic logic [3:0] count_leading_zeros(logic [FRAC_W-1:0] frac);
+    logic [3:0] lz = '0;
+    for (int i = FRAC_W - 1; i >= 0; i--) begin
+      if (frac[i]) break;
+      lz++;
+    end
+    return lz;
+  endfunction
+
+  logic signed [SIGNED_EXP_W-1:0] true_exp_a;
+  logic signed [SIGNED_EXP_W-1:0] true_exp_b;
+  logic        [  MANTISSA_W-1:0] norm_mant_a;
+  logic        [  MANTISSA_W-1:0] norm_mant_b;
+
   always_comb begin
+    // Pre-normalize A
+    if (float_a.exp == '0 && float_a.frac != '0) begin
+      logic [3:0] lz_a = count_leading_zeros(float_a.frac);
+      // Denormals have a mathematical exponent of 1. We subtract lz_a to get the true exponent.
+      true_exp_a  = $signed(SIGNED_EXP_W'(1)) - $signed({1'b0, lz_a});
+      // Shift left to place the first '1' at the implicit bit (bit 10), pad with 0 at LSB
+      norm_mant_a = {float_a.frac << lz_a, 1'b0};
+    end else begin
+      true_exp_a  = float_a.exp == '0 ? '0 : $signed({1'b0, unpacked_a.exp});
+      norm_mant_a = unpacked_a.mantissa;
+    end
+
+    // Pre-normalize B
+    if (float_b.exp == '0 && float_b.frac != '0) begin
+      logic [3:0] lz_b = count_leading_zeros(float_b.frac);
+      true_exp_b  = $signed(SIGNED_EXP_W'(1)) - $signed({1'b0, lz_b});
+      norm_mant_b = {float_b.frac << lz_b, 1'b0};
+    end else begin
+      true_exp_b  = float_b.exp == '0 ? '0 : $signed({1'b0, unpacked_b.exp});
+      norm_mant_b = unpacked_b.mantissa;
+    end
+
     product_sign = unpacked_a.sign ^ unpacked_b.sign;
-    product_exp  = $signed({1'b0, unpacked_a.exp}) + $signed({1'b0, unpacked_b.exp}) - BIAS;
+    product_exp  = true_exp_a + true_exp_b - $signed(SIGNED_EXP_W'(BIAS));
 
     foreach (partial_products[i]) begin
       logic [MANTISSA_W-1:0] partial_product;
-
-      partial_product     = unpacked_a.mantissa & {MANTISSA_W{unpacked_b.mantissa[i]}};
+      partial_product     = norm_mant_a & {MANTISSA_W{norm_mant_b[i]}};
       partial_products[i] = {{(MANTISSA_W + 1) {1'b0}}, partial_product} << i;
     end
   end
