@@ -242,8 +242,8 @@ module mac_float #(
       sum_frac_raw       = float_c.frac;
       sum_exp            = $signed({2'b0, float_c.exp});
       sum_rounded_signed = float_c.sign;
-      //sticky_sum         = ;
-      //guard              = ;
+      sticky_sum         = 1'b0;
+      guard              = 1'b0;
       if (1'b0) begin
         sticky_sum = |mantissa_sum_lower[PRODUCT_MANTISSA_W-2:0];
         guard      = mantissa_sum_lower[PARTIAL_SUM_LOW_W-1] && c_round_prod;
