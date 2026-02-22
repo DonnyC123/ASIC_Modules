@@ -180,7 +180,7 @@ module mac_float #(
     // Pre-normalize B
     if (float_b.exp == '0 && float_b.frac != '0) begin
       lz_b        = count_leading_zeros(float_b.frac);
-      true_exp_b  = $signed(SIGNED_EXP_W'(1)) - $signed({1'b0, lz_b});
+      true_exp_b  = $signed(SIGNED_EXP_W'(0)) - $signed({1'b0, lz_b});
       norm_mant_b = {float_b.frac << lz_b, 1'b0};
     end else begin
       true_exp_b  = float_b.exp == '0 ? '0 : $signed({1'b0, unpacked_b.exp});
