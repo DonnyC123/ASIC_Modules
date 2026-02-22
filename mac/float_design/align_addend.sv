@@ -93,5 +93,5 @@ module align_addend #(
     end
   end
   assign c_dominates_o = c_shift_ovfl;
-  assign cancel_round_even_o = (c_shift_amount.ovfl == 'b1) && (c_shift_amount.exp == 'b1) && subtract_c && unpacked_c_i.mantissa != 0;
+  assign cancel_round_even_o = (c_shift_amount.ovfl == '1) && (c_shift_amount.exp == '1) && subtract_c && unpacked_c_i.mantissa != 0;
 endmodule
