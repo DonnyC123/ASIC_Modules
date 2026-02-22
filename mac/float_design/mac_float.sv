@@ -270,11 +270,11 @@ module mac_float #(
       if (sum_rounded_exp_ovfl) begin
         float_z.exp  = '1;
         float_z.frac = '0;
+      end else if (c_dominates) begin
+        float_z = float_c;
       end else if (sum_zero) begin
         float_z.exp  = '0;
         float_z.frac = '0;
-      end else if (c_dominates) begin
-        float_z = float_c;
       end else if (sum_rounded_exp_unfl) begin
         float_z.exp  = '0;
         float_z.frac = sum_frac_rounded;
