@@ -89,6 +89,7 @@ module mac_float #(
 
   logic signed     [      SIGNED_EXP_W-1:0] sum_exp;
   logic                                     sum_signed;
+  logic                                     sum_rounded_signed;
   logic                                     sum_exp_ovfl;
   logic                                     sum_exp_unfl;
 
@@ -214,6 +215,8 @@ module mac_float #(
   );
 
   always_comb begin
+    sum_rounded_signed = sum_signed;
+
     sum_exp = product_exp - $signed({1'b0, mantissa_sum_lz}) + (SUM_EXP_ADD_OFFSET) +
         (MANTISSA_W - FRAC_W);
     sum_exp_ovfl = sum_exp[EXP_OVFL_IDX] && !sum_exp[EXP_SIGN_IDX];
@@ -236,10 +239,11 @@ module mac_float #(
     guard               = normalized_mantissa[GUARD_IDX];
 
     if (c_dominates) begin
-      sum_frac_raw = float_c.frac;
-      sticky_sum   = |normalized_mantissa[FULL_SUM_W-2:0];
-      guard        = normalized_mantissa[FULL_SUM_W-1] && c_round_prod;
-      sum_exp      = $signed({2'b0, float_c.exp});
+      sum_frac_raw       = float_c.frac;
+      sticky_sum         = |normalized_mantissa[FULL_SUM_W-2:0];
+      guard              = normalized_mantissa[FULL_SUM_W-1] && c_round_prod;
+      sum_exp            = $signed({2'b0, float_c.exp});
+      sum_rounded_signed = float_c.sign;
     end else if (sum_exp_unfl || sum_exp == 0) begin
       sum_frac_raw = normalized_mantissa[FULL_SUM_W-1-:FRAC_W];
       sticky_sum   = |normalized_mantissa[GUARD_IDX:0];
@@ -257,7 +261,7 @@ module mac_float #(
   end
 
   always_comb begin
-    float_z.sign = sum_signed;
+    float_z.sign = sum_rounded_signed;
     float_z.exp  = sum_rounded_exp[EXP_W-1:0];
     float_z.frac = sum_frac_rounded;
     if (float_z.exp == '1) begin
