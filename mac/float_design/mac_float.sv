@@ -19,7 +19,7 @@ module mac_float #(
 
   localparam PRODUCT_MANTISSA_W = 2 * MANTISSA_W;
   localparam LOW_SUM_W          = PRODUCT_MANTISSA_W + CARRY_W;
-  localparam FULL_SUM_W         = 3 * MANTISSA_W + CARRY_W;
+  localparam FULL_SUM_W         = 3 * MANTISSA_W + SIGN_W + 2 * CARRY_W;
   localparam FULL_SUM_CARRY_W   = FULL_SUM_W + CARRY_W;
 
   localparam PARTIAL_SUM_LOW_W  = LOW_SUM_W + CARRY_W;
@@ -145,8 +145,7 @@ module mac_float #(
 
   always_comb begin
     product_sign = unpacked_a.sign ^ unpacked_b.sign;
-    product_exp = $signed({1'b0, unpacked_a.exp}) + $signed({1'b0, unpacked_b.exp}) -
-        (EXP_W'(BIAS));
+    product_exp  = $signed({1'b0, unpacked_a.exp}) + $signed({1'b0, unpacked_b.exp}) - BIAS;
 
     foreach (partial_products[i]) begin
       logic [MANTISSA_W-1:0] partial_product;
@@ -166,8 +165,7 @@ module mac_float #(
       .c_upper_slice_o (c_upper_slice),
       .csa_c_o         (csa_c),
       .c_lower_sticky_o(sticky_c),
-      .c_dominates_o   (c_dominates),
-      .c_round_prod_o  (c_round_prod)
+      .c_dominates_o   (c_dominates)
   );
 
   always_comb begin
