@@ -90,6 +90,6 @@ module align_addend #(
       c_lower_sticky_o = |c_shifted_struct.rounding_c;
     end
   end
-  assign c_round_prod_o = (c_shift_amount == C_SHIFT_MAX + 1) && c_shift_unfl;
+  assign c_round_prod_o = (c_shift_amount == C_SHIFT_MAX + 1) && !c_shift_unfl && !subtract_c;
   assign c_dominates_o  = c_shift_ovfl;
 endmodule
