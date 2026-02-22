@@ -276,7 +276,8 @@ module mac_float #(
       end else if (c_dominates) begin
         float_z = float_c;
       end else if (sum_rounded_exp_unfl) begin
-        float_z.exp = '0;
+        float_z.exp  = '0;
+        float_z.frac = sum_frac_rounded;
       end
     end
   end
