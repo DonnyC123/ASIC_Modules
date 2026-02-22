@@ -198,8 +198,9 @@ module tb_mac_float;
       $error("[%s] FAIL: A=%f B=%f C=%f | DUT=%f (0x%h) REF=%f (0x%h)", name, real_a, real_b,
              real_c, real_z_dut, z, real_z_ref, expected_bits);
       errors++;
+      $stop();
     end else begin
-      $display("[%s] PASS: %f", name, real_z_dut);
+      //$display("[%s] PASS: %f", name, real_z_dut);
     end
   endtask
 
