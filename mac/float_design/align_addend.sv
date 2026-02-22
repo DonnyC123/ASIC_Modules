@@ -57,7 +57,7 @@ module align_addend #(
     c_shift_unfl = &c_shift_amount.ovfl;
     c_shift_ovfl = (c_shift_amount > C_SHIFT_MAX) && !c_shift_unfl;
 
-    subtract_c = (product_sign_i ^ unpacked_c_i.sign) && !c_shift_unfl;
+    subtract_c = (product_sign_i ^ unpacked_c_i.sign);
     c_wide_prep = C_SHIFT_RAW_W'(unpacked_c_i.mantissa);
 
     if (subtract_c) begin
