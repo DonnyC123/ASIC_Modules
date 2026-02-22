@@ -144,24 +144,21 @@ module mac_float #(
       .nan_o     (sum_nan)
   );
 
-  function automatic logic [3:0] count_leading_zeros(logic [FRAC_W-1:0] frac);
-    logic [3:0] lz = '0;
-    for (int i = FRAC_W - 1; i >= 0; i--) begin
-      if (frac[i]) break;
-      lz++;
-    end
-    return lz;
-  endfunction
-
   logic signed [SIGNED_EXP_W-1:0] true_exp_a;
   logic signed [SIGNED_EXP_W-1:0] true_exp_b;
   logic        [  MANTISSA_W-1:0] norm_mant_a;
   logic        [  MANTISSA_W-1:0] norm_mant_b;
+  logic        [             3:0] lz_a;
+  logic        [             3:0] lz_b;
 
   always_comb begin
+    // Default assignments to prevent latches
+    lz_a = '0;
+    lz_b = '0;
+
     // Pre-normalize A
     if (float_a.exp == '0 && float_a.frac != '0) begin
-      logic [3:0] lz_a = count_leading_zeros(float_a.frac);
+      lz_a        = count_leading_zeros(float_a.frac);
       // Denormals have a mathematical exponent of 1. We subtract lz_a to get the true exponent.
       true_exp_a  = $signed(SIGNED_EXP_W'(1)) - $signed({1'b0, lz_a});
       // Shift left to place the first '1' at the implicit bit (bit 10), pad with 0 at LSB
@@ -173,7 +170,7 @@ module mac_float #(
 
     // Pre-normalize B
     if (float_b.exp == '0 && float_b.frac != '0) begin
-      logic [3:0] lz_b = count_leading_zeros(float_b.frac);
+      lz_b        = count_leading_zeros(float_b.frac);
       true_exp_b  = $signed(SIGNED_EXP_W'(1)) - $signed({1'b0, lz_b});
       norm_mant_b = {float_b.frac << lz_b, 1'b0};
     end else begin
@@ -190,6 +187,7 @@ module mac_float #(
       partial_products[i] = {{(MANTISSA_W + 1) {1'b0}}, partial_product} << i;
     end
   end
+
 
   align_addend #(
       .EXP_W (EXP_W),
