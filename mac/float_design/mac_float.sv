@@ -231,7 +231,8 @@ module mac_float #(
         float_z.sign = sum_float_flags.sign;
       end
     end else if (sum_rounded_exp_unfl) begin
-      float_z.exp = '0;
+      float_z.exp  = '0;
+      float_z.frac = sum_frac_rounded;
     end
   end
 
