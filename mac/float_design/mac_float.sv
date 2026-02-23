@@ -154,6 +154,15 @@ module mac_float #(
   logic        [             3:0] lz_a;
   logic        [             3:0] lz_b;
 
+  function automatic logic [3:0] count_leading_zeros(logic [FRAC_W-1:0] frac);
+    logic [3:0] lz = '0;
+    for (int i = FRAC_W - 1; i >= 0; i--) begin
+      if (frac[i]) break;
+      lz++;
+    end
+    return lz;
+  endfunction
+
   always_comb begin
     lz_a = '0;
     lz_b = '0;
