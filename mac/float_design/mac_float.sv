@@ -146,7 +146,7 @@ module mac_float #(
 
   always_comb begin
     unsigned_mantissa_sum = mantissa_sum_raw_q[FULL_SUM_W-1:0];
-
+    sum_signed            = product_sign_2q;
     mantissa_sum_raw_neg  = $unsigned(-$signed(mantissa_sum_raw_q));
     if (mantissa_sum_raw_q[FULL_SUM_CARRY_W-1]) begin
       unsigned_mantissa_sum = mantissa_sum_raw_neg[FULL_SUM_W-1:0];
