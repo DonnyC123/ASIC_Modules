@@ -187,16 +187,16 @@ module mac_float #(
   always_comb begin
     float_z = float_sum_rounded_q;
 
-    if (sum_float_flags.nan) begin
+    if (sum_float_flags_3q.nan) begin
       float_z.exp  = '1;
       float_z.frac = '1;
-    end else if (sum_rounded_exp_unfl) begin
+    end else if (sum_rounded_exp_unfl_q) begin
       float_z.exp = '0;
-    end else if (sum_float_flags.inf || sum_rounded_exp_ovfl || (float_sum_rounded_q.exp == '1)) begin
+    end else if (sum_float_flags_3q.inf || sum_rounded_exp_ovfl || (float_sum_rounded_q.exp == '1)) begin
       float_z.exp  = '1;
       float_z.frac = '0;
-      if (sum_float_flags.inf) begin
-        float_z.sign = sum_float_flags.sign;
+      if (sum_float_flags_3q.inf) begin
+        float_z.sign = sum_float_flags_3q.sign;
       end
     end
     z = float_z;
