@@ -222,7 +222,7 @@ module mac_float #(
     if (sum_float_flags.nan) begin
       float_z.exp  = '1;
       float_z.frac = '1;
-    end 
+    end
     else if (sum_float_flags.inf || sum_rounded_exp_ovfl || (sum_rounded_exp[EXP_W-1:0] == '1)) begin
       float_z.exp  = '1;
       float_z.frac = '0;
