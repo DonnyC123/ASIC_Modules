@@ -22,7 +22,7 @@ module align_addend #(
     output logic            [PRODUCT_MANTISSA_W-1:0] csa_c_o,
     output logic                                     c_lower_sticky_o,
     output logic                                     c_dominates_o,
-    output logic                                     cancel_round_even_o
+    output logic                                     ignore_round_even_o
 );
 
   localparam C_SHIFT_RAW_W    = MANTISSA_W + PRODUCT_MANTISSA_W + UPPER_SLICE_W;
@@ -84,5 +84,5 @@ module align_addend #(
     end
   end
   assign c_dominates_o       = c_shift_ovfl;
-  assign cancel_round_even_o = c_shift_unfl && subtract_c && unpacked_c_i.mantissa != 0;
+  assign ignore_round_even_o = c_shift_unfl && subtract_c && unpacked_c_i.mantissa != 0;
 endmodule

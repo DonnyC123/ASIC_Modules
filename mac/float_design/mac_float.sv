@@ -8,10 +8,8 @@ module mac_float #(
     input  logic [DATA_W-1:0] c,
     output logic [DATA_W-1:0] z
 );
-  localparam CARRY_W = 1;
-  localparam SIGN_W  = 1;
+  import mac_float_pkg::*;
 
-  localparam MANTISSA_INT_W       = 1;
   localparam MANTISSA_W           = FRAC_W + MANTISSA_INT_W;
   localparam BIAS                 = (1 << (EXP_W - 1)) - 1;
   localparam NUM_PARTIAL_PRODUCTS = MANTISSA_W;
@@ -44,176 +42,91 @@ module mac_float #(
     logic [FRAC_W-1:0] frac;
   } float_t;
 
-  typedef struct packed {
-    logic                  sign;
-    logic [EXP_W-1:0]      exp;
-    logic [MANTISSA_W-1:0] mantissa;
-  } unpacked_float_t;
+  float_t                                    float_a;
+  float_t                                    float_b;
+  float_t                                    float_c;
+  float_t                                    float_z;
 
-  float_t                                   float_a;
-  float_t                                   float_b;
-  float_t                                   float_c;
-  float_t                                   float_z;
+  sum_float_flags_t                          sum_float_flags;
+  logic             [        MANTISSA_W-1:0] norm_mant_a;
+  logic             [        MANTISSA_W-1:0] norm_mant_b;
 
-  unpacked_float_t                          unpacked_a;
-  unpacked_float_t                          unpacked_b;
-  unpacked_float_t                          unpacked_c;
+  logic signed      [      SIGNED_EXP_W-1:0] product_exp;
+  logic                                      product_sign;
+  logic             [         LOW_SUM_W-1:0] partial_products        [NUM_PARTIAL_PRODUCTS];
 
-  logic signed     [      SIGNED_EXP_W-1:0] product_exp;
+  logic             [PRODUCT_MANTISSA_W-1:0] csa_c;
+  logic             [         LOW_SUM_W-1:0] csa_summands            [  NUM_WALLACE_INPUTS];
+  logic             [         LOW_SUM_W-1:0] csa_tree_sum;
+  logic             [         LOW_SUM_W-1:0] csa_tree_carry;
+  logic             [  PARTIAL_SUM_HIGH_W:0] upper_sum_temp;
+  logic             [PARTIAL_SUM_HIGH_W-1:0] c_upper_slice;
+  logic             [PARTIAL_SUM_HIGH_W-1:0] mantissa_sum_upper;
+  logic             [ PARTIAL_SUM_LOW_W-1:0] mantissa_sum_lower;
+  logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw;
+  logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_neg;
 
-  logic                                     product_sign;
-  logic            [         LOW_SUM_W-1:0] partial_products        [NUM_PARTIAL_PRODUCTS];
-  logic            [PRODUCT_MANTISSA_W-1:0] csa_c;
-  logic                                     c_dominates;
+  logic             [        FULL_SUM_W-1:0] unsigned_mantissa_sum;
+  logic             [        FULL_SUM_W-1:0] normalized_mantissa;
 
-  logic            [         LOW_SUM_W-1:0] csa_summands            [  NUM_WALLACE_INPUTS];
-  logic            [         LOW_SUM_W-1:0] csa_tree_sum;
-  logic            [         LOW_SUM_W-1:0] csa_tree_carry;
-  logic            [  PARTIAL_SUM_HIGH_W:0] upper_sum_temp;
-  logic            [PARTIAL_SUM_HIGH_W-1:0] c_upper_slice;
-  logic            [PARTIAL_SUM_HIGH_W-1:0] mantissa_sum_upper;
-  logic            [ PARTIAL_SUM_LOW_W-1:0] mantissa_sum_lower;
-  logic            [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw;
-  logic            [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_neg;
+  logic             [            FRAC_W-1:0] sum_frac_raw;
+  logic             [        MANTISSA_W-1:0] sum_frac_carry;
+  logic             [            FRAC_W-1:0] sum_frac_rounded;
 
-  logic            [        FULL_SUM_W-1:0] unsigned_mantissa_sum;
-  logic            [        FULL_SUM_W-1:0] normalized_mantissa;
+  logic             [       LZC_COUNT_W-1:0] mantissa_sum_lz;
+  logic             [       LZC_COUNT_W-1:0] mantissa_sum_shift;
+  logic             [  LZC_COUNT_OVFL_W-1:0] mantissa_sum_shift_ovfl;
 
-  logic            [            FRAC_W-1:0] sum_frac_raw;
-  logic            [        MANTISSA_W-1:0] sum_frac_carry;
-  logic            [            FRAC_W-1:0] sum_frac_rounded;
+  logic signed      [      SIGNED_EXP_W-1:0] sum_exp;
+  logic                                      sum_signed;
+  logic                                      sum_rounded_signed;
+  logic                                      sum_exp_ovfl;
+  logic                                      sum_exp_unfl;
 
-  logic            [       LZC_COUNT_W-1:0] mantissa_sum_lz;
-  logic            [       LZC_COUNT_W-1:0] mantissa_sum_shift;
-  logic            [  LZC_COUNT_OVFL_W-1:0] mantissa_sum_shift_ovfl;
+  logic signed      [      SIGNED_EXP_W-1:0] sum_rounded_exp;
+  logic                                      sum_rounded_exp_ovfl;
+  logic                                      sum_rounded_exp_unfl;
 
-  logic signed     [      SIGNED_EXP_W-1:0] sum_exp;
-  logic                                     sum_signed;
-  logic                                     sum_rounded_signed;
-  logic                                     sum_exp_ovfl;
-  logic                                     sum_exp_unfl;
+  logic                                      sticky_sum;
+  logic                                      guard;
+  logic                                      round_mantissa;
+  logic                                      sum_zero;
 
-  logic signed     [      SIGNED_EXP_W-1:0] sum_rounded_exp;
-  logic                                     sum_rounded_exp_ovfl;
-  logic                                     sum_rounded_exp_unfl;
-
-  logic                                     sum_inf;
-  logic                                     sum_inf_sign;
-  logic                                     sum_nan;
-  logic                                     sticky_c;
-  logic                                     sticky_sum;
-  logic                                     guard;
-  logic                                     round_mantissa;
-  logic                                     sum_zero;
-  logic                                     c_round_prod;
-  logic                                     cancel_round_even;
-  logic                                     product_zero;
-
-
-  function automatic unpacked_float_t unpack_float(input float_t float_i);
-    unpacked_float_t unpacked_o;
-
-    unpacked_o.sign     = float_i.sign;
-    unpacked_o.exp      = float_i.exp;
-    unpacked_o.mantissa = {1'b1, float_i.frac};
-
-    if (float_i.exp == '0) begin
-      unpacked_o.exp[0]                 = 1'b1;
-      unpacked_o.mantissa[MANTISSA_W-1] = 1'b0;
-    end
-
-    return unpacked_o;
-  endfunction
 
   always_comb begin
-    float_a    = float_t'(a);
-    float_b    = float_t'(b);
-    float_c    = float_t'(c);
-
-    unpacked_a = unpack_float(float_a);
-    unpacked_b = unpack_float(float_b);
-    unpacked_c = unpack_float(float_c);
+    float_a = float_t'(a);
+    float_b = float_t'(b);
+    float_c = float_t'(c);
   end
 
-  special_float_handler #(
-      .float_t(float_t)
-  ) special_float_handler_inst (
-      .float_a_i     (float_a),
-      .float_b_i     (float_b),
-      .float_c_i     (float_c),
-      .product_zero_o(product_zero),
-      .inf_o         (sum_inf),
-      .inf_sign_o    (sum_inf_sign),
-      .nan_o         (sum_nan)
+
+  mac_float_decode #(
+      .float_t           (float_t),
+      .SIGNED_EXP_W      (SIGNED_EXP_W),
+      .MANTISSA_W        (MANTISSA_W),
+      .PARTIAL_SUM_HIGH_W(PARTIAL_SUM_HIGH_W),
+      .PRODUCT_MANTISSA_W(PRODUCT_MANTISSA_W)
+  ) mac_float_decode_inst (
+      .float_a_i        (float_a),
+      .float_b_i        (float_b),
+      .float_c_i        (float_c),
+      .sum_float_flags_o(sum_float_flags),
+      .product_sign_o   (product_sign),
+      .product_exp_o    (product_exp),
+      .c_upper_slice_o  (c_upper_slice),
+      .csa_c_o          (csa_c),
+      .norm_mant_a      (norm_mant_a),
+      .norm_mant_b      (norm_mant_b)
+
   );
 
-  function automatic logic [3:0] count_leading_zeros(logic [FRAC_W-1:0] frac);
-    logic [3:0] lz = '0;
-    for (int i = FRAC_W - 1; i >= 0; i--) begin
-      if (frac[i]) break;
-      lz++;
-    end
-    return lz;
-  endfunction
-
-  logic signed [SIGNED_EXP_W-1:0] true_exp_a;
-  logic signed [SIGNED_EXP_W-1:0] true_exp_b;
-  logic        [  MANTISSA_W-1:0] norm_mant_a;
-  logic        [  MANTISSA_W-1:0] norm_mant_b;
-  logic        [             3:0] lz_a;
-  logic        [             3:0] lz_b;
-
   always_comb begin
-    lz_a = '0;
-    lz_b = '0;
-
-    if (float_a.exp == '0 && float_a.frac != '0) begin
-      lz_a        = count_leading_zeros(float_a.frac);
-      // Denormals have a mathematical exponent of 1. We subtract lz_a to get the true exponent.
-      true_exp_a  = -$signed({1'b0, lz_a});
-      // Shift left to place the first '1' at the implicit bit (bit 10), pad with 0 at LSB
-      norm_mant_a = {float_a.frac << lz_a, 1'b0};
-    end else begin
-      true_exp_a  = float_a.exp == '0 ? '0 : $signed({1'b0, unpacked_a.exp});
-      norm_mant_a = unpacked_a.mantissa;
-    end
-
-    // Pre-normalize B
-    if (float_b.exp == '0 && float_b.frac != '0) begin
-      lz_b        = count_leading_zeros(float_b.frac);
-      true_exp_b  = -$signed({1'b0, lz_b});
-      norm_mant_b = {float_b.frac << lz_b, 1'b0};
-    end else begin
-      true_exp_b  = float_b.exp == '0 ? '0 : $signed({1'b0, unpacked_b.exp});
-      norm_mant_b = unpacked_b.mantissa;
-    end
-
-    product_sign = unpacked_a.sign ^ unpacked_b.sign;
-    product_exp  = true_exp_a + true_exp_b - $signed(SIGNED_EXP_W'(BIAS));
-
     foreach (partial_products[i]) begin
       logic [MANTISSA_W-1:0] partial_product;
       partial_product     = norm_mant_a & {MANTISSA_W{norm_mant_b[i]}};
       partial_products[i] = {{(MANTISSA_W + 1) {1'b0}}, partial_product} << i;
     end
-  end
 
-
-  align_addend #(
-      .EXP_W (EXP_W),
-      .FRAC_W(FRAC_W)
-  ) align_addend_inst (
-      .unpacked_c_i       (unpacked_c),
-      .product_exp_i      (product_exp),
-      .product_sign_i     (product_sign),
-      .c_upper_slice_o    (c_upper_slice),
-      .csa_c_o            (csa_c),
-      .c_lower_sticky_o   (sticky_c),
-      .c_dominates_o      (c_dominates),
-      .cancel_round_even_o(cancel_round_even)
-  );
-
-  always_comb begin
     for (int i = 0; i < NUM_PARTIAL_PRODUCTS; i++) begin
       csa_summands[i] = partial_products[i];
     end
@@ -243,7 +156,7 @@ module mac_float #(
     unsigned_mantissa_sum = mantissa_sum_raw[FULL_SUM_W-1:0];
 
     mantissa_sum_raw_neg = $unsigned(-$signed(mantissa_sum_raw));
-    if (mantissa_sum_raw[FULL_SUM_CARRY_W-1] || c_round_prod) begin
+    if (mantissa_sum_raw[FULL_SUM_CARRY_W-1]) begin
       unsigned_mantissa_sum = mantissa_sum_raw_neg[FULL_SUM_W-1:0];
       sum_signed            = ~product_sign;
     end
@@ -281,7 +194,7 @@ module mac_float #(
     sticky_sum          = |normalized_mantissa[GUARD_IDX-1:0];
     guard               = normalized_mantissa[GUARD_IDX];
 
-    if (c_dominates || product_zero) begin
+    if (sum_float_flags.c_dominates) begin
       sum_frac_raw       = float_c.frac;
       sticky_sum         = '0;
       guard              = '0;
@@ -293,7 +206,7 @@ module mac_float #(
       guard        = normalized_mantissa[GUARD_IDX+1];
     end
 
-    round_mantissa = guard && (sticky_sum || sticky_c || (sum_frac_raw[0] && !cancel_round_even));
+    round_mantissa = guard && (sticky_sum || sum_float_flags.sticky_c || (sum_frac_raw[0] && !sum_float_flags.ignore_round_even));
     sum_frac_carry = sum_frac_raw + FRAC_W'(round_mantissa);
 
     sum_rounded_exp = (sum_frac_carry[MANTISSA_W-1] && !sum_exp_ovfl) ? sum_exp + 1 : sum_exp;
@@ -311,11 +224,11 @@ module mac_float #(
       float_z.frac = '0;
     end
 
-    if (sum_nan) begin  // Wanted to add unique0 here
+    if (sum_float_flags.nan) begin  // Wanted to add unique0 here
       float_z.exp  = '1;
       float_z.frac = '1;
-    end else if (sum_inf) begin
-      float_z.sign = sum_inf_sign;
+    end else if (sum_float_flags.inf) begin
+      float_z.sign = sum_float_flags.sign;
       float_z.exp  = '1;
       float_z.frac = '0;
     end else begin
@@ -323,7 +236,7 @@ module mac_float #(
         float_z.exp  = '1;
         float_z.frac = '0;
       end else
-      if (c_dominates) begin
+      if (sum_float_flags.c_dominates) begin
       end else if (sum_zero) begin
         float_z.exp  = '0;
         float_z.frac = '0;
