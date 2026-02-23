@@ -34,7 +34,7 @@ module tb_mac_float;
   localparam DOUBLE_SIGN_W   = 1;
   localparam DOUBLE_W        = DOUBLE_EXP_W + DOUBLE_FRAC_W + DOUBLE_SIGN_W;
   localparam DOUBLE_BIAS     = (1 << (DOUBLE_EXP_W - 1)) - 1;
-  localparam PIPELINE_STAGES = 1;
+  localparam PIPELINE_STAGES = 4;
 
   typedef struct packed {
     logic sign;
@@ -219,7 +219,7 @@ module tb_mac_float;
     check_result("Simple Add");
 
     $display("--- Random Stress Test ---");
-    for (i = 0; i < 1000000; i++) begin
+    for (i = 0; i < 100000000; i++) begin
       void'(std::randomize(a, b, c));
 
       if (i % 10 == 0) c = 0;

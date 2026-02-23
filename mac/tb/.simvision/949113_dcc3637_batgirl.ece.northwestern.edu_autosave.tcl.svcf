@@ -1,0 +1,295 @@
+
+#
+# Preferences
+#
+preferences set toolbar-Standard-WatchWindow {
+  usual
+  shown 0
+}
+preferences set plugin-enable-svdatabrowser-new 1
+preferences set toolbar-SimControl-WaveWindow {
+  usual
+  position -anchor e
+}
+preferences set cursorctl-dont-show-sync-warning 1
+preferences set toolbar-Windows-WatchWindow {
+  usual
+  shown 0
+}
+preferences set toolbar-txe_waveform_toggle-WaveWindow {
+  usual
+  position -pos 1
+}
+preferences set plugin-enable-groupscope 0
+preferences set plugin-enable-interleaveandcompare 0
+preferences set plugin-enable-waveformfrequencyplot 0
+preferences set toolbar-SimControl-WatchWindow {
+  usual
+  shown 0
+}
+preferences set toolbar-Windows-WaveWindow {
+  usual
+  position -pos 2
+}
+preferences set savedlg-simulator ppe
+preferences set toolbar-TimeSearch-WatchWindow {
+  usual
+  shown 0
+}
+
+#
+# Mnemonic Maps
+#
+mmap new  -reuse -name {Boolean as Logic} -radix %b -contents {{%c=FALSE -edgepriority 1 -shape low}
+{%c=TRUE -edgepriority 1 -shape high}}
+mmap new  -reuse -name {Example Map} -radix %x -contents {{%b=11???? -bgcolor orange -label REG:%x -linecolor yellow -shape bus}
+{%x=1F -bgcolor red -label ERROR -linecolor white -shape EVENT}
+{%x=2C -bgcolor red -label ERROR -linecolor white -shape EVENT}
+{%x=* -label %x -linecolor gray -shape bus}}
+
+#
+# Design Browser windows
+#
+if {[catch {window new WatchList -name "Design Browser 1" -geometry 730x500+261+33}] != ""} {
+    window geometry "Design Browser 1" 730x500+261+33
+}
+window target "Design Browser 1" on
+browser using {Design Browser 1}
+browser set -scope  simulator::tb_mac_float.dut 
+browser set \
+    -signalsort name
+browser yview see  simulator::tb_mac_float.dut 
+browser timecontrol set -lock 0
+
+#
+# Waveform windows
+#
+if {[catch {window new WaveWindow -name "Waveform 1" -geometry 1010x600+500+272}] != ""} {
+    window geometry "Waveform 1" 1010x600+500+272
+}
+window target "Waveform 1" on
+waveform using {Waveform 1}
+waveform sidebar visibility partial
+waveform set \
+    -primarycursor TimeA \
+    -signalnames name \
+    -signalwidth 175 \
+    -units ps \
+    -valuewidth 75
+waveform baseline set -time 0
+
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.a[15:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.b[15:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.c[15:0]}
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.double_fields_t
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.errors
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.float_t
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.i
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.real_a
+	} ]
+waveform format $id -trace digital
+waveform axis range $id -for default -min -1 -max 1 -scale linear
+set id [waveform add -signals  {
+	simulator::tb_mac_float.real_b
+	} ]
+waveform format $id -trace digital
+waveform axis range $id -for default -min -1 -max 1 -scale linear
+set id [waveform add -signals  {
+	simulator::tb_mac_float.real_c
+	} ]
+waveform format $id -trace digital
+waveform axis range $id -for default -min -1 -max 1 -scale linear
+set id [waveform add -signals  {
+	simulator::tb_mac_float.real_z_dut
+	} ]
+waveform format $id -trace digital
+waveform axis range $id -for default -min -1 -max 1 -scale linear
+set id [waveform add -signals  {
+	simulator::tb_mac_float.real_z_ref
+	} ]
+waveform format $id -trace digital
+waveform axis range $id -for default -min -1 -max 1 -scale linear
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.z[15:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.a[15:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.b[15:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.c[15:0]}
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.c_dominates
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.c_upper_slice[11:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.csa_c[21:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.csa_summands[0:11]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.csa_tree_carry[22:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.csa_tree_sum[22:0]}
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.ext_exp_t
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.float_a
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.float_b
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.float_c
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.float_t
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.float_z
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.guard
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.mantissa_sum_lower[23:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.mantissa_sum_lz[5:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.mantissa_sum_raw[34:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.mantissa_sum_raw_neg[34:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.mantissa_sum_shift[5:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.mantissa_sum_upper[11:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.normalized_mantissa[33:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.partial_products[0:10]}
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.product_exp
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.product_sign
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.round_mantissa
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.sticky_c
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.sticky_sum
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.sum_exp
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.sum_exp_ovfl
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.sum_exp_t
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.sum_exp_unfl
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.sum_frac_carry[10:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.sum_frac_raw[9:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.sum_frac_rounded[9:0]}
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.sum_inf
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.sum_inf_sign
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.sum_nan
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.sum_rounded_exp
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.sum_rounded_exp_ovfl
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.sum_rounded_exp_unfl
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.sum_signed
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.unpacked_a
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.unpacked_b
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.unpacked_c
+	} ]
+set id [waveform add -signals  {
+	simulator::tb_mac_float.dut.unpacked_float_t
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.unsigned_mantissa_sum[33:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.upper_sum_temp[12:0]}
+	} ]
+set id [waveform add -signals  {
+	{simulator::tb_mac_float.dut.z[15:0]}
+	} ]
+
+waveform xview limits 100018000ps 100020000ps
+
+#
+# Waveform Window Links
+#
+
+#
+# Console windows
+#
+console set -windowname Console
+window geometry Console 730x250+577+110
+
+#
+# Layout selection
+#

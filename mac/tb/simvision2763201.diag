@@ -1,0 +1,92 @@
+*** Message Type: info ***
+When: Tue Feb 17 11:18:36 PM CST 2026
+SimVision started.
+Version: TOOL:  simvision(64)   21.09-s001
+User: dcc3637
+Host: batgirl.ece.northwestern.edu
+Platform: Linux/x86_64/4.18.0-553.89.1.el8_10.x86_64
+Started: Tue Feb 17 11:18:36 PM CST 2026
+Command: /vol/cadence2018/XCELIUM2109/tools.lnx86/simvision/bin/64bit/simvision.exe -connect dc:batgirl.ece.northwestern.edu:42467 -64BIT -nocopyright
+Work Directory: /home/dcc3637/Floating_Point_Modules/mac/tb
+ 
+*** Message Type: info ***
+When: Tue Feb 17 11:18:36 PM CST 2026
+Create browser window: "Design Browser 1"
+ 
+*** Message Type: info ***
+When: Tue Feb 17 11:18:37 PM CST 2026
+Create console window: "Console"
+ 
+*** Message Type: info ***
+When: Tue Feb 17 11:18:38 PM CST 2026
+Connect to Simulator
+      Design: worklib.tb_mac_float:sv
+   Languages: verilog
+   Simulator: XM-Sim
+     Version: TOOL:    xmsim(64)       21.09-s001
+        User: dcc3637
+        Host: batgirl.ece.northwestern.edu
+Time Started: Tue Feb 17 11:18:34 PM CST 2026
+  Process ID: 2763074
+   Directory: /home/dcc3637/Floating_Point_Modules/mac/tb
+     Command: xrun -64bit -sv -f run.f -timescale 1ns/1ps -access +rwc -top tb_mac_float -gui
+
+ 
+*** Message Type: info ***
+When: Tue Feb 17 11:18:38 PM CST 2026
+Create utility window: "Properties"
+ 
+*** Message Type: info ***
+When: Tue Feb 17 11:19:22 PM CST 2026
+Create waveform window: "Waveform 1"
+ 
+*** Message Type: info ***
+When: Tue Feb 17 11:19:53 PM CST 2026
+Delete browser window: "Design Browser 1"
+ 
+*** Message Type: info ***
+When: Tue Feb 17 11:20:54 PM CST 2026
+Exit XM-Sim: user
+      Design: worklib.tb_mac_float:sv
+   Languages: verilog
+   Simulator: XM-Sim
+     Version: TOOL:    xmsim(64)       21.09-s001
+        User: dcc3637
+        Host: batgirl.ece.northwestern.edu
+Time Started: Tue Feb 17 11:18:34 PM CST 2026
+  Process ID: 2763074
+   Directory: /home/dcc3637/Floating_Point_Modules/mac/tb
+     Command: xrun -64bit -sv -f run.f -timescale 1ns/1ps -access +rwc -top tb_mac_float -gui
+
+ 
+*** Message Type: error ***
+When: Tue Feb 17 11:20:54 PM CST 2026
+XM-Sim Crashed:
+      Design: worklib.tb_mac_float:sv
+   Languages: verilog
+   Simulator: XM-Sim
+     Version: TOOL:    xmsim(64)       21.09-s001
+        User: dcc3637
+        Host: batgirl.ece.northwestern.edu
+Time Started: Tue Feb 17 11:18:34 PM CST 2026
+  Process ID: 2763074
+   Directory: /home/dcc3637/Floating_Point_Modules/mac/tb
+     Command: xrun -64bit -sv -f run.f -timescale 1ns/1ps -access +rwc -top tb_mac_float -gui
+      Design: worklib.tb_mac_float:sv
+   Languages: verilog
+   Simulator: XM-Sim
+     Version: TOOL:    xmsim(64)       21.09-s001
+        User: dcc3637
+        Host: batgirl.ece.northwestern.edu
+Time Started: Tue Feb 17 11:18:34 PM CST 2026
+  Process ID: 2763074
+   Directory: /home/dcc3637/Floating_Point_Modules/mac/tb
+     Command: xrun -64bit -sv -f run.f -timescale 1ns/1ps -access +rwc -top tb_mac_float -gui
+
+Outstanding STRAP Requests:
+        strap::report enable out
+ 
+*** Message Type: info ***
+When: Tue Feb 17 11:21:07 PM CST 2026
+SimVision Exit.
+ 

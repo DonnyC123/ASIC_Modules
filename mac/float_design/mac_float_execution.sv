@@ -39,7 +39,7 @@ module mac_float_execution
     for (int i = 0; i < NUM_PARTIAL_PRODUCTS; i++) begin
       csa_summands[i] = partial_products[i];
     end
-    csa_summands[NUM_WALLACE_INPUTS-1] = {1'b0, csa_c};
+    csa_summands[NUM_WALLACE_INPUTS-1] = {1'b0, csa_c_i};
   end
 
   wallace_tree_recursive #(
