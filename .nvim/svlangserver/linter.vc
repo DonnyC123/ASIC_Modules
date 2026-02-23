@@ -1,3 +1,5 @@
+-v /home/donald/FloatingPointModules/mac/float_design/mac_float_pkg.sv
+-v /home/donald/FloatingPointModules/mac/float_design/mac_float_pkg2.sv
 +incdir+/home/donald/FloatingPointModules/mac/float_design
 +incdir+/home/donald/FloatingPointModules/mac/tb
 +incdir+/home/donald/FloatingPointModules/mac/float_design

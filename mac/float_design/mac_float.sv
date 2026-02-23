@@ -93,13 +93,11 @@ module mac_float #(
   logic                                      round_mantissa;
   logic                                      sum_zero;
 
-
   always_comb begin
     float_a = float_t'(a);
     float_b = float_t'(b);
     float_c = float_t'(c);
   end
-
 
   mac_float_decode #(
       .float_t           (float_t),
