@@ -3,7 +3,7 @@ module mac_float #(
     parameter  FRAC_W = 10,
     localparam DATA_W = FRAC_W + EXP_W + 1
 ) (
-    input  logic clk,
+    input  logic              clk,
     input  logic [DATA_W-1:0] a,
     input  logic [DATA_W-1:0] b,
     input  logic [DATA_W-1:0] c,
@@ -116,7 +116,6 @@ module mac_float #(
       .csa_c_o          (csa_c),
       .norm_mant_a      (norm_mant_a),
       .norm_mant_b      (norm_mant_b)
-
   );
 
   always_comb begin
@@ -182,7 +181,7 @@ module mac_float #(
                                         LZC_COUNT_OVFL_W'(MANTISSA_W - FRAC_W));
 
     if (sum_exp_unfl) begin
-      mantissa_sum_shift = mantissa_sum_shift_ovfl[LZC_COUNT_W-1:0];  // Check for underflow
+      mantissa_sum_shift = mantissa_sum_shift_ovfl[LZC_COUNT_W-1:0];
       sum_zero           = mantissa_sum_shift_ovfl[LZC_COUNT_OVFL_W-1];
     end else begin
       mantissa_sum_shift = mantissa_sum_lz;
@@ -234,11 +233,6 @@ module mac_float #(
       if (sum_rounded_exp_ovfl) begin
         float_z.exp  = '1;
         float_z.frac = '0;
-      end else
-      if (sum_float_flags.c_dominates) begin
-      end else if (sum_zero) begin
-        float_z.exp  = '0;
-        float_z.frac = '0;
       end else if (sum_rounded_exp_unfl) begin
         float_z.exp  = '0;
         float_z.frac = sum_frac_rounded;
@@ -246,7 +240,7 @@ module mac_float #(
     end
   end
   always_ff @(posedge clk) begin
-  z <= float_z;
+    z <= float_z;
   end
 endmodule
 
