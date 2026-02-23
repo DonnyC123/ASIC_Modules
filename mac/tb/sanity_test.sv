@@ -237,11 +237,11 @@ module tb_mac_float;
     check_result("Simple Add");
 
     $display("--- Random Stress Test ---");
-    for (i = 0; i < 10000; i++) begin
+    for (i = 0; i < 100000000; i++) begin
       void'(std::randomize(a, b, c));
 
       if (i % 10 == 0) c = 0;
-
+	if (i % 10000 == 0) $display("Test Case %0d", i);
       #10;
       check_result($sformatf("Rand #%0d", i));
     end

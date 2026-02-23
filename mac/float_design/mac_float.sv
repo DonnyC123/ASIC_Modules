@@ -3,6 +3,7 @@ module mac_float #(
     parameter  FRAC_W = 10,
     localparam DATA_W = FRAC_W + EXP_W + 1
 ) (
+    input  logic clk,
     input  logic [DATA_W-1:0] a,
     input  logic [DATA_W-1:0] b,
     input  logic [DATA_W-1:0] c,
@@ -246,7 +247,8 @@ module mac_float #(
       end
     end
   end
-
-  assign z = float_z;
+  always_ff @(posedge clk) begin
+  z <= float_z;
+  end
 endmodule
 

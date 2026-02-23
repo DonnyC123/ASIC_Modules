@@ -21,7 +21,7 @@ module mac_float_decode
 );
 
   localparam LZ_COUNTER_W         = $clog2(MANTISSA_W);
-  localparam EXP_W                = $bits(float_a_i.exp);
+  localparam EXP_W                = 5;
   localparam BIAS                 = (1 << (EXP_W - 1)) - 1;
  
   typedef struct packed {
@@ -130,14 +130,14 @@ module mac_float_decode
   end
 
   leading_zero_counter_top #(
-      .DATA_W($bits(float_a_i.frac))
+      .DATA_W(MANTISSA_W-1)
   ) leading_zero_counter_a_top_inst (
       .data_i              (float_a_i.frac),
       .leading_zero_count_o(lz_a)
   );
 
   leading_zero_counter_top #(
-      .DATA_W($bits(float_b_i.frac))
+      .DATA_W(MANTISSA_W-1)
   ) leading_zero_counter_b_top_inst (
       .data_i              (float_b_i.frac),
       .leading_zero_count_o(lz_b)
@@ -166,7 +166,7 @@ module mac_float_decode
 
     align_addend #(
       .EXP_W (EXP_W),
-      .FRAC_W($bits(float_a_i.frac)),
+      .FRAC_W(MANTISSA_W-1),
       .unpacked_float_t(unpacked_float_t)
   ) align_addend_inst (
       .unpacked_c_i       (unpacked_c),
