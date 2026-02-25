@@ -2,7 +2,7 @@ module mantissa_divider
   import divider_float_pkg::*;
 #(
     parameter  MANTISSA_W     = 11,
-    localparam QUOTIENT_RAW_W = OFFSET_BIT_W + MANTISSA_W + GUARD_W + ROUND_W
+    localparam QUOTIENT_RAW_W = OFFSET_BIT_W + MANTISSA_W + GUARD_W
 ) (
     input  logic                      clk,
     input  logic                      rst_n,

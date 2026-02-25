@@ -16,7 +16,7 @@ module divider_float #(
 
   localparam MANTISSA_W     = FRAC_W + 1;
   localparam SIGNED_EXP_W   = EXP_W + SIGN_W + 2 * CARRY_W;
-  localparam QUOTIENT_RAW_W = OFFSET_BIT_W + MANTISSA_W + GUARD_W + ROUND_W;
+  localparam QUOTIENT_RAW_W = OFFSET_BIT_W + MANTISSA_W + GUARD_W;
 
   typedef struct packed {
     logic sign;
@@ -62,9 +62,9 @@ module divider_float #(
   ) divider_float_decoder_inst (
       .float_a_i             (float_a),
       .float_b_i             (float_b),
-      .float_quotient_flags_o(float_quotient_flags_d),
       .norm_mant_a_o         (norm_mant_a),
       .norm_mant_b_o         (norm_mant_b),
+      .float_quotient_flags_o(float_quotient_flags_d),
       .quotient_exp_o        (quotient_exp_d)
   );
 

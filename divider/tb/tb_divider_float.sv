@@ -165,9 +165,10 @@ module tb_divider_float;
     expected      = (real_a / real_b);
     expected_bits = downscale_double(expected);
 
-    start         = 1;
+    start <= 1;
     @(posedge clk);
-    start = 0;
+    start <= 0;
+    @(posedge clk);
 
     wait (z_valid == 1'b1);
 
