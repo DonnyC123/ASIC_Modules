@@ -231,6 +231,11 @@ module tb_divider_float;
 
     check_result("Simple Add");
 
+    a = 16'hBBFF;
+    b = 16'h7400;
+
+    check_result("Past Error Case 1");
+
     $display("--- Random Stress Test ---");
     for (i = 0; i < 100000000; i++) begin
       void'(std::randomize(a, b));
