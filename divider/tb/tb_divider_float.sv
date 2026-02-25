@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module tb_mac_float;
+module tb_divider_float;
 
   parameter EXP_W    = 5;
   parameter FRAC_W   = 10;

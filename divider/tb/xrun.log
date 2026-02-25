@@ -1,0 +1,181 @@
+xrun(64): 21.09-s001: (c) Copyright 1995-2021 Cadence Design Systems, Inc.
+TOOL:	xrun(64)	21.09-s001: Started on Feb 24, 2026 at 23:17:10 CST
+xrun
+	-64bit
+	-sv
+	-f run.f
+		../../common/data_pipeline.sv
+		../../common/data_status_pipeline.sv
+		../../mac/float_design/leading_zero_counter.sv
+		../../mac/float_design/leading_zero_counter_top.sv
+		../float_design/divider_float_pkg.sv
+		../float_design/divider_float_decoder.sv
+		../float_design/mantissa_divider.sv
+		../float_design/quotient_rounder.sv
+		../float_design/divider_float.sv
+		../tb/tb_divider_float.sv
+	-timescale 1ns/1ps
+	-access +rwc
+	-top tb_divider_float
+	-gui
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xrun: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1/Lab1
+|
+xmsim: *W,DLCPTH (/home/dcc3637/cds.lib,2): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lab1' (cds.lib command ignored).
+DEFINE Lb1 /home/dcc3637/CE_391/Lab1/Lb1
+|
+xmsim: *W,DLCPTH (/home/dcc3637/cds.lib,4): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb1' (cds.lib command ignored).
+DEFINE Lb /home/dcc3637/CE_391/Lab1/Lb
+|
+xmsim: *W,DLCPTH (/home/dcc3637/cds.lib,5): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1/Lb' (cds.lib command ignored).
+DEFINE Lab1 /home/dcc3637/CE_391/Lab1
+|
+xmsim: *W,DLCPTH (/home/dcc3637/cds.lib,6): cds.lib Invalid path '/home/dcc3637/CE_391/Lab1' (cds.lib command ignored).
+SVSEED default: 1
+xmsim: *W,DSEM2009: This SystemVerilog design is simulated as per IEEE 1800-2009 SystemVerilog simulation semantics. Use -disable_sem2009 option for turning off SV 2009 simulation semantics.
+
+-------------------------------------
+Relinquished control to SimVision...
+xcelium> 
+xcelium> source /vol/cadence2018/XCELIUM2109/tools/xcelium/files/xmsimrc
+xcelium> database -open waves -into waves.shm -default
+Created default SHM database waves
+xcelium> probe -create -shm tb_divider_float.divider_float_inst.a tb_divider_float.divider_float_inst.b tb_divider_float.divider_float_inst.clk tb_divider_float.divider_float_inst.divider_done tb_divider_float.divider_float_inst.divider_done_q tb_divider_float.divider_float_inst.float_a tb_divider_float.divider_float_inst.float_b tb_divider_float.divider_float_inst.float_quotient tb_divider_float.divider_float_inst.float_quotient_flags_d tb_divider_float.divider_float_inst.float_quotient_flags_q tb_divider_float.divider_float_inst.float_z tb_divider_float.divider_float_inst.norm_mant_a tb_divider_float.divider_float_inst.norm_mant_a_q tb_divider_float.divider_float_inst.norm_mant_b tb_divider_float.divider_float_inst.norm_mant_b_q tb_divider_float.divider_float_inst.quotient_exp_d tb_divider_float.divider_float_inst.quotient_exp_q tb_divider_float.divider_float_inst.quotient_raw tb_divider_float.divider_float_inst.quotient_raw_q tb_divider_float.divider_float_inst.rst_n tb_divider_float.divider_float_inst.start_divider_q tb_divider_float.divider_float_inst.start_i tb_divider_float.divider_float_inst.sticky tb_divider_float.divider_float_inst.sticky_q tb_divider_float.divider_float_inst.z tb_divider_float.divider_float_inst.z_valid
+Created probe 1
+xcelium> run 1000
+xmsim: *W,NOCOND: Unique case violation:  Every case item expression was false.
+            File: ../float_design/mantissa_divider.sv, line = 91, pos = 14
+           Scope: tb_divider_float.divider_float_inst.mantissa_divider_inst
+            Time: 0 FS + 3
+
+xmsim: *W,NOCOND: Unique case violation:  Every case item expression was false.
+            File: ../float_design/mantissa_divider.sv, line = 91, pos = 14
+           Scope: tb_divider_float.divider_float_inst.mantissa_divider_inst
+            Time: 5 NS + 6
+
+=== STARTING PARAMETERIZED MAC TEST (Exp=5, Frac=10) ===
+Ran until 1 US + 0
+xcelium> probe -create -shm tb_divider_float.divider_float_inst.divider_float_decoder_inst.a_flags tb_divider_float.divider_float_inst.divider_float_decoder_inst.b_flags tb_divider_float.divider_float_inst.divider_float_decoder_inst.float_a_i tb_divider_float.divider_float_inst.divider_float_decoder_inst.float_b_i tb_divider_float.divider_float_inst.divider_float_decoder_inst.float_quotient_flags_o tb_divider_float.divider_float_inst.divider_float_decoder_inst.lz_a tb_divider_float.divider_float_inst.divider_float_decoder_inst.lz_b tb_divider_float.divider_float_inst.divider_float_decoder_inst.norm_mant_a_o tb_divider_float.divider_float_inst.divider_float_decoder_inst.norm_mant_b_o tb_divider_float.divider_float_inst.divider_float_decoder_inst.quotient_exp_o tb_divider_float.divider_float_inst.divider_float_decoder_inst.true_exp_a tb_divider_float.divider_float_inst.divider_float_decoder_inst.true_exp_b
+Created probe 2
+xcelium> reset
+SVSEED default: 1
+xmsim: *W,DSEM2009: This SystemVerilog design is simulated as per IEEE 1800-2009 SystemVerilog simulation semantics. Use -disable_sem2009 option for turning off SV 2009 simulation semantics.
+Loaded snapshot worklib.tb_divider_float:sv
+xcelium> run 1000
+xmsim: *W,NOCOND: Unique case violation:  Every case item expression was false.
+            File: ../float_design/mantissa_divider.sv, line = 91, pos = 14
+           Scope: tb_divider_float.divider_float_inst.mantissa_divider_inst
+            Time: 0 FS + 3
+
+xmsim: *W,NOCOND: Unique case violation:  Every case item expression was false.
+            File: ../float_design/mantissa_divider.sv, line = 91, pos = 14
+           Scope: tb_divider_float.divider_float_inst.mantissa_divider_inst
+            Time: 5 NS + 6
+
+=== STARTING PARAMETERIZED MAC TEST (Exp=5, Frac=10) ===
+Ran until 1 US + 0
+xcelium> probe -create -shm tb_divider_float.divider_float_inst.decode_to_divider_pipe.data_pipeline_inst.clk tb_divider_float.divider_float_inst.decode_to_divider_pipe.data_pipeline_inst.data_i tb_divider_float.divider_float_inst.decode_to_divider_pipe.data_pipeline_inst.data_o tb_divider_float.divider_float_inst.decode_to_divider_pipe.data_pipeline_inst.rst_n tb_divider_float.divider_float_inst.decode_to_divider_pipe.status_pipeline_inst.clk tb_divider_float.divider_float_inst.decode_to_divider_pipe.status_pipeline_inst.data_i tb_divider_float.divider_float_inst.decode_to_divider_pipe.status_pipeline_inst.data_o tb_divider_float.divider_float_inst.decode_to_divider_pipe.status_pipeline_inst.rst_n
+Created probe 3
+xcelium> reset
+SVSEED default: 1
+xmsim: *W,DSEM2009: This SystemVerilog design is simulated as per IEEE 1800-2009 SystemVerilog simulation semantics. Use -disable_sem2009 option for turning off SV 2009 simulation semantics.
+Loaded snapshot worklib.tb_divider_float:sv
+xcelium> run 1000
+xmsim: *W,NOCOND: Unique case violation:  Every case item expression was false.
+            File: ../float_design/mantissa_divider.sv, line = 91, pos = 14
+           Scope: tb_divider_float.divider_float_inst.mantissa_divider_inst
+            Time: 0 FS + 3
+
+xmsim: *W,NOCOND: Unique case violation:  Every case item expression was false.
+            File: ../float_design/mantissa_divider.sv, line = 91, pos = 14
+           Scope: tb_divider_float.divider_float_inst.mantissa_divider_inst
+            Time: 5 NS + 6
+
+=== STARTING PARAMETERIZED MAC TEST (Exp=5, Frac=10) ===
+Ran until 1 US + 0
+xcelium> ^C
+xcelium> exit
+TOOL:	xrun(64)	21.09-s001: Exiting on Feb 24, 2026 at 23:25:49 CST  (total: 00:08:39)
