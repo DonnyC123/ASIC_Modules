@@ -70,8 +70,33 @@ module quotient_rounder
     quotient_mantissa         = quotient_rounded;
 
     if (quotient_exp_rounded_unfl) begin
-      quotient_mantissa = quotient_rounded >> -quotient_exp_rounded;
+      logic [MANTISSA_W-1:0] shift_mask;
+      logic [MANTISSA_W-1:0] shifted_bits;
+      logic                  denorm_guard;
+      logic                  denorm_sticky;
+      logic                  denorm_round_up;
+      int                    shift_amt;
+
+      shift_amt         = 1 - quotient_exp_rounded;
+
+      quotient_mantissa = quotient_rounded >> shift_amt;
+
+      shift_mask        = (MANTISSA_W'(1) << shift_amt) - 1;
+
+      shifted_bits      = quotient_rounded & shift_mask;
+
+      if (shift_amt > 0) denorm_guard = quotient_rounded[shift_amt-1];
+      else denorm_guard = 1'b0;
+
+      denorm_sticky   = |(quotient_rounded & (shift_mask >> 1));
+
+      denorm_round_up = denorm_guard && (denorm_sticky || quotient_mantissa[0]);
+
+      if (denorm_round_up) begin
+        quotient_mantissa = quotient_mantissa + 1;
+      end
     end
+
 
   end
 
