@@ -61,7 +61,7 @@ module quotient_rounder
     quotient_exp_rounded_ovfl    = |quotient_exp_extended[SIGNED_EXP_W-2-:2];
     quotient_extended_normalized = quotient_extended;
 
-    if (quotient_exp_rounded_unfl || quotient_exp_rounded == '0) begin
+    if (quotient_exp_extended_unfl || quotient_exp_extended == '0) begin
       temp_shift_reg = {quotient_extended, {QUOTIENT_EXTENDED_W{1'b0}}}  >> (1 - quotient_exp_extended);
       quotient_extended_normalized = temp_shift_reg[2*QUOTIENT_EXTENDED_W-1-:QUOTIENT_EXTENDED_W];
       sticky = sticky || (|temp_shift_reg[QUOTIENT_EXTENDED_W-1:0]);
@@ -69,7 +69,7 @@ module quotient_rounder
 
     guard = quotient_extended_normalized[0];
 
-    quotient_unrounded = {1'b0, quotient_extended[QUOTIENT_EXTENDED_W-1:1]};
+    quotient_unrounded = {1'b0, quotient_extended_normalized[QUOTIENT_EXTENDED_W-1:1]};
 
     quotient_rounded_raw   = guard && (sticky || quotient_unrounded[0]) ? quotient_unrounded + 1 : quotient_unrounded;
 
@@ -108,4 +108,3 @@ module quotient_rounder
   end
 
 endmodule
-
