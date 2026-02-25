@@ -84,8 +84,8 @@ module mac_float_decode
   unpacked_float_t                unpacked_b;
   unpacked_float_t                unpacked_c;
 
-  logic signed  [signed_exp_w-1:0] true_exp_a;
-  logic signed  [signed_exp_w-1:0] true_exp_b;
+  logic signed  [SIGNED_EXP_W-1:0] true_exp_a;
+  logic signed  [SIGNED_EXP_W-1:0] true_exp_b;
   logic         [LZ_COUNTER_W-1:0] lz_a;
   logic         [LZ_COUNTER_W-1:0] lz_b;
  

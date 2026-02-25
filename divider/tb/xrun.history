@@ -1,4 +1,0 @@
-s1(24Feb2026:23:13:55):  xrun -64bit -sv -f run.f -timescale 1ns/1ps -access +rwc -top tb_divider_float 
-s2(24Feb2026:23:14:40):  xrun -64bit -sv -f run.f -timescale 1ns/1ps -access +rwc -top tb_divider_float 
-s3(24Feb2026:23:16:08):  xrun -64bit -sv -f run.f -timescale 1ns/1ps -access +rwc -top tb_divider_float 
-s4(24Feb2026:23:17:10):  xrun -64bit -sv -f run.f -timescale 1ns/1ps -access +rwc -top tb_divider_float -gui 

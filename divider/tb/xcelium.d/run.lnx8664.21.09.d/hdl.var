@@ -1,8 +1,0 @@
-define XMSIMRC	( /vol/cadence2018/XCELIUM2109/tools/xcelium/files/xmsimrc, ~/.xmsimrc )
-define AMSRC	( /vol/cadence2018/XCELIUM2109/tools/xcelium/files/amsrc, ~/.amsrc )
-include ./hdlrun.var
-define SNAPSHOT worklib.tb_divider_float:sv
-DEFINE RUNMODEDEFAULT 1
-DEFINE LIB_MAP ( + => worklib )
-define ELAB_SNAPSHOT
-define SNAPSHOT worklib.tb_divider_float:sv
