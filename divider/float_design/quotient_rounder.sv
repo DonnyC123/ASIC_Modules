@@ -47,7 +47,7 @@ module quotient_rounder
 
     if (!quotient_raw_i[QUOTIENT_RAW_W-1]) begin
       quotient_exp_extended = quotient_exp_i - 1;
-      quotient_extended     = quotient_raw_i[QUOTIENT_EXTENDED_W-1:0];
+      quotient_extended     = quotient_raw_i[QUOTIENT_RAW_W-2:0];
       sticky                = sticky_i;
     end
 

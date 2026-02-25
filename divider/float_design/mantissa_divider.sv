@@ -103,20 +103,27 @@ module mantissa_divider
         remainder_d = remainder_shifted - subtrahend;
 
         if (divider_counter_q == COUNTER_W'($unsigned(COUNTER_LEN - 1))) begin
-          divider_state_d = IDLE;
-          done_o          = 1'b1;
+          divider_state_d = DONE;
         end
       end
 
       DONE: begin
+        done_o          = 1'b1;
         divider_state_d = IDLE;
+        if (remainder_q[REMAINDER_W-1]) begin
+          quotient_extended_d = quotient_extended_q - 1;
+          sticky_o            = 1'b1;
+        end else begin
+          quotient_extended_d = quotient_extended_q;
+          sticky_o            = (remainder_q != 0);
+        end
+
       end
     endcase
   end
 
   always_comb begin
     quotient_raw_o = quotient_extended_d;
-    sticky_o       = remainder_d != 0;
   end
 
   always_ff @(posedge clk or negedge rst_n) begin
