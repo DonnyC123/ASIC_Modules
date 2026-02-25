@@ -91,9 +91,9 @@ module mantissa_divider
     unique case (divider_state_q)
       IDLE: begin
         if (start_i) begin
-          divider_state_d = ACTIVE;
-          divisor_d = divisor_i;
-          remainder_d = $signed({(SIGN_W + GUARD_W)'(1'b0), dividend_i, (REDUCTION_FACTOR)'(1'b0)});
+          divider_state_d     = ACTIVE;
+          divisor_d           = divisor_i;
+          remainder_d         = $signed({(SIGN_W + GUARD_W + REDUCTION_FACTOR)'(1'b0), dividend_i});
           quotient_extended_d = '0;
         end
       end
