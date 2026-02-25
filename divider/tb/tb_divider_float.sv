@@ -202,10 +202,10 @@ module tb_divider_float;
   always #5 clk = ~clk;
 
   initial begin
-    rst_n = 1;
+    rst_n = 0;
     start = 0;
     repeat (3) @(posedge clk);
-    rst_n = 0;
+    rst_n = 1;
     repeat (1) @(posedge clk);
 
     $display("=== STARTING PARAMETERIZED MAC TEST (Exp=%0d, Frac=%0d) ===", EXP_W, FRAC_W);
