@@ -57,14 +57,15 @@ module quotient_rounder
       sticky                = sticky_i;
     end
 
-    quotient_exp_extended_unfl   = quotient_exp_extended[SIGNED_EXP_W-1];
-    quotient_exp_extended_ovfl   = |quotient_exp_extended[SIGNED_EXP_W-2-:2];
+    quotient_exp_extended_unfl = quotient_exp_extended[SIGNED_EXP_W-1];
+    quotient_exp_extended_ovfl = |quotient_exp_extended[SIGNED_EXP_W-2-:2];
     quotient_extended_normalized = quotient_extended;
 
+    temp_shift_reg = {quotient_extended, {QUOTIENT_EXTENDED_W{1'b0}}}  >> (1 - quotient_exp_extended);
+
     if (quotient_exp_extended_unfl || quotient_exp_extended == '0) begin
-      temp_shift_reg = {quotient_extended, {QUOTIENT_EXTENDED_W{1'b0}}}  >> (1 - quotient_exp_extended);
       quotient_extended_normalized = temp_shift_reg[2*QUOTIENT_EXTENDED_W-1-:QUOTIENT_EXTENDED_W];
-      sticky = sticky || (|temp_shift_reg[QUOTIENT_EXTENDED_W-1:0]);
+      sticky                       = sticky || (|temp_shift_reg[QUOTIENT_EXTENDED_W-1:0]);
     end
 
     guard = quotient_extended_normalized[0];
@@ -104,6 +105,8 @@ module quotient_rounder
     end else if (float_quotient_flags_i.inf || quotient_exp_rounded_ovfl || quotient_exp_rounded[EXP_W-1:0] == '1) begin
       quotient_o.exp  = '1;
       quotient_o.frac = '0;
+    end else if (quotient_exp_rounded == '0 && quotient_mantissa[MANTISSA_W-1]) begin
+      quotient_o.exp = 1;
     end
   end
 
