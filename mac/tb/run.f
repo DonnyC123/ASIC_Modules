@@ -10,5 +10,4 @@
 ../float_design/mac_float.sv
 ../../common/data_pipeline.sv
 
-../tb/sanity_test.sv
-../tb/mac_float_model.sv
+../tb/tb_mac_float.sv

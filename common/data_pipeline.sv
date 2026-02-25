@@ -5,7 +5,7 @@ module data_pipeline #(
     parameter logic [DATA_W-1:0] RST_VAL    = '0
 ) (
     input  logic              clk,
-    input  logic              rst,
+    input  logic              rst_n,
     input  logic [DATA_W-1:0] data_i,
     output logic [DATA_W-1:0] data_o
 );
@@ -14,8 +14,8 @@ module data_pipeline #(
     if (PIPE_DEPTH >= 1) begin : gen_delay
       logic [DATA_W-1:0] data_shift_reg_q[PIPE_DEPTH];
 
-      always_ff @(posedge clk) begin
-        if (rst && RST_EN) begin
+      always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n && RST_EN) begin
 
           for (int i = 0; i < PIPE_DEPTH; i++) begin
             data_shift_reg_q[i] <= RST_VAL;

@@ -4,6 +4,7 @@ module mac_float_decode
     parameter type float_t            = struct packed {logic sign; logic [5:0] exp; logic [9:0] frac;},
     parameter      SIGNED_EXP_W       = 9,
     parameter      MANTISSA_W         = 11,
+    parameter      EXP_W              = 5,
     parameter      PARTIAL_SUM_HIGH_W = 14,
     parameter      PRODUCT_MANTISSA_W = 2 * (MANTISSA_W)
 ) (
@@ -15,13 +16,11 @@ module mac_float_decode
     output logic signed [SIGNED_EXP_W-1:0]  product_exp_o,
     output logic [PARTIAL_SUM_HIGH_W-1:0]   c_upper_slice_o,
     output logic [PRODUCT_MANTISSA_W-1:0]   csa_c_o,
-    output logic         [  MANTISSA_W-1:0] norm_mant_a,
-    output logic         [  MANTISSA_W-1:0] norm_mant_b
-
+    output logic         [  MANTISSA_W-1:0] norm_mant_a_o,
+    output logic         [  MANTISSA_W-1:0] norm_mant_b_o
 );
 
   localparam LZ_COUNTER_W         = $clog2(MANTISSA_W);
-  localparam EXP_W                = 5;
   localparam BIAS                 = (1 << (EXP_W - 1)) - 1;
  
   typedef struct packed {
@@ -74,7 +73,6 @@ module mac_float_decode
     return unpacked_o;
   endfunction
 
-
   float_flags_t                    a_flags;
   float_flags_t                    b_flags;
   float_flags_t                    c_flags;
@@ -86,11 +84,11 @@ module mac_float_decode
   unpacked_float_t                unpacked_b;
   unpacked_float_t                unpacked_c;
 
-  logic signed  [SIGNED_EXP_W-1:0] true_exp_a;
-  logic signed  [SIGNED_EXP_W-1:0] true_exp_b;
+  logic signed  [signed_exp_w-1:0] true_exp_a;
+  logic signed  [signed_exp_w-1:0] true_exp_b;
   logic         [LZ_COUNTER_W-1:0] lz_a;
   logic         [LZ_COUNTER_W-1:0] lz_b;
-  
+ 
   logic                         c_dominates;
 
   always_comb begin
@@ -146,18 +144,18 @@ module mac_float_decode
   always_comb begin
     if (a_flags.exp_zero && !a_flags.frac_zero) begin
       true_exp_a  = -$signed({1'b0, lz_a});
-      norm_mant_a = {float_a_i.frac << lz_a, 1'b0};
+      norm_mant_a_o = {float_a_i.frac << lz_a, 1'b0};
     end else begin
       true_exp_a  = a_flags.exp_zero ? $signed('0) : $signed({1'b0, unpacked_a.exp});
-      norm_mant_a = unpacked_a.mantissa;
+      norm_mant_a_o = unpacked_a.mantissa;
     end
 
    if (b_flags.exp_zero && !b_flags.frac_zero) begin
-      true_exp_b  = -$signed({1'b0, lz_b});
-      norm_mant_b = {float_b_i.frac << lz_b, 1'b0};
+      true_exp_b    = -$signed({1'b0, lz_b});
+      norm_mant_b_o = {float_b_i.frac << lz_b, 1'b0};
    end else begin
-      true_exp_b  = b_flags.exp_zero ? $signed('0) : $signed({1'b0, unpacked_b.exp});
-      norm_mant_b = unpacked_b.mantissa;
+      true_exp_b    = b_flags.exp_zero ? $signed('0) : $signed({1'b0, unpacked_b.exp});
+      norm_mant_b_o = unpacked_b.mantissa;
      end
  
     product_sign_o = unpacked_a.sign ^ unpacked_b.sign;

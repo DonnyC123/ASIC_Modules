@@ -11,10 +11,7 @@ module mac_float #(
 );
   import mac_float_pkg::*;
 
-  localparam MANTISSA_W           = FRAC_W + MANTISSA_INT_W;
-  localparam BIAS                 = (1 << (EXP_W - 1)) - 1;
-  localparam NUM_PARTIAL_PRODUCTS = MANTISSA_W;
-  localparam NUM_WALLACE_INPUTS   = NUM_PARTIAL_PRODUCTS + 1;
+  localparam MANTISSA_W = FRAC_W + MANTISSA_INT_W;
 
   localparam PRODUCT_MANTISSA_W = 2 * MANTISSA_W;
   localparam FULL_SUM_W         = 3 * MANTISSA_W + SIGN_W + 2 * CARRY_W;
@@ -83,6 +80,7 @@ module mac_float #(
       .float_t           (float_t),
       .SIGNED_EXP_W      (SIGNED_EXP_W),
       .MANTISSA_W        (MANTISSA_W),
+      .EXP_W             (EXP_W),
       .PARTIAL_SUM_HIGH_W(PARTIAL_SUM_HIGH_W),
       .PRODUCT_MANTISSA_W(PRODUCT_MANTISSA_W)
   ) mac_float_decode_inst (
@@ -94,8 +92,8 @@ module mac_float #(
       .product_exp_o    (product_exp),
       .c_upper_slice_o  (c_upper_slice),
       .csa_c_o          (csa_c),
-      .norm_mant_a      (norm_mant_a),
-      .norm_mant_b      (norm_mant_b)
+      .norm_mant_a_o    (norm_mant_a),
+      .norm_mant_b_o    (norm_mant_b)
   );
 
   data_pipeline #(
@@ -104,7 +102,7 @@ module mac_float #(
       .RST_EN    (0)
   ) decode_to_execution_pipe (
       .clk   (clk),
-      .rst   (1'b0),
+      .rst_n (1'b1),
       .data_i({c_upper_slice, csa_c, norm_mant_a, norm_mant_b}),
       .data_o({c_upper_slice_q, csa_c_q, norm_mant_a_q, norm_mant_b_q})
   );
@@ -115,7 +113,7 @@ module mac_float #(
       .RST_EN    (0)
   ) decode_to_round_pipe (
       .clk   (clk),
-      .rst   (1'b0),
+      .rst_n (1'b1),
       .data_i({sum_float_flags, product_sign, product_exp, float_c}),
       .data_o({sum_float_flags_2q, product_sign_2q, product_exp_2q, float_c_2q})
   );
@@ -139,10 +137,11 @@ module mac_float #(
       .RST_EN    (0)
   ) execution_to_round_pipe (
       .clk   (clk),
-      .rst   (1'b0),
+      .rst_n (1'b1),
       .data_i(mantissa_sum_raw),
       .data_o(mantissa_sum_raw_q)
   );
+  // Might be better to move before flip_flop
 
   always_comb begin
     unsigned_mantissa_sum = mantissa_sum_raw_q[FULL_SUM_W-1:0];
@@ -177,7 +176,7 @@ module mac_float #(
       .RST_EN    (0)
   ) round_to_output_pipe (
       .clk(clk),
-      .rst(1'b0),
+      .rst_n(1'b1),
       .data_i({float_sum_rounded, sum_rounded_exp_ovfl, sum_rounded_exp_unfl, sum_float_flags_2q}),
       .data_o({
         float_sum_rounded_q, sum_rounded_exp_ovfl_q, sum_rounded_exp_unfl_q, sum_float_flags_3q
