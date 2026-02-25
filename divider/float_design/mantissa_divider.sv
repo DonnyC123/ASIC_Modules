@@ -16,7 +16,7 @@ module mantissa_divider
 
   localparam REMAINDER_W      = SIGN_W + MANTISSA_W + REDUCTION_W + GUARD_W;
   localparam DIVISOR_SCALED_W = REMAINDER_W;
-  localparam COUNTER_LEN      = (MANTISSA_W + (REDUCTION_W - 1) + OFFSET_BIT_W) / REDUCTION_W;
+  localparam COUNTER_LEN      = (QUOTIENT_RAW_W + (REDUCTION_W - 1)) / REDUCTION_W;
   localparam COUNTER_W        = $clog2(COUNTER_LEN) + 1;
 
   logic                    [      MANTISSA_W-1:0] divisor_d;
