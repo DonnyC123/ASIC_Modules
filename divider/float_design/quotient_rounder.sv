@@ -63,13 +63,12 @@ module quotient_rounder
       quotient_exp_rounded = quotient_exp_extended + 1;
     end
 
-
     quotient_exp_rounded_unfl = quotient_exp_rounded[SIGNED_EXP_W-1];
     quotient_exp_rounded_ovfl = |quotient_exp_rounded[SIGNED_EXP_W-2-:2];
 
     quotient_mantissa         = quotient_rounded;
 
-    if (quotient_exp_rounded_unfl) begin
+    if (quotient_exp_rounded_unfl || quotient_exp_rounded == '0) begin
       logic [MANTISSA_W-1:0] shift_mask;
       logic [MANTISSA_W-1:0] shifted_bits;
       logic                  denorm_guard;
