@@ -13,7 +13,7 @@ package divider_float_pkg;
 
   localparam GUARD_IDX = 1;
   localparam ROUND_IDX = 1;
-
+  
   typedef enum logic [NUM_MANTISSA_DIV_STATES-1:0] {
     IDLE   = 3'b001,
     ACTIVE = 3'b010,

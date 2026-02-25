@@ -1,10 +1,7 @@
--v /home/donald/FloatingPointModules/divider/float_design/divider_float_pkg.sv
 -v /home/donald/FloatingPointModules/mac/float_design/mac_float_pkg.sv
-+incdir+/home/donald/FloatingPointModules/common
-+incdir+/home/donald/FloatingPointModules/divider/float_design
+-v /home/donald/FloatingPointModules/mac/float_design/mac_float_pkg2.sv
+-v /home/donald/FloatingPointModules/divider/float_design/divider_float_pkg.sv
 +incdir+/home/donald/FloatingPointModules/mac/float_design
 +incdir+/home/donald/FloatingPointModules/mac/tb
-+incdir+/home/donald/FloatingPointModules/common
-+incdir+/home/donald/FloatingPointModules/divider/float_design
 +incdir+/home/donald/FloatingPointModules/mac/float_design
 +incdir+/home/donald/FloatingPointModules/mac/tb
