@@ -21,21 +21,27 @@ module quotient_rounder
 
   localparam QUOTIENT_EXTENDED_W = MANTISSA_W + GUARD_W;
 
-  logic        [QUOTIENT_EXTENDED_W-1:0] quotient_extended;
-  logic        [QUOTIENT_EXTENDED_W-1:0] quotient_unrounded;
-  logic        [QUOTIENT_EXTENDED_W-1:0] quotient_rounded_raw;
-  logic        [         MANTISSA_W-1:0] quotient_rounded;
-  logic        [         MANTISSA_W-1:0] quotient_mantissa;
 
+  logic        [  QUOTIENT_EXTENDED_W-1:0] quotient_extended;
+  logic        [  QUOTIENT_EXTENDED_W-1:0] quotient_extended_normalized;
+  logic        [  QUOTIENT_EXTENDED_W-1:0] quotient_unrounded;
+  logic        [  QUOTIENT_EXTENDED_W-1:0] quotient_rounded_raw;
+  logic        [           MANTISSA_W-1:0] quotient_rounded;
+  logic        [           MANTISSA_W-1:0] quotient_mantissa;
 
-  logic signed [       SIGNED_EXP_W-1:0] quotient_exp_extended;
-  logic signed [       SIGNED_EXP_W-1:0] quotient_exp_rounded;
+  logic        [2*QUOTIENT_EXTENDED_W-1:0] temp_shift_reg;
 
-  logic                                  quotient_exp_rounded_unfl;
-  logic                                  quotient_exp_rounded_ovfl;
+  logic signed [         SIGNED_EXP_W-1:0] quotient_exp_extended;
+  logic signed [         SIGNED_EXP_W-1:0] quotient_exp_rounded;
 
-  logic                                  guard;
-  logic                                  sticky;
+  logic                                    quotient_exp_extended_unfl;
+  logic                                    quotient_exp_extended_ovfl;
+
+  logic                                    quotient_exp_rounded_unfl;
+  logic                                    quotient_exp_rounded_ovfl;
+
+  logic                                    guard;
+  logic                                    sticky;
 
   // Might be able to check if we will round and then do one add instead of
   // mutliple
@@ -51,8 +57,20 @@ module quotient_rounder
       sticky                = sticky_i;
     end
 
-    guard = quotient_extended[0];
+    quotient_exp_extended_unfl   = quotient_exp_extended[SIGNED_EXP_W-1];
+    quotient_exp_rounded_ovfl    = |quotient_exp_extended[SIGNED_EXP_W-2-:2];
+    quotient_extended_normalized = quotient_extended;
+
+    if (quotient_exp_rounded_unfl || quotient_exp_rounded == '0) begin
+      temp_shift_reg = {quotient_extended, {QUOTIENT_EXTENDED_W{1'b0}}}  >> (1 - quotient_exp_extended);
+      quotient_extended_normalized = temp_shift_reg[2*QUOTIENT_EXTENDED_W-1-:QUOTIENT_EXTENDED_W];
+      sticky = sticky || (|temp_shift_reg[QUOTIENT_EXTENDED_W-1:0]);
+    end
+
+    guard = quotient_extended_normalized[0];
+
     quotient_unrounded = {1'b0, quotient_extended[QUOTIENT_EXTENDED_W-1:1]};
+
     quotient_rounded_raw   = guard && (sticky || quotient_unrounded[0]) ? quotient_unrounded + 1 : quotient_unrounded;
 
     quotient_rounded = quotient_rounded_raw[MANTISSA_W-1:0];
@@ -67,35 +85,6 @@ module quotient_rounder
     quotient_exp_rounded_ovfl = |quotient_exp_rounded[SIGNED_EXP_W-2-:2];
 
     quotient_mantissa         = quotient_rounded;
-
-    if (quotient_exp_rounded_unfl || quotient_exp_rounded == '0) begin
-      logic [MANTISSA_W-1:0] shift_mask;
-      logic [MANTISSA_W-1:0] shifted_bits;
-      logic                  denorm_guard;
-      logic                  denorm_sticky;
-      logic                  denorm_round_up;
-      int                    shift_amt;
-
-      shift_amt         = 1 - quotient_exp_rounded;
-
-      quotient_mantissa = quotient_rounded >> shift_amt;
-
-      shift_mask        = (MANTISSA_W'(1) << shift_amt) - 1;
-
-      shifted_bits      = quotient_rounded & shift_mask;
-
-      if (shift_amt > 0) denorm_guard = quotient_rounded[shift_amt-1];
-      else denorm_guard = 1'b0;
-
-      denorm_sticky   = |(quotient_rounded & (shift_mask >> 1));
-
-      denorm_round_up = denorm_guard && (denorm_sticky || quotient_mantissa[0]);
-
-      if (denorm_round_up) begin
-        quotient_mantissa = quotient_mantissa + 1;
-      end
-    end
-
 
   end
 

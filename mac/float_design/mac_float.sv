@@ -61,7 +61,7 @@ module mac_float #(
 
   logic             [        FULL_SUM_W-1:0] unsigned_mantissa_sum;
   logic                                      sum_signed;
-  logic                                      test = DATA_W'(1'bx);
+
   float_t                                    float_sum_rounded;
   float_t                                    float_sum_rounded_q;
   logic                                      sum_rounded_exp_ovfl;
