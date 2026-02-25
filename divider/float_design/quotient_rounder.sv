@@ -30,7 +30,6 @@ module quotient_rounder
 
   logic signed [       SIGNED_EXP_W-1:0] quotient_exp_extended;
   logic signed [       SIGNED_EXP_W-1:0] quotient_exp_rounded;
-  logic signed [              EXP_W-1:0] quotient_exp;
 
   logic                                  quotient_exp_rounded_unfl;
   logic                                  quotient_exp_rounded_ovfl;
