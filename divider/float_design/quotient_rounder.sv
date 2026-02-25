@@ -65,7 +65,7 @@ module quotient_rounder
 
 
     quotient_exp_rounded_unfl = quotient_exp_rounded[SIGNED_EXP_W-1];
-    quotient_exp_rounded_ovfl = |quotient_exp_rounded[SIGNED_EXP_W-2-:1];
+    quotient_exp_rounded_ovfl = |quotient_exp_rounded[SIGNED_EXP_W-2-:2];
 
     quotient_mantissa         = quotient_rounded;
 
