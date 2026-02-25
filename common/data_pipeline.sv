@@ -15,11 +15,9 @@ module data_pipeline #(
       logic [DATA_W-1:0] data_shift_reg_q[PIPE_DEPTH];
 
       always_ff @(posedge clk or negedge rst_n) begin
-        if (RST_EN) begin
-          if (!rst_n) begin
-            for (int i = 0; i < PIPE_DEPTH; i++) begin
-              data_shift_reg_q[i] <= RST_VAL;
-            end
+        if (!rst_n && RST_EN) begin
+          for (int i = 0; i < PIPE_DEPTH; i++) begin
+            data_shift_reg_q[i] <= RST_VAL;
           end
         end else begin
 
