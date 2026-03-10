@@ -1,0 +1,9 @@
+-v /home/donald/sqrt_modules/srt_sqrt_rtl/srt_sqrt_pkg.sv
++incdir+/home/donald/sqrt_modules/common
++incdir+/home/donald/sqrt_modules/restoring_sqrt_rtl
++incdir+/home/donald/sqrt_modules/srt_sqrt_rtl
++incdir+/home/donald/sqrt_modules/tb
++incdir+/home/donald/sqrt_modules/common
++incdir+/home/donald/sqrt_modules/restoring_sqrt_rtl
++incdir+/home/donald/sqrt_modules/srt_sqrt_rtl
++incdir+/home/donald/sqrt_modules/tb
