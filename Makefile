@@ -1,4 +1,4 @@
-TB_DIRS = sqrt_uint64_tb tb_mac_float_16 tb_decoder tb_top
+TB_DIRS = sqrt_uint64_tb mac_float_16_tb divider_float_16_tb
 
 .PHONY: all clean $(TB_DIRS)
 
