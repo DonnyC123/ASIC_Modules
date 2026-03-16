@@ -25,7 +25,7 @@ module sqrt_tb ();
 
   logic [ DIN_W-1:0] input_sent_queue  [$];
 
-  sqrt_restoring #(
+  sqrt_non_restoring #(
       .DIN_W(DIN_W)
   ) sqrt_restoring_dut (
       .clk    (clk),
