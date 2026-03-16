@@ -1,6 +1,6 @@
-../common/data_pipeline.sv
-../common/shift_reg.sv
-../common/data_status_pipeline.sv
+../../common/data_pipeline.sv
+../../common/shift_reg.sv
+../../common/data_status_pipeline.sv
 
 ../srt_sqrt_rtl/srt_radix4_qds.sv
 ../srt_sqrt_rtl/srt_radix4_seed.sv
