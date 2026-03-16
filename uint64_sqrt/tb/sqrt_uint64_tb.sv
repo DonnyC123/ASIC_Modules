@@ -1,4 +1,4 @@
-module sqrt_tb ();
+module sqrt_uint64_tb ();
   localparam int DIN_W           = 64;
   localparam int DOUT_W          = DIN_W / 2;
   localparam int PIPELINE_STAGES = 4;
