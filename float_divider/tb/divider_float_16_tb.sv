@@ -2,7 +2,7 @@
 
 module tb_divider_float;
 
-  import float_16_pkg::*;
+  import float_16_tb_pkg::*;
 
   logic clk;
   logic rst_n;

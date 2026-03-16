@@ -1,4 +1,4 @@
-package float_16_pkg;
+package float_16_tb_pkg;
 
   parameter EXP_W    = 5;
   parameter FRAC_W   = 10;

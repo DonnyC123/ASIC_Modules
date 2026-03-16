@@ -1,6 +1,7 @@
 ../../common/rtl/data_pipeline.sv
 ../../common/rtl/data_status_pipeline.sv
 ../../common/rtl/data_status_pipeline.sv
+../../common/tb/float_16_tb_pkg.sv
 
 ../../mac/float_design/leading_zero_counter.sv
 ../../mac/float_design/leading_zero_counter_top.sv

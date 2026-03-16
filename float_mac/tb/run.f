@@ -1,4 +1,6 @@
 ../../common/rtl/data_pipeline.sv
+../../common/tb/float_16_tb_pkg.sv
+
 
 ../float_design/mac_float_pkg.sv
 ../float_design/carry_save_adder.sv

@@ -2,7 +2,7 @@
 
 module tb_mac_float;
 
-  import float_16_pkg::*;
+  import float_16_tb_pkg::*;
 
   mac_float #(
       .EXP_W (EXP_W),
