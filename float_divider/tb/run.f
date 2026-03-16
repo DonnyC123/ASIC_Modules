@@ -3,8 +3,9 @@
 ../../common/rtl/data_status_pipeline.sv
 ../../common/tb/float_16_tb_pkg.sv
 
-../../mac/float_design/leading_zero_counter.sv
-../../mac/float_design/leading_zero_counter_top.sv
+../../common/rtl/leading_zero_counter.sv
+../../common/rtl/leading_zero_counter_top.sv
+
 ../float_design/divider_float_pkg.sv
 ../float_design/divider_float_decoder.sv
 ../float_design/mantissa_divider.sv

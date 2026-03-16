@@ -1,11 +1,11 @@
 ../../common/rtl/data_pipeline.sv
 ../../common/tb/float_16_tb_pkg.sv
+../../common/rtl/leading_zero_counter.sv     
+../../common/rtl/leading_zero_counter_top.sv 
 
 
 ../float_design/mac_float_pkg.sv
 ../float_design/carry_save_adder.sv
-../float_design/leading_zero_counter.sv
-../float_design/leading_zero_counter_top.sv
 ../float_design/wallace_tree_recursive.sv
 ../float_design/align_addend.sv
 ../float_design/mac_float_decode.sv
