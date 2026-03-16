@@ -4,6 +4,12 @@ module tb_mac_float;
 
   import float_16_tb_pkg::*;
 
+  localparam PIPELINE_STAGES = 4;
+
+  logic [FLOAT_W-1:0] a, b, c;
+  logic [FLOAT_W-1:0] z;
+  logic               clk;
+
   mac_float #(
       .EXP_W (EXP_W),
       .FRAC_W(FRAC_W)
