@@ -1,4 +1,4 @@
-TB_DIRS = sqrt_uint64_tb mac_float_16_tb divider_float_16_tb
+TB_DIRS = uint64_sqrt mac_float divider_float
 
 .PHONY: all clean $(TB_DIRS)
 
@@ -9,7 +9,7 @@ $(TB_DIRS):
 	@echo "================================================="
 	@echo " Running Make in $@"
 	@echo "================================================="
-	$(MAKE) -C $@ sim
+	$(MAKE) -C $@ run
 
 clean:
 	@for dir in $(TB_DIRS); do \
