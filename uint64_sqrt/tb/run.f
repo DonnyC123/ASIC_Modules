@@ -14,4 +14,7 @@
 ../restoring_sqrt_rtl/sqrt_restoring.sv
 ../restoring_sqrt_rtl/sqrt_restoring_stage.sv
 
+../non_restoring_sqrt_rtl/sqrt_non_restoring.sv
+../non_restoring_sqrt_rtl/sqrt_non_restoring_stage.sv
+
 ../tb/sqrt_tb.sv
