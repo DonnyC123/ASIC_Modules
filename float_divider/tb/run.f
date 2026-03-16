@@ -12,4 +12,4 @@
 ../rtl/quotient_rounder.sv
 ../rtl/divider_float.sv
 
-../tb/divider_float_16.sv
+../tb/divider_float_16_tb.sv
