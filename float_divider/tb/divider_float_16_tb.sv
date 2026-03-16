@@ -85,7 +85,7 @@ module tb_divider_float;
     rst_n = 1;
     repeat (1) @(posedge clk);
 
-    $display("=== STARTING PARAMETERIZED MAC TEST (Exp=%0d, Frac=%0d) ===", EXP_W, FRAC_W);
+    $display("=== STARTING PARAMETERIZED DIVIDER TEST (Exp=%0d, Frac=%0d) ===", EXP_W, FRAC_W);
 
     a = downscale_double(1.5);
     b = downscale_double(2.0);
