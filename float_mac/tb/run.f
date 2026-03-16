@@ -4,13 +4,13 @@
 ../../common/rtl/leading_zero_counter_top.sv 
 
 
-../float_design/mac_float_pkg.sv
-../float_design/carry_save_adder.sv
-../float_design/wallace_tree_recursive.sv
-../float_design/align_addend.sv
-../float_design/mac_float_decode.sv
-../float_design/mac_float_execution.sv
-../float_design/mac_float_align_round_sum.sv
-../float_design/mac_float.sv
+../rtl/mac_float_pkg.sv
+../rtl/carry_save_adder.sv
+../rtl/wallace_tree_recursive.sv
+../rtl/align_addend.sv
+../rtl/mac_float_decode.sv
+../rtl/mac_float_execution.sv
+../rtl/mac_float_align_round_sum.sv
+../rtl/mac_float.sv
 
 ../tb/mac_float_16_tb.sv
