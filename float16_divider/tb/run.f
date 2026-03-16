@@ -1,5 +1,7 @@
-../../common/data_pipeline.sv
-../../common/data_status_pipeline.sv
+../../common/rtl/data_pipeline.sv
+../../common/rtl/data_status_pipeline.sv
+../../common/rtl/data_status_pipeline.sv
+
 ../../mac/float_design/leading_zero_counter.sv
 ../../mac/float_design/leading_zero_counter_top.sv
 ../float_design/divider_float_pkg.sv
@@ -8,4 +10,4 @@
 ../float_design/quotient_rounder.sv
 ../float_design/divider_float.sv
 
-../tb/tb_divider_float.sv
+../tb/divider_float_16.sv
