@@ -1,6 +1,6 @@
-../../common/data_pipeline.sv
-../../common/shift_reg.sv
-../../common/data_status_pipeline.sv
+../../common/rtl/data_pipeline.sv
+../../common/rtl/shift_reg.sv
+../../common/rtl/data_status_pipeline.sv
 
 ../srt_sqrt_rtl/srt_radix4_qds.sv
 ../srt_sqrt_rtl/srt_radix4_seed.sv
@@ -17,4 +17,4 @@
 ../non_restoring_sqrt_rtl/sqrt_non_restoring.sv
 ../non_restoring_sqrt_rtl/sqrt_non_restoring_stage.sv
 
-../tb/sqrt_tb.sv
+../tb/sqrt_uint64_tb.sv
