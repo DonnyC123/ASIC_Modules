@@ -49,7 +49,7 @@ module root_rounder
     guard            = root_normalized[0];
     lsb              = root_normalized[1];
 
-    root_unrounded   = {1'b0, root_normalized[MANTISSA_W:1]};
+    root_unrounded   = {1'b0, root_normalized[MANTISSA_W-1:1]};
 
     round_up         = guard && (sticky || lsb);
     root_rounded_raw = root_unrounded + round_up;
@@ -61,8 +61,6 @@ module root_rounder
       root_frac        = root_rounded_raw[FRAC_W-1:0];
       root_exp_rounded = (root_exp_i < 1) ? 0 : root_exp_i;
     end
-
-
 
   end
 
