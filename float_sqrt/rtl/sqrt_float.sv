@@ -81,7 +81,8 @@ module sqrt_float #(
   data_status_pipeline #(
       .DATA_W    (SIGNED_EXP_W + FLOAT_FLAGS_W),
       .STATUS_W  (1),
-      .PIPE_DEPTH(2)
+      .PIPE_DEPTH(3)
+
   ) flags_exp_delay_pipe (
       .clk     (clk),
       .rst_n   (rst_n),
