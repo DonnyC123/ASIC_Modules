@@ -34,7 +34,7 @@ module sqrt_mantissa #(
   logic [ROOT_EXTENDED_W-1:0] Q_out;
 
   always_comb begin
-    AX[ROOT_EXTENDED_W-1:0]           = {mantissa_rad_i, 1'b0};
+    AX[ROOT_EXTENDED_W-1:0]           = mantissa_rad_i;
     AX[REMAINDER_W-1:ROOT_EXTENDED_W] = '0;
     T                                 = '0;
     Q                                 = '0;
