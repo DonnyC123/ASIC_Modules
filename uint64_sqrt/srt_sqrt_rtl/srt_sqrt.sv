@@ -13,7 +13,7 @@ module srt_sqrt #(
 
   localparam FRAC_BITS   = DIN_W + RADIX_W;
   localparam DATA_W      = INT_W + FRAC_BITS;
-  localparam ITERATIONS  = DIN_W / 2 - 2 - 1;
+  localparam ITERATIONS  = DOUT_W / 2 - 2 - 1;
   localparam DIN_PAIRS_W = DIN_W / 2;
 
   localparam LZ_PAIR_COUNT_W = $clog2(DIN_PAIRS_W);
