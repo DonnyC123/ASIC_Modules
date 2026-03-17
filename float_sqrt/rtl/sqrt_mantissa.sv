@@ -48,8 +48,8 @@ module sqrt_mantissa #(
     for (stage_idx = 0; stage_idx < PIPELINE_STAGES; stage_idx++) begin
 
       localparam SQRT_STEPS = (stage_idx == PIPELINE_STAGES -1) ?                
-                            REMAINING_STAGE_STEPS + STAGE_STEPS                
-                          : STAGE_STEPS;
+                              REMAINING_STAGE_STEPS + STAGE_STEPS                
+                            : STAGE_STEPS;
 
       sqrt_non_restoring_stage #(
           .DIN_W     (ROOT_EXTENDED_W),
@@ -65,7 +65,7 @@ module sqrt_mantissa #(
       );
 
       data_status_pipeline #(
-          .DATA_W    (REMAINDER_W + TEST_SUB_W + MANTISSA_W),
+          .DATA_W    (REMAINDER_W + TEST_SUB_W + ROOT_EXTENDED_W),
           .STATUS_W  (1),
           .PIPE_DEPTH(1),
           .CLOCK_GATE(1)
@@ -82,8 +82,7 @@ module sqrt_mantissa #(
   endgenerate
 
   always_comb begin
-
-    root_extended    = Q[PIPELINE_STAGES][MANTISSA_W-1:0];
+    root_extended    = Q[PIPELINE_STAGES];
     final_rem_is_neg = AX[PIPELINE_STAGES][REMAINDER_W-1];
 
     if (final_rem_is_neg) begin
