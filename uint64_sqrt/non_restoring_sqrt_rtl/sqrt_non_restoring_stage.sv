@@ -1,7 +1,7 @@
 module sqrt_non_restoring_stage #(
     parameter  int DIN_W       = 64,
     parameter  int SQRT_STEPS  = 16,
-    localparam     DOUT_W      = DIN_W / 2,
+    parameter      DOUT_W      = DIN_W / 2,
     localparam     REMAINDER_W = 2 * DIN_W + 1,
     localparam     TEST_SUB_W  = DIN_W + 1
 ) (
