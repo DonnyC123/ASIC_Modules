@@ -16,7 +16,7 @@ module sqrt_float #(
   localparam GUARD_W         = 1;
   localparam SIGN_W          = 1;
   localparam MANTISSA_W      = FRAC_W + MANTISSA_INT_W;
-  localparam ROOT_EXTENDED_W = FRAC_W + MANTISSA_INT_W + GUARD_W;
+  localparam ROOT_EXTENDED_W = FRAC_W + MANTISSA_INT_W;
   localparam SIGNED_EXP_W    = EXP_W + SIGN_W;
 
   typedef struct packed {
