@@ -35,8 +35,6 @@ module root_rounder
 
   logic                                final_sticky;
 
-  logic                                exact_root_artifact;
-
   always_comb begin
     temp_shift_reg = {root_raw_i, {ROOT_EXTENDED_W{1'b0}}} >> (1 - root_exp_i);
 
@@ -48,20 +46,14 @@ module root_rounder
       sticky          = sticky_i;
     end
 
-    guard               = root_normalized[0];
-    lsb                 = root_normalized[1];
-    root_unrounded      = {1'b0, root_normalized[ROOT_EXTENDED_W-1:1]};
+    guard            = root_normalized[0];
+    lsb              = root_normalized[1];
 
-    // 2. Exact Root Artifact Suppression
-    exact_root_artifact = (root_unrounded[MANTISSA_W-2:0] == '0);
+    root_unrounded   = {2'b00, root_normalized[11:1]};
 
-    // 3. RNTE Rounding
-    // Standard rounding, but suppress it if we know it's an exact root artifact
-    round_up            = (guard && (sticky || lsb)) && !exact_root_artifact;
+    round_up         = guard && (sticky || lsb);
+    root_rounded_raw = root_unrounded + round_up;
 
-    root_rounded_raw    = root_unrounded + round_up;
-
-    // 4. Carry-out logic (Unchanged)
     if (root_rounded_raw[MANTISSA_W]) begin
       root_mantissa    = root_rounded_raw[MANTISSA_W:1];
       root_exp_rounded = (root_exp_i < 1) ? 1 : root_exp_i + 1;
