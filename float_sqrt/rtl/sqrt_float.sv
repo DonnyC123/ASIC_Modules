@@ -30,7 +30,7 @@ module sqrt_float #(
   float_t                             float_root_unpacked;
 
   float_flags_t                       root_float_flags;
-  logic         [   FLOAT_FLAG_W-1:0] root_float_flags_raw;
+  logic         [  FLOAT_FLAGS_W-1:0] root_float_flags_raw;
 
   logic         [     MANTISSA_W-1:0] norm_mant_rad;
   logic signed  [   SIGNED_EXP_W-1:0] root_exp_signed;
@@ -39,7 +39,7 @@ module sqrt_float #(
   logic                               decode_valid_q;
 
   float_flags_t                       root_float_flags_q2;
-  logic         [   FLOAT_FLAG_W-1:0] root_float_flags_q2_raw;
+  logic         [  FLOAT_FLAGS_W-1:0] root_float_flags_q2_raw;
   logic signed  [   SIGNED_EXP_W-1:0] root_exp_signed_q2;
   logic         [ROOT_EXTENDED_W-1:0] root_extended_q;
   logic                               sticky_rem_q;
