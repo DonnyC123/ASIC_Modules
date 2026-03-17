@@ -61,36 +61,6 @@ module sqrt_float #(
       .root_exp_o     (root_exp_signed)
   );
 
-  data_status_pipeline #(
-      .DATA_W    (MANTISSA_W),
-      .STATUS_W  (1),
-      .PIPE_DEPTH(1),
-      .CLOCK_GATE(1)
-  ) decode_to_mantissa_pipe (
-      .clk     (clk),
-      .rst_n   (rst_n),
-      .data_i  (norm_mant_rad),
-      .status_i(rad_valid_i),
-      .data_o  (norm_mant_rad_q),
-      .status_o(decode_valid_q)
-  );
-
-  assign root_float_flags_raw = FLOAT_FLAGS_W'(root_float_flags);
-
-  data_status_pipeline #(
-      .DATA_W    (SIGNED_EXP_W + FLOAT_FLAGS_W),
-      .STATUS_W  (1),
-      .PIPE_DEPTH(1)
-  ) flags_exp_delay_pipe (
-      .clk     (clk),
-      .rst_n   (rst_n),
-      .data_i  ({root_exp_signed, root_float_flags_raw}),
-      .status_i(rad_valid_i),
-      .data_o  ({root_exp_signed_q2, root_float_flags_q2_raw}),
-      .status_o(flags_exp_valid_q2)
-  );
-
-  assign root_float_flags_q2 = float_flags_t'(root_float_flags_q2_raw);
 
   sqrt_mantissa #(
       .MANTISSA_W     (MANTISSA_W),
@@ -100,23 +70,9 @@ module sqrt_float #(
 
       .clk            (clk),
       .rst_n          (rst_n),
-      .mantissa_rad_i (norm_mant_rad_q),
+      .mantissa_rad_i (norm_mant_rad),
       .root_extended_o(root_extended),
       .sticky_rem_o   (sticky_rem)
-  );
-
-
-  data_status_pipeline #(
-      .DATA_W    (ROOT_EXTENDED_W + 1),
-      .STATUS_W  (1),
-      .PIPE_DEPTH(1)
-  ) engine_to_round_pipe (
-      .clk     (clk),
-      .rst_n   (rst_n),
-      .data_i  ({root_extended, sticky_rem}),
-      .status_i(decode_valid_q),
-      .data_o  ({root_extended_q, sticky_rem_q}),
-      .status_o(mantissa_valid_q)
   );
 
   root_rounder #(
@@ -126,10 +82,10 @@ module sqrt_float #(
       .ROOT_EXTENDED_W(ROOT_EXTENDED_W),
       .float_t        (float_t)
   ) root_rounder_inst (
-      .float_root_flags_i(root_float_flags_q2),
-      .root_exp_i        (root_exp_signed_q2),
-      .root_raw_i        (root_extended_q),
-      .sticky_i          (sticky_rem_q),
+      .float_root_flags_i(root_float_flags),
+      .root_exp_i        (root_exp_signed),
+      .root_raw_i        (root_extended),
+      .sticky_i          (sticky_rem),
       .root_o            (float_root_unpacked)
   );
 
@@ -141,7 +97,7 @@ module sqrt_float #(
       .clk     (clk),
       .rst_n   (rst_n),
       .data_i  (float_root_unpacked),
-      .status_i(mantissa_valid_q),     // Fixed: Use valid signal from rounder input stage
+      .status_i(rad_valid_i),          // Fixed: Use valid signal from rounder input stage
       .data_o  (root_o),
       .status_o(root_valid_o)
   );

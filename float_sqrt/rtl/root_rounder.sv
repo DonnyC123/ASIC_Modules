@@ -4,7 +4,7 @@ module root_rounder
     parameter FRAC_W          = 10,
     parameter EXP_W           = 5,
     parameter SIGNED_EXP_W    = 8,
-    parameter ROOT_EXTENDED_W = 13,
+    parameter ROOT_EXTENDED_W = 12,
     parameter type float_t    = struct packed {
       logic sign;
       logic [EXP_W-1:0] exp;
