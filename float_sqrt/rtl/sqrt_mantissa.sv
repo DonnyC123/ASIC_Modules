@@ -82,10 +82,10 @@ module sqrt_mantissa #(
   endgenerate
 
   always_comb begin
-    root_extended = Q[PIPELINE_STAGES];
+    root_extended_o = Q[PIPELINE_STAGES];
 
-    valid_o       = valid[PIPELINE_STAGES];
-    sticky_rem_o  = (AX[PIPELINE_STAGES] != '0);
+    valid_o         = valid[PIPELINE_STAGES];
+    sticky_rem_o    = (AX[PIPELINE_STAGES] != '0);
   end
 
 endmodule
