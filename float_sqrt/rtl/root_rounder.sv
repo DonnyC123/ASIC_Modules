@@ -44,9 +44,10 @@ module root_rounder
       sticky          = sticky_i;
     end
 
-    guard            = root_normalized[0];
-    lsb              = root_normalized[1];
-    root_unrounded   = {1'b0, root_normalized[ROOT_EXTENDED_W-1:1]};
+    sticky |= root_normalized[0];
+    guard            = root_normalized[1];
+    lsb              = root_normalized[2];
+    root_unrounded   = {1'b0, root_normalized[ROOT_EXTENDED_W-1:2]};
 
     round_up         = guard && (sticky || lsb);
     root_rounded_raw = root_unrounded + round_up;
