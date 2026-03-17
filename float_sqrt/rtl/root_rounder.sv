@@ -46,14 +46,12 @@ module root_rounder
       sticky          = sticky_i;
     end
 
-    guard            = root_normalized[1];
-    lsb              = root_normalized[2];
+    guard            = root_normalized[0];
+    lsb              = root_normalized[1];
 
-    final_sticky     = sticky || root_normalized[0];
+    root_unrounded   = {2'b00, root_normalized[11:1]};
 
-    root_unrounded   = {2'b00, root_normalized[ROOT_EXTENDED_W-1:2]};
-
-    round_up         = guard && (final_sticky || lsb);
+    round_up         = guard && (sticky || lsb);
     root_rounded_raw = root_unrounded + round_up;
 
     if (root_rounded_raw[MANTISSA_W]) begin
@@ -63,6 +61,9 @@ module root_rounder
       root_mantissa    = root_rounded_raw[MANTISSA_W-1:0];
       root_exp_rounded = (root_exp_i < 1) ? 0 : root_exp_i;
     end
+
+
+
   end
 
   always_comb begin
