@@ -13,7 +13,6 @@ module sqrt_float #(
 
   import sqrt_float_pkg::*;
 
-  localparam MANTISSA_INT_W  = 1;
   localparam GUARD_W         = 1;
   localparam SIGN_W          = 1;
   localparam MANTISSA_W      = FRAC_W + MANTISSA_INT_W;

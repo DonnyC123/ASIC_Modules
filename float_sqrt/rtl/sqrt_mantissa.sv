@@ -1,6 +1,6 @@
 module sqrt_mantissa #(
     parameter int MANTISSA_W      = 12,
-    parameter int ROOT_EXTENDED_W = 12,
+    parameter int ROOT_EXTENDED_W = 13,
     parameter int PIPELINE_STAGES = 1
 ) (
     input  logic                       clk,
