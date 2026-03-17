@@ -93,18 +93,18 @@ module sqrt_float #(
   assign root_float_flags_q2 = float_flags_t'(root_float_flags_q2_raw);
 
   sqrt_mantissa #(
-      .MANTISSA_W     (MANTISSA_W),
-      .ROOT_EXTENDED_W(ROOT_EXTENDED_W),
-      .PIPELINE_STAGES(2)
+      .MANTISSA_W     (12),
+      .ROOT_EXTENDED_W(13),
+      .PIPELINE_STAGES(1)
   ) sqrt_mantissa_inst (
+
       .clk            (clk),
       .rst_n          (rst_n),
       .mantissa_rad_i (norm_mant_rad_q),
-      .valid_i        (decode_valid_q),
       .root_extended_o(root_extended),
-      .sticky_rem_o   (sticky_rem),
-      .valid_o        (mantissa_valid)
+      .sticky_rem_o   (sticky_rem)
   );
+
 
   data_status_pipeline #(
       .DATA_W    (ROOT_EXTENDED_W + 1),
@@ -114,7 +114,7 @@ module sqrt_float #(
       .clk     (clk),
       .rst_n   (rst_n),
       .data_i  ({root_extended, sticky_rem}),
-      .status_i(mantissa_valid),
+      .status_i(decode_valid_q),
       .data_o  ({root_extended_q, sticky_rem_q}),
       .status_o(mantissa_valid_q)
   );
