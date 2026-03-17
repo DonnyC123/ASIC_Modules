@@ -7,7 +7,8 @@
                                              
 ../../common/rtl/leading_zero_counter.sv     
 ../../common/rtl/leading_zero_counter_top.sv 
-                                             
+         
+../../uint64_sqrt/non_restoring_sqrt_rtl/sqrt_non_restoring_stage.sv
 ../rtl/sqrt_float_pkg.sv                  
 ../rtl/sqrt_float_decoder.sv              
 ../rtl/sqrt_mantissa.sv
