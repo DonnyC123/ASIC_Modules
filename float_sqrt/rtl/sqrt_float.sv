@@ -30,6 +30,8 @@ module sqrt_float #(
   float_t                             float_root_unpacked;
 
   float_flags_t                       root_float_flags;
+  logic         [   FLOAT_FLAG_W-1:0] root_float_flags_raw;
+
   logic         [     MANTISSA_W-1:0] norm_mant_rad;
   logic signed  [   SIGNED_EXP_W-1:0] root_exp_signed;
 
@@ -37,6 +39,7 @@ module sqrt_float #(
   logic                               decode_valid_q;
 
   float_flags_t                       root_float_flags_q2;
+  logic         [   FLOAT_FLAG_W-1:0] root_float_flags_q2_raw;
   logic signed  [   SIGNED_EXP_W-1:0] root_exp_signed_q2;
   logic         [ROOT_EXTENDED_W-1:0] root_extended_q;
   logic                               sticky_rem_q;
@@ -73,6 +76,8 @@ module sqrt_float #(
       .status_o(decode_valid_q)
   );
 
+  assign root_float_flags_raw = FLOAT_FLAGS_W'(root_float_flags);
+
   data_status_pipeline #(
       .DATA_W    (SIGNED_EXP_W + FLOAT_FLAGS_W),
       .STATUS_W  (1),
@@ -81,11 +86,13 @@ module sqrt_float #(
   ) flags_exp_delay_pipe (
       .clk     (clk),
       .rst_n   (rst_n),
-      .data_i  ({root_exp_signed, FLOAT_FLAGS_W'(root_float_flags)}),
+      .data_i  ({root_exp_signed, root_float_flags_raw}),
       .status_i(rad_valid_i),
-      .data_o  ({root_exp_signed_q2, FLOAT_FLAGS_W'(root_float_flags_q2)}),
+      .data_o  ({root_exp_signed_q2, root_float_flags_q2_raw}),
       .status_o(flags_exp_valid_q2)
   );
+
+  assign root_float_flags_q2 = float_flags_t'(root_float_flags_q2_raw);
 
   sqrt_mantissa #(
       .MANTISSA_W     (MANTISSA_W),
