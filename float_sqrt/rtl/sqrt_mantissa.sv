@@ -13,7 +13,7 @@ module sqrt_mantissa #(
   import sqrt_float_pkg::*;
 
   localparam SIGN_W      = 1;
-  localparam REMAINDER_W = 2 * ROOT_EXTENDED_W + SIGN_W;
+  localparam REMAINDER_W = 2 * (MANTISSA_W + 1) + SIGN_W;
   localparam TEST_SUB_W  = ROOT_EXTENDED_W + SIGN_W;
 
   localparam STAGE_STEPS           = ROOT_EXTENDED_W / PIPELINE_STAGES;
@@ -58,14 +58,9 @@ module sqrt_mantissa #(
     root_extended    = Q_out;
 
     final_rem_is_neg = AX_out[REMAINDER_W-1];
+    root_extended_o  = root_extended;
 
-    if (final_rem_is_neg) begin
-      root_extended_o = root_extended - 1'b1;
-    end else begin
-      root_extended_o = root_extended;
-    end
-
-    sticky_rem_o = (AX_out != '0);
+    sticky_rem_o     = (AX_out != '0);
   end
 
 endmodule
