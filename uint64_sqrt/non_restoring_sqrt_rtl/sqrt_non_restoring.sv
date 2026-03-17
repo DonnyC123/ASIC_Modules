@@ -18,18 +18,15 @@ module sqrt_non_restoring #(
   localparam STAGE_STEPS           = DOUT_W / PIPELINE_STAGES;
   localparam REMAINING_STAGE_STEPS = DOUT_W - PIPELINE_STAGES * STAGE_STEPS;
 
-  logic                   final_rem_is_neg;
-  logic [     DOUT_W-1:0] floored_root;
+  logic [REMAINDER_W-1:0] AX     [PIPELINE_STAGES+1];
+  logic [ TEST_SUB_W-1:0] T      [PIPELINE_STAGES+1];
+  logic [     DOUT_W-1:0] Q      [PIPELINE_STAGES+1];
 
-  logic [REMAINDER_W-1:0] AX               [PIPELINE_STAGES+1];
-  logic [ TEST_SUB_W-1:0] T                [PIPELINE_STAGES+1];
-  logic [     DOUT_W-1:0] Q                [PIPELINE_STAGES+1];
+  logic [REMAINDER_W-1:0] AX_next[PIPELINE_STAGES+1];
+  logic [ TEST_SUB_W-1:0] T_next [PIPELINE_STAGES+1];
+  logic [     DOUT_W-1:0] Q_next [PIPELINE_STAGES+1];
 
-  logic [REMAINDER_W-1:0] AX_next          [PIPELINE_STAGES+1];
-  logic [ TEST_SUB_W-1:0] T_next           [PIPELINE_STAGES+1];
-  logic [     DOUT_W-1:0] Q_next           [PIPELINE_STAGES+1];
-
-  logic                   valid            [PIPELINE_STAGES+1];
+  logic                   valid  [PIPELINE_STAGES+1];
 
   always_comb begin
     AX[0][DIN_W-1:0]           = rad_i;
