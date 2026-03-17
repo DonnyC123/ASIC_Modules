@@ -35,7 +35,7 @@ module sqrt_mantissa #(
   logic                       valid            [PIPELINE_STAGES+1];
 
   always_comb begin
-    AX[0][MANTISSA_W-1:0]           = mantissa_rad_i;
+    AX[0]                           = {1'b0, mantissa_rad_i, {MANTISSA_W{1'b0}}};
     valid[0]                        = valid_i;
 
     AX[0][REMAINDER_W-1:MANTISSA_W] = '0;
