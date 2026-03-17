@@ -5,7 +5,7 @@ package sqrt_float_pkg;
   localparam GUARD_W         = 1;
   localparam FLOAT_FLAGS_W   = 4;
 
-typedef struct {
+typedef struct packed {
   logic sign;
   logic inf;
   logic nan;
