@@ -63,15 +63,6 @@ module root_rounder
       root_mantissa    = root_rounded_raw[MANTISSA_W-1:0];
       root_exp_rounded = (root_exp_i < 1) ? 0 : root_exp_i;
     end
-
-
-    if (root_rounded_raw[MANTISSA_W]) begin
-      root_mantissa    = root_rounded_raw[MANTISSA_W:1];
-      root_exp_rounded = (root_exp_i < 1) ? 1 : root_exp_i + 1;
-    end else begin
-      root_mantissa    = root_rounded_raw[MANTISSA_W-1:0];
-      root_exp_rounded = (root_exp_i < 1) ? 0 : root_exp_i;
-    end
   end
 
   always_comb begin
