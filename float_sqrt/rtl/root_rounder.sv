@@ -49,12 +49,12 @@ module root_rounder
     guard            = root_normalized[0];
     lsb              = root_normalized[1];
 
-    root_unrounded   = {2'b00, root_normalized[11:1]};
+    root_unrounded   = {2'b00, root_normalized[MANTISSA_W:1]};
 
     round_up         = guard && (sticky || lsb);
     root_rounded_raw = root_unrounded + round_up;
 
-    if (root_rounded_raw[MANTISSA_W]) begin
+    if (root_rounded_raw[MANTISSA_W+1]) begin
       root_mantissa    = root_rounded_raw[MANTISSA_W:1];
       root_exp_rounded = (root_exp_i < 1) ? 1 : root_exp_i + 1;
     end else begin
