@@ -51,11 +51,11 @@ module sqrt_mantissa #(
                               REMAINING_STAGE_STEPS + STAGE_STEPS                
                             : STAGE_STEPS;
 
-      sqrt_non_restoring_stage #(
+      sqrt_restoring_stage #(
           .DIN_W     (ROOT_EXTENDED_W),
           .DOUT_W    (ROOT_EXTENDED_W),
           .SQRT_STEPS(SQRT_STEPS)
-      ) sqrt_non_restoring_stage_inst (
+      ) sqrt_restoring_stage_inst (
           .AX_i(AX[stage_idx]),
           .T_i (T[stage_idx]),
           .Q_i (Q[stage_idx]),
@@ -82,17 +82,10 @@ module sqrt_mantissa #(
   endgenerate
 
   always_comb begin
-    root_extended    = Q[PIPELINE_STAGES];
-    final_rem_is_neg = AX[PIPELINE_STAGES][REMAINDER_W-1];
+    root_extended = Q[PIPELINE_STAGES];
 
-    if (final_rem_is_neg) begin
-      root_extended_o = root_extended - 1'b1;
-    end else begin
-      root_extended_o = root_extended;
-    end
-
-    valid_o      = valid[PIPELINE_STAGES];
-    sticky_rem_o = (AX[PIPELINE_STAGES] != '0);
+    valid_o       = valid[PIPELINE_STAGES];
+    sticky_rem_o  = (AX[PIPELINE_STAGES] != '0);
   end
 
 endmodule
