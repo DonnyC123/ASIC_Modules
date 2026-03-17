@@ -11,7 +11,7 @@ module sqrt_float #(
     output logic              root_valid_o
 );
 
-  import float_sqrt_pkg::*;
+  import sqrt_float_pkg::*;
 
   localparam MANTISSA_INT_W  = 1;
   localparam GUARD_W         = 1;
