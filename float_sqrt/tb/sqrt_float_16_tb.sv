@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module tb_root_float;
+module sqrt_float_tb;
 
   import float_16_tb_pkg::*;
 
@@ -67,13 +67,11 @@ module tb_root_float;
       return;
     end
 
-    // 4. Extract DUT Result and Compare
     real_root_dut = upscale_to_double(root_o);
     real_root_ref = upscale_to_double(expected_bits);
 
     check_pass    = 0;
 
-    // Check conditions: Exact 0.0, Exact Match, or Both are NaN
     if ((real_root_dut == 0.0 && real_root_ref == 0.0) || 
         (real_root_dut == real_root_ref) || 
         (is_nan(
@@ -103,7 +101,6 @@ module tb_root_float;
     rst_n = 1;
     repeat (2) @(posedge clk);
 
-    // Explicit Basic Tests
     check_result("Sqrt(4.0)", downscale_double(4.0));
     check_result("Sqrt(2.0)", downscale_double(2.0));
     check_result("Sqrt(0.25)", downscale_double(0.25));

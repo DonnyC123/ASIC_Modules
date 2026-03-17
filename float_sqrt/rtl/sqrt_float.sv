@@ -54,7 +54,7 @@ module sqrt_float #(
       .MANTISSA_W(MANTISSA_W)
   ) sqrt_float_decoder_inst (
       .float_rad_i    (float_rad),
-      .float_flags_o  (root_float_flags),
+      .root_flags_o   (root_float_flags),
       .norm_mant_rad_o(norm_mant_rad),
       .root_exp_o     (root_exp_signed)
   );
@@ -81,9 +81,9 @@ module sqrt_float #(
   ) flags_exp_delay_pipe (
       .clk     (clk),
       .rst_n   (rst_n),
-      .data_i  ({root_exp_signed, root_float_flags}),
+      .data_i  ({root_exp_signed, FLOAT_FLAGS_W'(root_float_flags)}),
       .status_i(rad_valid_i),
-      .data_o  ({root_exp_signed_q2, root_float_flags_q2}),
+      .data_o  ({root_exp_signed_q2, FLOAT_FLAGS_W'(root_float_flags_q2)}),
       .status_o(flags_exp_valid_q2)
   );
 

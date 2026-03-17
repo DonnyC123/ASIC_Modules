@@ -4,7 +4,7 @@ BITWIDTH ?= 16
 
 TB_FILE = mac_float_$(BITWIDTH)_tb.sv
 
-TOP = tb_mac_float
+TOP = sqrt_float_tb
 
 FLAGS = -64bit -sv -f run.f $(TB_FILE) -timescale 1ns/1ps -access +rwc -l xrun_$(BITWIDTH)bit.log
 
