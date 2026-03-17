@@ -33,6 +33,8 @@ module root_rounder
   logic                                lsb;
   logic                                round_up;
 
+  logic                                final_sticky;
+
   always_comb begin
     temp_shift_reg = {root_raw_i, {ROOT_EXTENDED_W{1'b0}}} >> (1 - root_exp_i);
 
@@ -44,13 +46,24 @@ module root_rounder
       sticky          = sticky_i;
     end
 
-    sticky |= root_normalized[0];
     guard            = root_normalized[1];
     lsb              = root_normalized[2];
-    root_unrounded   = {1'b0, root_normalized[ROOT_EXTENDED_W-1:2]};
 
-    round_up         = guard && (sticky || lsb);
+    final_sticky     = sticky || root_normalized[0];
+
+    root_unrounded   = {2'b00, root_normalized[ROOT_EXTENDED_W-1:2]};
+
+    round_up         = guard && (final_sticky || lsb);
     root_rounded_raw = root_unrounded + round_up;
+
+    if (root_rounded_raw[MANTISSA_W]) begin
+      root_mantissa    = root_rounded_raw[MANTISSA_W:1];
+      root_exp_rounded = (root_exp_i < 1) ? 1 : root_exp_i + 1;
+    end else begin
+      root_mantissa    = root_rounded_raw[MANTISSA_W-1:0];
+      root_exp_rounded = (root_exp_i < 1) ? 0 : root_exp_i;
+    end
+
 
     if (root_rounded_raw[MANTISSA_W]) begin
       root_mantissa    = root_rounded_raw[MANTISSA_W:1];
