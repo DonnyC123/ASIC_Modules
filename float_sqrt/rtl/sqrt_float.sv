@@ -16,8 +16,9 @@ module sqrt_float #(
   localparam GUARD_W         = 1;
   localparam SIGN_W          = 1;
   localparam MANTISSA_W      = FRAC_W + MANTISSA_INT_W;
-  localparam ROOT_EXTENDED_W = FRAC_W + MANTISSA_INT_W;
+  localparam ROOT_EXTENDED_W = FRAC_W + MANTISSA_INT_W + GUARD_W;
   localparam SIGNED_EXP_W    = EXP_W + SIGN_W;
+  localparam SQRT_STAGES     = 2;
 
   typedef struct packed {
     logic sign;
@@ -80,7 +81,7 @@ module sqrt_float #(
   data_status_pipeline #(
       .DATA_W    (SIGNED_EXP_W + FLOAT_FLAGS_W),
       .STATUS_W  (1),
-      .PIPE_DEPTH(2)
+      .PIPE_DEPTH(SQRT_STAGES)
   ) flags_exp_delay_pipe (
       .clk     (clk),
       .rst_n   (rst_n),
@@ -95,7 +96,7 @@ module sqrt_float #(
   sqrt_mantissa #(
       .MANTISSA_W     (MANTISSA_W),
       .ROOT_EXTENDED_W(ROOT_EXTENDED_W),
-      .PIPELINE_STAGES(2)
+      .PIPELINE_STAGES(SQRT_STAGES + 2)
   ) sqrt_mantissa_inst (
       .clk            (clk),
       .rst_n          (rst_n),
