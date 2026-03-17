@@ -64,10 +64,8 @@ module sqrt_float #(
 
   sqrt_mantissa #(
       .MANTISSA_W     (MANTISSA_W),
-      .ROOT_EXTENDED_W(ROOT_EXTENDED_W),
-      .PIPELINE_STAGES(1)
+      .ROOT_EXTENDED_W(ROOT_EXTENDED_W)
   ) sqrt_mantissa_inst (
-
       .clk            (clk),
       .rst_n          (rst_n),
       .mantissa_rad_i (norm_mant_rad),
