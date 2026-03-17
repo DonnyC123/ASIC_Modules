@@ -34,7 +34,6 @@ module root_rounder
   logic                                round_up;
 
   logic                                final_sticky;
-  logic                                exact_root_artifact;
 
   always_comb begin
     temp_shift_reg = {root_raw_i, {ROOT_EXTENDED_W{1'b0}}} >> (1 - root_exp_i);
@@ -46,17 +45,14 @@ module root_rounder
       root_normalized = root_raw_i;
       sticky          = sticky_i;
     end
-    guard               = root_normalized[1];
-    lsb                 = root_normalized[2];
 
-    final_sticky        = sticky || root_normalized[0];
+    guard            = root_normalized[0];
+    lsb              = root_normalized[1];
 
-    root_unrounded      = {2'b00, root_normalized[ROOT_EXTENDED_W-1:2]};
+    root_unrounded   = {2'b00, root_normalized[11:1]};
 
-    exact_root_artifact = (root_unrounded[MANTISSA_W-2:0] == '0);
-
-    round_up            = guard && (final_sticky || lsb) && !exact_root_artifact;
-    root_rounded_raw    = root_unrounded + round_up;
+    round_up         = guard && (sticky || lsb);
+    root_rounded_raw = root_unrounded + round_up;
 
     if (root_rounded_raw[MANTISSA_W]) begin
       root_mantissa    = root_rounded_raw[MANTISSA_W:1];
@@ -65,6 +61,8 @@ module root_rounder
       root_mantissa    = root_rounded_raw[MANTISSA_W-1:0];
       root_exp_rounded = (root_exp_i < 1) ? 0 : root_exp_i;
     end
+
+
 
   end
 
