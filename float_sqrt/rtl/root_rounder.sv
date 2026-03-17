@@ -20,10 +20,10 @@ module root_rounder
 );
 
   logic        [  ROOT_EXTENDED_W-1:0] root_normalized;
-  logic        [  ROOT_EXTENDED_W-1:0] root_unrounded;
-  logic        [    ROOT_EXTENDED_W:0] root_rounded_raw;
+  logic        [       MANTISSA_W-1:0] root_unrounded;
+  logic        [       MANTISSA_W-1:0] root_rounded_raw;
 
-  logic        [       MANTISSA_W-1:0] root_mantissa;
+  logic        [           FRAC_W-1:0] root_frac;
   logic signed [     SIGNED_EXP_W-1:0] root_exp_rounded;
 
   logic        [2*ROOT_EXTENDED_W-1:0] temp_shift_reg;
@@ -49,16 +49,16 @@ module root_rounder
     guard            = root_normalized[0];
     lsb              = root_normalized[1];
 
-    root_unrounded   = {2'b00, root_normalized[MANTISSA_W:1]};
+    root_unrounded   = {1'b0, root_normalized[MANTISSA_W-1:1]};
 
     round_up         = guard && (sticky || lsb);
     root_rounded_raw = root_unrounded + round_up;
 
-    if (root_rounded_raw[MANTISSA_W+1]) begin
-      root_mantissa    = root_rounded_raw[MANTISSA_W:1];
+    if (root_rounded_raw[MANTISSA_W-1]) begin
+      root_frac        = root_rounded_raw[MANTISSA_W-1:1];
       root_exp_rounded = (root_exp_i < 1) ? 1 : root_exp_i + 1;
     end else begin
-      root_mantissa    = root_rounded_raw[MANTISSA_W-1:0];
+      root_frac        = root_rounded_raw[FRAC_W-1:0];
       root_exp_rounded = (root_exp_i < 1) ? 0 : root_exp_i;
     end
 
@@ -68,7 +68,7 @@ module root_rounder
 
   always_comb begin
     root_o.sign = float_root_flags_i.sign;
-    root_o.frac = root_mantissa[FRAC_W-1:0];
+    root_o.frac = root_frac;
     root_o.exp  = root_exp_rounded[EXP_W-1:0];
 
     if (float_root_flags_i.nan) begin
