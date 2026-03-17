@@ -33,8 +33,6 @@ module srt_sqrt_stage
   assign rem_carry_shift = rem_carry_i << RADIX_W;
   assign raw_q_idx       = root_q_i[FRAC_BITS-:6];
 
-  assign raw_q_idx       = root_q_i[FRAC_BITS-:6];
-
   always_comb begin
     if (raw_q_idx[INT_W-1]) begin
       q_idx = 4'd15;
