@@ -55,7 +55,7 @@ module srt_sqrt_stage
 
   always_comb begin
     neg_sub = '0;
-    if (1) begin
+    if (USE_ADDER) begin
       case (q_digit)
         3'sd2, -3'sd2: two_root_q = root_q_i << 2;
         3'sd1, -3'sd1: two_root_q = root_q_i << 1;
