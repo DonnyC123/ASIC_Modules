@@ -93,8 +93,8 @@ module sqrt_float #(
   assign root_float_flags_q2 = float_flags_t'(root_float_flags_q2_raw);
 
   sqrt_mantissa #(
-      .MANTISSA_W     (12),
-      .ROOT_EXTENDED_W(13),
+      .MANTISSA_W     (MANTISSA_W),
+      .ROOT_EXTENDED_W(ROOT_EXTENDED_W),
       .PIPELINE_STAGES(1)
   ) sqrt_mantissa_inst (
 
