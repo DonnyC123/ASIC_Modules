@@ -18,8 +18,8 @@ module sqrt_mantissa #(
   localparam REMAINING_STAGE_STEPS = ROOT_EXTENDED_W - PIPELINE_STAGES * STAGE_STEPS;
   localparam SQRT_STEPS            = ROOT_EXTENDED_W;
 
-  localparam REMAINDER_W = TEST_SUB_W + (2 * SQRT_STEPS);
   localparam TEST_SUB_W  = ROOT_EXTENDED_W + SIGN_W + 2;
+  localparam REMAINDER_W = TEST_SUB_W + (2 * SQRT_STEPS);
 
 
 
