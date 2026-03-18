@@ -15,7 +15,7 @@ module sqrt_float_tb;
   logic [DATA_W-1:0] root_o;
   logic              root_valid_o;
 
-  root_float #(
+  sqrt_float #(
       .EXP_W (EXP_W),
       .FRAC_W(FRAC_W)
   ) dut (

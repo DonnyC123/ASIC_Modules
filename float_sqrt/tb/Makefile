@@ -2,7 +2,7 @@ XRUN = xrun
 
 BITWIDTH ?= 16
 
-TB_FILE = mac_float_$(BITWIDTH)_tb.sv
+TB_FILE = sqrt_float_$(BITWIDTH)_tb.sv
 
 TOP = sqrt_float_tb
 
