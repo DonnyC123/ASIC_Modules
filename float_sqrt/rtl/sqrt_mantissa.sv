@@ -53,37 +53,47 @@ module sqrt_mantissa #(
       .T_o (T_out),
       .Q_o (Q_out)
   );
-
-  logic [REMAINDER_W-1:0] tc_AX_out;
   logic [REMAINDER_W-1:0] true_rem;
   logic [ TEST_SUB_W-1:0] restore_val;
 
   always_comb begin
     root_extended    = Q_out;
 
-    // 1. CONVERT TO TWO'S COMPLEMENT
-    // Flips the Carry-Out MSB so we can do standard signed math
-    tc_AX_out        = {~AX_out[REMAINDER_W-1], AX_out[REMAINDER_W-2:0]};
-
-    // 2. CHECK OVERSHOOT
-    final_rem_is_neg = tc_AX_out[REMAINDER_W-1];
+    // 1. THE TRUE SIGN CHECK
+    // No '!', no flipping. AX_out is standard Two's Complement.
+    final_rem_is_neg = AX_out[REMAINDER_W-1];
 
     if (final_rem_is_neg) begin
+      // It overshot. Subtract 1 to correct the root.
       root_extended_o = root_extended - 1'b1;
 
-      // The exact integer mathematical overshoot is (2Q + 1)
+      // Build the integer overshoot value (2Q + 1)
       restore_val     = {root_extended_o, 1'b1};
 
-      // Add DIRECTLY. No 12-bit shift needed because AX_out is a standard integer!
-      true_rem        = tc_AX_out + restore_val;
+      // Add it back to perfectly cancel out the negative remainder
+      true_rem        = AX_out + restore_val;
     end else begin
+      // No overshoot. Everything is already correct.
       root_extended_o = root_extended;
-      true_rem        = tc_AX_out;
+      true_rem        = AX_out;
     end
 
-    // 3. STICKY BIT
-    // Since true_rem is the exact integer remainder, we just check if it's non-zero!
+    // 2. THE STICKY BIT
+    // Because true_rem is completely restored to 0 for exact squares,
+    // we can safely check the whole register.
     sticky_rem_o = (true_rem != '0);
   end
+
+
+
+
+
+
+
+
+
+
+
+
 
 endmodule
