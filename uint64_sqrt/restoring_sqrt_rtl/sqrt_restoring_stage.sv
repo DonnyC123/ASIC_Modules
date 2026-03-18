@@ -1,9 +1,9 @@
 module sqrt_restoring_stage #(
-    parameter      DIN_W       = 64,
-    parameter  int SQRT_STEPS  = 16,
-    parameter      DOUT_W      = DIN_W / 2,      // I could make these marcos
-    localparam     REMAINDER_W = 2 * DIN_W + 1,
-    localparam     TEST_SUB_W  = DIN_W + 1
+    parameter DIN_W       = 64,
+    parameter SQRT_STEPS  = 16,
+    parameter DOUT_W      = DIN_W / 2,      // I could make these marcos
+    parameter REMAINDER_W = 2 * DIN_W + 1,
+    parameter TEST_SUB_W  = DIN_W + 1
 ) (
     input  logic [REMAINDER_W-1:0] AX_i,
     input  logic [ TEST_SUB_W-1:0] T_i,
