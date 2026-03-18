@@ -59,33 +59,32 @@ module sqrt_mantissa #(
   always_comb begin
     root_extended    = Q_out;
 
-    // 1. THE TRUE SIGN CHECK
-    // No '!', no flipping. AX_out is standard Two's Complement.
+    // 1. STANDARD SIGN CHECK (No '!', No bit-flipping)
+    // 1 = Negative (Overshoot), 0 = Positive
     final_rem_is_neg = AX_out[REMAINDER_W-1];
 
     if (final_rem_is_neg) begin
-      // It overshot. Subtract 1 to correct the root.
+      // Correct the overshoot
       root_extended_o = root_extended - 1'b1;
 
-      // Build the integer overshoot value (2Q + 1)
+      // Construct the mathematical overshoot value (2Q + 1)
       restore_val     = {root_extended_o, 1'b1};
 
-      // Add it back to perfectly cancel out the negative remainder
-      true_rem        = AX_out + restore_val;
+      // 2. RESTORE THE REMAINDER (Aligned to the Top)
+      // Since AX_out shifts the remainder to the MSBs, we must pad the 
+      // restore value with zeros at the bottom so they perfectly align!
+      true_rem        = AX_out + {restore_val, {(REMAINDER_W - TEST_SUB_W) {1'b0}}};
     end else begin
-      // No overshoot. Everything is already correct.
+      // No overshoot, remainder is naturally correct
       root_extended_o = root_extended;
       true_rem        = AX_out;
     end
 
-    // 2. THE STICKY BIT
-    // Because true_rem is completely restored to 0 for exact squares,
-    // we can safely check the whole register.
-    sticky_rem_o = (true_rem != '0);
+    // 3. MASK THE STICKY BIT
+    // Only check the top bits where the true remainder actually lives.
+    // The bottom bits are just shift-garbage and must be ignored.
+    sticky_rem_o = (true_rem[REMAINDER_W-1 : REMAINDER_W-TEST_SUB_W] != '0);
   end
-
-
-
 
 
 
