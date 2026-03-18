@@ -35,7 +35,6 @@ module sqrt_float #(
 
   logic         [ROOT_EXTENDED_W-1:0] root_extended;
   logic                               sticky_rem;
-  logic                               mantissa_valid;
 
   assign float_rad = float_t'(rad_i);
 
