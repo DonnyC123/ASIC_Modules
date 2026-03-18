@@ -43,7 +43,7 @@ module sqrt_mantissa #(
   sqrt_restoring_stage #(
       .DIN_W     (MANTISSA_W),
       .DOUT_W    (ROOT_EXTENDED_W),
-      .SQRT_STEPS(SQRT_STEPS)
+      .SQRT_STEPS(SQRT_STEPS - 1)
   ) sqrt_restoring_stage_inst (
       .AX_i(AX),
       .T_i (T),
