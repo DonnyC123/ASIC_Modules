@@ -110,7 +110,7 @@ module sqrt_float_tb;
     check_result("Hex 0x3C00 (1.0)", 16'h3C00);
 
     $display("--- Random Stress Test ---");
-    for (i = 0; i < 100000; i++) begin
+    for (i = 0; i < 10000000; i++) begin
       logic [DATA_W-1:0] rand_val;
       void'(std::randomize(rand_val));
 
