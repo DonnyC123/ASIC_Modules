@@ -1,6 +1,6 @@
 module sqrt_mantissa #(
     parameter int MANTISSA_W      = 12,
-    parameter int ROOT_EXTENDED_W = 12,
+    parameter int ROOT_EXTENDED_W = 13,
     parameter int PIPELINE_STAGES = 1
 ) (
     input  logic                       clk,
@@ -34,7 +34,7 @@ module sqrt_mantissa #(
   logic [ROOT_EXTENDED_W-1:0] Q_out;
 
   always_comb begin
-    AX[ROOT_EXTENDED_W-1:0]           = mantissa_rad_i;
+    AX[ROOT_EXTENDED_W-1:0]           = {mantissa_rad_i, 1'b0};
     AX[REMAINDER_W-1:ROOT_EXTENDED_W] = '0;
     T                                 = '0;
     Q                                 = '0;
@@ -64,15 +64,15 @@ module sqrt_mantissa #(
     final_rem_is_neg = AX_out[REMAINDER_W-1];
 
     if (final_rem_is_neg) begin
-      // Overshoot detected. Subtract 1 to correct the root.
+      // Overshoot detected. Correct the root.
       root_extended_o = root_extended - 1'b1;
 
       // Construct the exact integer mathematical overshoot (2Q + 1)
       restore_val     = {root_extended_o, 1'b1};
 
-      // 2. PURE INTEGER RESTORATION
-      // Add it directly to the bottom. No shifting required!
-      true_rem        = AX_out + restore_val;
+      // 2. HARDWARE-EFFICIENT RESTORATION
+      // Pad the restore value with zeros so it aligns perfectly with the shifts!
+      true_rem        = AX_out + {restore_val, {(2 * SQRT_STEPS) {1'b0}}};
     end else begin
       // No overshoot. Everything is naturally correct.
       root_extended_o = root_extended;
@@ -80,9 +80,39 @@ module sqrt_mantissa #(
     end
 
     // 3. THE STICKY BIT
-    // Because true_rem is a pure integer, we just check the whole register.
-    // If it's a perfect square, it will be exactly 0.
-    sticky_rem_o = (true_rem != '0);
+    // Only check the top active bits where the true remainder actually lives.
+    // The bottom bits are just shift-garbage and are safely ignored.
+    sticky_rem_o = (true_rem[REMAINDER_W-1 : 2*SQRT_STEPS] != '0);
   end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 endmodule
