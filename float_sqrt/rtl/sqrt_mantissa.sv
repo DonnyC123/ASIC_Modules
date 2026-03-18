@@ -53,40 +53,36 @@ module sqrt_mantissa #(
       .T_o (T_out),
       .Q_o (Q_out)
   );
-
-  logic [REMAINDER_W-1:0] tc_AX_out;  // Two's complement version
   logic [REMAINDER_W-1:0] true_rem;
   logic [ TEST_SUB_W-1:0] restore_val;
 
   always_comb begin
     root_extended    = Q_out;
 
-    // 1. CONVERT FROM CARRY-OUT TO TWO'S COMPLEMENT
-    // Flips the MSB so 1 = Negative, 0 = Positive
-    tc_AX_out        = {~AX_out[REMAINDER_W-1], AX_out[REMAINDER_W-2:0]};
-
-    // 2. CHECK THE TRUE SIGN
-    final_rem_is_neg = tc_AX_out[REMAINDER_W-1];
+    // 1. STANDARD SIGN CHECK
+    // No '!', no bit-flipping. Just the pure Two's Complement MSB.
+    final_rem_is_neg = AX_out[REMAINDER_W-1];
 
     if (final_rem_is_neg) begin
-      // It overshot. Subtract 1 to correct the root.
+      // Overshoot detected. Subtract 1 to correct the root.
       root_extended_o = root_extended - 1'b1;
 
-      // Construct the exact mathematical overshoot (2Q + 1)
+      // Construct the exact integer mathematical overshoot (2Q + 1)
       restore_val     = {root_extended_o, 1'b1};
 
-      // RESTORE THE REMAINDER (Aligned to the Top)
-      // Add the restore value to the top bits where the remainder actually lives
-      true_rem        = tc_AX_out + {restore_val, {(REMAINDER_W - TEST_SUB_W) {1'b0}}};
+      // 2. PURE INTEGER RESTORATION
+      // Add it directly to the bottom. No shifting required!
+      true_rem        = AX_out + restore_val;
     end else begin
-      // No overshoot, remainder is naturally correct
+      // No overshoot. Everything is naturally correct.
       root_extended_o = root_extended;
-      true_rem        = tc_AX_out;
+      true_rem        = AX_out;
     end
 
-    // 3. MASK THE STICKY BIT
-    // Only check the top bits. The bottom bits are shift-garbage.
-    sticky_rem_o = (true_rem[REMAINDER_W-1 : REMAINDER_W-TEST_SUB_W] != '0);
+    // 3. THE STICKY BIT
+    // Because true_rem is a pure integer, we just check the whole register.
+    // If it's a perfect square, it will be exactly 0.
+    sticky_rem_o = (true_rem != '0);
   end
 
 endmodule
