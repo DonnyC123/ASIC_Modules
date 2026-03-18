@@ -56,7 +56,7 @@ module sqrt_mantissa #(
   logic [ TEST_SUB_W-1:0] restore_val;
 
   always_comb begin
-    root_extended = Q_out;
-    sticky_rem_o  = |AX_out;
+    root_extended_o = Q_out;
+    sticky_rem_o    = |AX_out;
   end
 endmodule
