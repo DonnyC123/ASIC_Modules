@@ -14,7 +14,7 @@ module sqrt_mantissa #(
 
   localparam SIGN_W      = 1;
   localparam REMAINDER_W = 2 * ROOT_EXTENDED_W + SIGN_W;
-  localparam TEST_SUB_W  = ROOT_EXTENDED_W + SIGN_W;
+  localparam TEST_SUB_W  = ROOT_EXTENDED_W + SIGN_W + 2;
 
   localparam STAGE_STEPS           = ROOT_EXTENDED_W / PIPELINE_STAGES;
   localparam REMAINING_STAGE_STEPS = ROOT_EXTENDED_W - PIPELINE_STAGES * STAGE_STEPS;
@@ -41,9 +41,11 @@ module sqrt_mantissa #(
   end
 
   sqrt_restoring_stage #(
-      .DIN_W     (MANTISSA_W),
-      .DOUT_W    (ROOT_EXTENDED_W),
-      .SQRT_STEPS(SQRT_STEPS)
+      .DIN_W      (MANTISSA_W),
+      .DOUT_W     (ROOT_EXTENDED_W),
+      .SQRT_STEPS (SQRT_STEPS),
+      .TEST_SUB_W (TEST_SUB_W),
+      .REMAINDER_W(REMAINDER_W)
   ) sqrt_restoring_stage_inst (
       .AX_i(AX),
       .T_i (T),
