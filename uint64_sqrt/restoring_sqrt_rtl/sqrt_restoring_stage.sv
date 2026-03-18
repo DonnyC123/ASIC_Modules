@@ -24,7 +24,7 @@ module sqrt_restoring_stage #(
 
     for (int i = 0; i < SQRT_STEPS; i++) begin
       AX = AX << 2;
-      T  = AX[REMAINDER_W-1:DIN_W] - {{(DOUT_W - 1) {1'b0}}, Q, 2'b01};
+      T  = AX[REMAINDER_W-1:TEST_SUB_W] - {{(TEST_SUB_W - 1) {1'b0}}, Q, 2'b01};
       Q  = Q << 1;
 
       if (T[TEST_SUB_W-1] == 1'b0) begin
