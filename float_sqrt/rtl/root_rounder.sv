@@ -19,6 +19,8 @@ module root_rounder
     output float_t                             root_o
 );
 
+  localparam int MSB = ROOT_EXTENDED_W - 1;
+
   logic        [  ROOT_EXTENDED_W-1:0] root_normalized;
   logic        [       MANTISSA_W-1:0] root_unrounded;
   logic        [       MANTISSA_W-1:0] root_rounded_raw;
@@ -27,6 +29,7 @@ module root_rounder
   logic signed [     SIGNED_EXP_W-1:0] root_exp_rounded;
 
   logic        [2*ROOT_EXTENDED_W-1:0] temp_shift_reg;
+  logic        [     SIGNED_EXP_W-1:0] shift_amt;
 
   logic                                guard;
   logic                                sticky;
@@ -36,7 +39,8 @@ module root_rounder
   logic                                final_sticky;
 
   always_comb begin
-    temp_shift_reg = {root_raw_i, {ROOT_EXTENDED_W{1'b0}}} >> (1 - root_exp_i);
+    shift_amt      = (root_exp_i < 1) ? (1 - root_exp_i) : '0;
+    temp_shift_reg = {root_raw_i, {ROOT_EXTENDED_W{1'b0}}} >> shift_amt;
 
     if (root_exp_i < 1) begin
       root_normalized = temp_shift_reg[2*ROOT_EXTENDED_W-1 : ROOT_EXTENDED_W];
@@ -46,19 +50,19 @@ module root_rounder
       sticky          = sticky_i;
     end
 
-    guard            = root_normalized[0];
-    lsb              = root_normalized[1];
+    guard            = root_normalized[MSB-MANTISSA_W];
+    lsb              = root_normalized[MSB-MANTISSA_W+1];
 
-    root_unrounded   = {1'b0, root_normalized[MANTISSA_W-1:1]};
+    root_unrounded   = {1'b0, root_normalized[MSB-1 : MSB-MANTISSA_W+1]};
 
     round_up         = guard && (sticky || lsb);
     root_rounded_raw = root_unrounded + round_up;
 
+    root_frac        = root_rounded_raw[FRAC_W-1:0];
+
     if (root_rounded_raw[MANTISSA_W-1]) begin
-      root_frac        = root_rounded_raw[MANTISSA_W-1:1];
       root_exp_rounded = (root_exp_i < 1) ? 1 : root_exp_i + 1;
     end else begin
-      root_frac        = root_rounded_raw[FRAC_W-1:0];
       root_exp_rounded = (root_exp_i < 1) ? 0 : root_exp_i;
     end
 
