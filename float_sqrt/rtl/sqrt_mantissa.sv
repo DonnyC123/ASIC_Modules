@@ -12,13 +12,16 @@ module sqrt_mantissa #(
 
   import sqrt_float_pkg::*;
 
-  localparam SIGN_W      = 1;
-  localparam REMAINDER_W = 2 * ROOT_EXTENDED_W + SIGN_W;
-  localparam TEST_SUB_W  = ROOT_EXTENDED_W + SIGN_W + 2;
+  localparam SIGN_W = 1;
 
   localparam STAGE_STEPS           = ROOT_EXTENDED_W / PIPELINE_STAGES;
   localparam REMAINING_STAGE_STEPS = ROOT_EXTENDED_W - PIPELINE_STAGES * STAGE_STEPS;
   localparam SQRT_STEPS            = ROOT_EXTENDED_W;
+
+  localparam REMAINDER_W = TEST_SUB_W + (2 * SQRT_STEPS);
+  localparam TEST_SUB_W  = ROOT_EXTENDED_W + SIGN_W + 2;
+
+
 
 
   logic                       final_rem_is_neg;
@@ -34,10 +37,10 @@ module sqrt_mantissa #(
   logic [ROOT_EXTENDED_W-1:0] Q_out;
 
   always_comb begin
-    AX[ROOT_EXTENDED_W-1:0]           = mantissa_rad_i;
-    AX[REMAINDER_W-1:ROOT_EXTENDED_W] = '0;
-    T                                 = '0;
-    Q                                 = '0;
+    AX                               = '0;
+    AX[(2*SQRT_STEPS)-1-:MANTISSA_W] = mantissa_rad_i;
+    T                                = '0;
+    Q                                = '0;
   end
 
   sqrt_restoring_stage #(
