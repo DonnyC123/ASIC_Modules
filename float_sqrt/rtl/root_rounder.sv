@@ -50,16 +50,8 @@ module root_rounder
       sticky          = sticky_i;
     end
 
-    guard = root_normalized[MSB-MANTISSA_W];
-    lsb   = root_normalized[MSB-MANTISSA_W+1];
-
-    if (ROOT_EXTENDED_W > MANTISSA_W + 1) begin
-      final_sticky = sticky || (|root_normalized[MSB-MANTISSA_W-1 : 0]);
-    end else begin
-      final_sticky = sticky;
-    end
-
-    round_up         = guard && (final_sticky || lsb);
+    guard            = root_normalized[MSB-MANTISSA_W];
+    lsb              = root_normalized[MSB-MANTISSA_W+1];
 
     root_unrounded   = {1'b0, root_normalized[MSB-1 : MSB-MANTISSA_W+1]};
 

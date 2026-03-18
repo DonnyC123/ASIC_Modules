@@ -34,18 +34,18 @@ module sqrt_mantissa #(
   logic [ROOT_EXTENDED_W-1:0] Q_out;
 
   always_comb begin
-    AX[ROOT_EXTENDED_W-1:0]           = {mantissa_rad_i, 1'b0};
+    AX[ROOT_EXTENDED_W-1:0]           = mantissa_rad_i;
     AX[REMAINDER_W-1:ROOT_EXTENDED_W] = '0;
     T                                 = '0;
     Q                                 = '0;
   end
 
 
-  sqrt_non_restoring_stage #(
+  sqrt_restoring_stage #(
       .DIN_W     (ROOT_EXTENDED_W),
       .DOUT_W    (ROOT_EXTENDED_W),
       .SQRT_STEPS(SQRT_STEPS)
-  ) sqrt_non_restoring_stage_inst (
+  ) sqrt_restoring_stage_inst (
       .AX_i(AX),
       .T_i (T),
       .Q_i (Q),
@@ -57,62 +57,7 @@ module sqrt_mantissa #(
   logic [ TEST_SUB_W-1:0] restore_val;
 
   always_comb begin
-    root_extended    = Q_out;
-
-    // 1. STANDARD SIGN CHECK
-    // No '!', no bit-flipping. Just the pure Two's Complement MSB.
-    final_rem_is_neg = AX_out[REMAINDER_W-1];
-
-    if (final_rem_is_neg) begin
-      // Overshoot detected. Correct the root.
-      root_extended_o = root_extended - 1'b1;
-
-      // Construct the exact integer mathematical overshoot (2Q + 1)
-      restore_val     = {root_extended_o, 1'b1};
-
-      // 2. HARDWARE-EFFICIENT RESTORATION
-      // Pad the restore value with zeros so it aligns perfectly with the shifts!
-      true_rem        = AX_out + {restore_val, {(2 * SQRT_STEPS) {1'b0}}};
-    end else begin
-      // No overshoot. Everything is naturally correct.
-      root_extended_o = root_extended;
-      true_rem        = AX_out;
-    end
-
-    // 3. THE STICKY BIT
-    // Only check the top active bits where the true remainder actually lives.
-    // The bottom bits are just shift-garbage and are safely ignored.
-    sticky_rem_o = (true_rem[REMAINDER_W-1 : 2*SQRT_STEPS] != '0);
+    root_extended = Q_out;
+    sticky_rem_o  = |AX_out;
   end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 endmodule
