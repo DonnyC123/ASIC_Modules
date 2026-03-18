@@ -54,6 +54,10 @@ module sqrt_mantissa #(
       .Q_o (Q_out)
   );
 
+  logic [REMAINDER_W-1:0] true_rem;
+  logic [ TEST_SUB_W-1:0] restore_val;
+
+
   always_comb begin
     root_extended    = Q_out;
 
@@ -61,11 +65,32 @@ module sqrt_mantissa #(
 
     if (final_rem_is_neg) begin
       root_extended_o = root_extended - 1'b1;
+      restore_val     = {root_extended_o, 1'b1};
+      true_rem        = AX_out + {restore_val, {ROOT_EXTENDED_W{1'b0}}};
+
     end else begin
+
       root_extended_o = root_extended;
+      true_rem        = AX_out;
     end
 
-    sticky_rem_o = (AX_out[REMAINDER_W-1 : ROOT_EXTENDED_W] != '0);
+    sticky_rem_o = (true_rem[REMAINDER_W-1 : ROOT_EXTENDED_W] != '0);
   end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 endmodule
