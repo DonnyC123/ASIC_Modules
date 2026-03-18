@@ -54,43 +54,38 @@ module sqrt_mantissa #(
       .Q_o (Q_out)
   );
 
+  logic [REMAINDER_W-1:0] tc_AX_out;  // Two's Complement version of AX_out
   logic [REMAINDER_W-1:0] true_rem;
   logic [ TEST_SUB_W-1:0] restore_val;
-
 
   always_comb begin
     root_extended    = Q_out;
 
-    final_rem_is_neg = AX_out[REMAINDER_W-1];
+    // 1. CONVERT TO TWO'S COMPLEMENT
+    // By inverting the Carry-Out MSB, we turn it into a standard signed number!
+    tc_AX_out        = {~AX_out[REMAINDER_W-1], AX_out[REMAINDER_W-2:0]};
+
+    // 2. Now we can check the standard sign bit directly (No '!' needed anymore)
+    final_rem_is_neg = tc_AX_out[REMAINDER_W-1];
 
     if (final_rem_is_neg) begin
       root_extended_o = root_extended - 1'b1;
+
+      // The overshoot is (2Q + 1)
       restore_val     = {root_extended_o, 1'b1};
-      true_rem        = AX_out + {restore_val, {ROOT_EXTENDED_W{1'b0}}};
 
+      // 3. Add to restore. Because tc_AX_out is now a true negative, 
+      // adding the positive restore_val will perfectly cancel it to 0!
+      true_rem        = tc_AX_out + {restore_val, {ROOT_EXTENDED_W{1'b0}}};
     end else begin
-
       root_extended_o = root_extended;
-      true_rem        = AX_out;
+      true_rem        = tc_AX_out;
     end
 
+    // 4. MASK THE STICKY BIT
+    // If it was a perfect square, true_rem is now exactly 000...000
     sticky_rem_o = (true_rem[REMAINDER_W-1 : ROOT_EXTENDED_W] != '0);
   end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 endmodule
