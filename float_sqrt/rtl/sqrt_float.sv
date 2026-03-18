@@ -26,28 +26,16 @@ module sqrt_float #(
   } float_t;
 
   float_t                             float_rad;
-  float_t                             float_root_unpacked;
+  float_t                             float_root;
 
   float_flags_t                       root_float_flags;
-  logic         [  FLOAT_FLAGS_W-1:0] root_float_flags_raw;
 
   logic         [     MANTISSA_W-1:0] norm_mant_rad;
   logic signed  [   SIGNED_EXP_W-1:0] root_exp_signed;
 
-  logic         [     MANTISSA_W-1:0] norm_mant_rad_q;
-  logic                               decode_valid_q;
-
-  float_flags_t                       root_float_flags_q2;
-  logic         [  FLOAT_FLAGS_W-1:0] root_float_flags_q2_raw;
-  logic signed  [   SIGNED_EXP_W-1:0] root_exp_signed_q2;
-  logic         [ROOT_EXTENDED_W-1:0] root_extended_q;
-  logic                               sticky_rem_q;
-  logic                               mantissa_valid_q;
-
   logic         [ROOT_EXTENDED_W-1:0] root_extended;
   logic                               sticky_rem;
   logic                               mantissa_valid;
-  logic                               flags_exp_valid_q2;  // Parallel valid signal
 
   assign float_rad = float_t'(rad_i);
 
@@ -83,12 +71,26 @@ module sqrt_float #(
       .root_exp_i        (root_exp_signed),
       .root_raw_i        (root_extended),
       .sticky_i          (sticky_rem),
-      .root_o            (float_root_unpacked)
+      .root_o            (float_root)
   );
 
-  always_comb begin
-    root_o       = float_root_unpacked;
-    root_valid_o = rad_valid_i;
-  end
+  data_status_pipeline #(
+      .DATA_W    (DATA_W),
+      .STATUS_W  (1),
+      .PIPE_DEPTH(1),
+      .CLOCK_GATE(1)
+  ) data_status_pipeline_inst (
+      .clk     (clk),
+      .rst_n   (rst_n),
+      .data_i  (float_root),
+      .status_i(rad_valid_i),
+      .data_o  (root_o),
+      .status_o(root_valid_o)
+  );
+
+  //   always_comb begin
+  //     root_o       = float_root;
+  //     root_valid_o = rad_valid_i;
+  //   end
 
 endmodule
