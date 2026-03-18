@@ -57,14 +57,15 @@ module sqrt_mantissa #(
   always_comb begin
     root_extended    = Q_out;
 
-    final_rem_is_neg = !AX_out[REMAINDER_W-1];
+    final_rem_is_neg = AX_out[REMAINDER_W-1];
 
     if (final_rem_is_neg) begin
       root_extended_o = root_extended - 1'b1;
     end else begin
       root_extended_o = root_extended;
     end
-    sticky_rem_o = (AX_out != '0);
+
+    sticky_rem_o = (AX_out[REMAINDER_W-1 : ROOT_EXTENDED_W] != '0);
   end
 
 endmodule
