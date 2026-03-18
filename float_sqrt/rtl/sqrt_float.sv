@@ -73,18 +73,6 @@ module sqrt_float #(
       .root_o            (float_root)
   );
 
-  // data_status_pipeline #(
-  //     .DATA_W    (DATA_W),
-  //     .STATUS_W  (1),
-  //     .PIPE_DEPTH(1)
-  // ) data_status_pipeline_inst (
-  //     .clk     (clk),
-  //     .rst_n   (rst_n),
-  //     .data_i  (float_root),
-  //     .status_i(rad_valid_i),
-  //     .data_o  (root_o),
-  //     .status_o(root_valid_o)
-  // );
 
   always_comb begin
     root_o       = float_root;
