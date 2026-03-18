@@ -77,8 +77,7 @@ module sqrt_float #(
   data_status_pipeline #(
       .DATA_W    (DATA_W),
       .STATUS_W  (1),
-      .PIPE_DEPTH(1),
-      .CLOCK_GATE(1)
+      .PIPE_DEPTH(1)
   ) data_status_pipeline_inst (
       .clk     (clk),
       .rst_n   (rst_n),
