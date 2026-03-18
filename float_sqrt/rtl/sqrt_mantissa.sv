@@ -1,6 +1,6 @@
 module sqrt_mantissa #(
     parameter int MANTISSA_W      = 12,
-    parameter int ROOT_EXTENDED_W = 13,
+    parameter int ROOT_EXTENDED_W = 12,
     parameter int PIPELINE_STAGES = 1
 ) (
     input  logic                       clk,
@@ -13,7 +13,7 @@ module sqrt_mantissa #(
   import sqrt_float_pkg::*;
 
   localparam SIGN_W      = 1;
-  localparam REMAINDER_W = 2 * (MANTISSA_W) + SIGN_W;
+  localparam REMAINDER_W = 2 * ROOT_EXTENDED_W + SIGN_W;
   localparam TEST_SUB_W  = ROOT_EXTENDED_W + SIGN_W;
 
   localparam STAGE_STEPS           = ROOT_EXTENDED_W / PIPELINE_STAGES;
