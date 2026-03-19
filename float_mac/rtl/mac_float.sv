@@ -209,7 +209,6 @@ module mac_float #(
         float_z.sign = sum_float_flags_3q.sign;
       end
     end
-    z = float_z;
   end
 
 
