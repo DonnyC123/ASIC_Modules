@@ -48,7 +48,7 @@ module sqrt_float #(
       .root_exp_o     (root_exp_signed)
   );
 
-  sqrt_mantissa #(
+  sqrt_srt_mantissa #(
       .MANTISSA_W     (MANTISSA_W),
       .ROOT_EXTENDED_W(ROOT_EXTENDED_W)
   ) sqrt_mantissa_inst (
