@@ -10,6 +10,7 @@ module mac_float #(
     output logic [DATA_W-1:0] z
 );
   import mac_float_pkg::*;
+  // Pipeline delay parameters
 
   localparam DECODE_PIPE_DEPTH    = 0;
   localparam EXECUTION_PIPE_DEPTH = 0;

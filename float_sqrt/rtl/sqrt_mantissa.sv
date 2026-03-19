@@ -21,10 +21,6 @@ module sqrt_mantissa #(
   localparam TEST_SUB_W  = ROOT_EXTENDED_W + SIGN_W + 2;
   localparam REMAINDER_W = TEST_SUB_W + (2 * SQRT_STEPS);
 
-
-
-
-  logic                       final_rem_is_neg;
   logic [ROOT_EXTENDED_W-1:0] root_extended;
 
 
