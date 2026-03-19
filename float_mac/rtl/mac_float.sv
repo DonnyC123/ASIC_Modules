@@ -11,6 +11,11 @@ module mac_float #(
 );
   import mac_float_pkg::*;
 
+  localparam DECODE_PIPE_DEPTH    = 0;
+  localparam EXECUTION_PIPE_DEPTH = 0;
+  localparam ALGIN_OUT_PIPE_DEPTH = 0;
+  localparam OUT_PIPE_DEPTH       = 1;
+
   localparam MANTISSA_W = FRAC_W + MANTISSA_INT_W;
 
   localparam PRODUCT_MANTISSA_W = 2 * MANTISSA_W;
@@ -96,9 +101,7 @@ module mac_float #(
       .norm_mant_b_o    (norm_mant_b)
   );
 
-  localparam DECODE_PIPE_DEPTH    = 1;
-  localparam EXECUTION_PIPE_DEPTH = 1;
-  localparam ALGIN_OUT_PIPE_DEPTH = 1;
+
   data_pipeline #(
       .DATA_W    (MANTISSA_W + MANTISSA_W + PRODUCT_MANTISSA_W + PARTIAL_SUM_HIGH_W),
       .PIPE_DEPTH(DECODE_PIPE_DEPTH),
@@ -204,5 +207,18 @@ module mac_float #(
     z = float_z;
   end
 
+
+  data_pipeline #(
+      .DATA_W    (DATA_W),
+      .PIPE_DEPTH(OUT_PIPE_DEPTH),
+      .RST_EN    (0),
+      .CLK_EN    (0)
+  ) output_pipe (
+      .clk   (clk),
+      .clk_en(),
+      .rst_n (1'b1),
+      .data_i(float_z),
+      .data_o(z)
+  );
 endmodule
 
