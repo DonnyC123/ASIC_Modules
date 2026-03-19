@@ -15,9 +15,9 @@ module mac_float #(
 
   import mac_float_pkg::*;
 
-  localparam DECODE_PIPE_DEPTH    = 0;
-  localparam EXECUTION_PIPE_DEPTH = 0;
-  localparam ALGIN_OUT_PIPE_DEPTH = 0;
+  localparam DECODE_PIPE_DEPTH    = 1;
+  localparam EXECUTION_PIPE_DEPTH = 1;
+  localparam ALGIN_OUT_PIPE_DEPTH = 1;
   localparam OUT_PIPE_DEPTH       = 1;
   localparam TOTAL_LATENCY        = DECODE_PIPE_DEPTH + 
                                     EXECUTION_PIPE_DEPTH + 
@@ -158,7 +158,6 @@ module mac_float #(
       .data_i(mantissa_sum_raw),
       .data_o(mantissa_sum_raw_q)
   );
-  // Might be better to move before flip_flop
 
   always_comb begin
     unsigned_mantissa_sum = mantissa_sum_raw_q[FULL_SUM_W-1:0];
