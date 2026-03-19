@@ -15,9 +15,9 @@ module mac_float #(
 
   import mac_float_pkg::*;
 
-  localparam DECODE_PIPE_DEPTH    = 1;
-  localparam EXECUTION_PIPE_DEPTH = 1;
-  localparam ALGIN_OUT_PIPE_DEPTH = 1;
+  localparam DECODE_PIPE_DEPTH    = 0;
+  localparam EXECUTION_PIPE_DEPTH = 0;
+  localparam ALGIN_OUT_PIPE_DEPTH = 0;
   localparam OUT_PIPE_DEPTH       = 1;
 
   localparam MANTISSA_W = FRAC_W + MANTISSA_INT_W;
@@ -70,6 +70,7 @@ module mac_float #(
 
   float_t                                    float_sum_rounded;
   float_t                                    float_sum_rounded_q;
+
   logic                                      sum_rounded_exp_ovfl;
   logic                                      sum_rounded_exp_ovfl_q;
   logic                                      sum_rounded_exp_unfl;
