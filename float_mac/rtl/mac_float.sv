@@ -110,6 +110,7 @@ module mac_float #(
   ) decode_to_execution_pipe (
       .clk   (clk),
       .rst_n (1'b1),
+      .clk_en(1'b1),
       .data_i({c_upper_slice, csa_c, norm_mant_a, norm_mant_b}),
       .data_o({c_upper_slice_q, csa_c_q, norm_mant_a_q, norm_mant_b_q})
   );
@@ -121,6 +122,7 @@ module mac_float #(
   ) decode_to_round_pipe (
       .clk   (clk),
       .rst_n (1'b1),
+      .clk_en(1'b1),
       .data_i({sum_float_flags, product_sign, product_exp, float_c}),
       .data_o({sum_float_flags_2q, product_sign_2q, product_exp_2q, float_c_2q})
   );
@@ -144,6 +146,7 @@ module mac_float #(
       .RST_EN    (0)
   ) execution_to_round_pipe (
       .clk   (clk),
+      .clk_en(1'b1),
       .rst_n (1'b1),
       .data_i(mantissa_sum_raw),
       .data_o(mantissa_sum_raw_q)
@@ -216,7 +219,7 @@ module mac_float #(
       .CLK_EN    (0)
   ) output_pipe (
       .clk   (clk),
-      .clk_en(),
+      .clk_en(1'b1),
       .rst_n (1'b1),
       .data_i(float_z),
       .data_o(z)
