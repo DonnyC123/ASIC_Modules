@@ -57,24 +57,23 @@ module mac_float #(
   logic signed [      SIGNED_EXP_W-1:0] product_exp;
   logic signed [      SIGNED_EXP_W-1:0] product_exp_2q;
 
-  logic [FULL_SUM_CARRY_W-1:0] mantissa_sum_raw, mantissa_sum_raw_q, mantissa_sum_raw_neg;
-  logic   [FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_q;
-  logic   [FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_neg;
-  logic   [      FULL_SUM_W-1:0] unsigned_mantissa_sum;
-  logic                          sum_signed;
+  logic        [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_q;
+  logic        [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_neg;
+  logic        [        FULL_SUM_W-1:0] unsigned_mantissa_sum;
+  logic                                 sum_signed;
 
-  float_t                        float_sum_rounded;
-  float_t                        float_sum_rounded_q;
-  logic                          sum_rounded_exp_ovfl;
-  logic                          sum_rounded_exp_ovfl_q;
+  float_t                               float_sum_rounded;
+  float_t                               float_sum_rounded_q;
+  logic                                 sum_rounded_exp_ovfl;
+  logic                                 sum_rounded_exp_ovfl_q;
 
-  logic                          sum_rounded_exp_unfl;
-  logic                          sum_rounded_exp_unfl_q;
+  logic                                 sum_rounded_exp_unfl;
+  logic                                 sum_rounded_exp_unfl_q;
 
-  logic                          valid_decode_q;
-  logic                          valid_exec_q;
-  logic                          valid_round_q;
-  logic                          valid_final_q;
+  logic                                 valid_decode_q;
+  logic                                 valid_exec_q;
+  logic                                 valid_round_q;
+  logic                                 valid_final_q;
 
   always_comb begin
     float_a = float_t'(a);
