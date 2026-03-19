@@ -96,9 +96,12 @@ module mac_float #(
       .norm_mant_b_o    (norm_mant_b)
   );
 
+  localparam DECODE_PIPE_DEPTH    = 1;
+  localparam EXECUTION_PIPE_DEPTH = 1;
+  localparam ALGIN_OUT_PIPE_DEPTH = 1;
   data_pipeline #(
       .DATA_W    (MANTISSA_W + MANTISSA_W + PRODUCT_MANTISSA_W + PARTIAL_SUM_HIGH_W),
-      .PIPE_DEPTH(1),
+      .PIPE_DEPTH(DECODE_PIPE_DEPTH),
       .RST_EN    (0)
   ) decode_to_execution_pipe (
       .clk   (clk),
@@ -109,7 +112,7 @@ module mac_float #(
 
   data_pipeline #(
       .DATA_W    (1 + SIGNED_EXP_W + SUM_FLOAT_FLAGS_W + DATA_W),
-      .PIPE_DEPTH(2),
+      .PIPE_DEPTH(DECODE_PIPE_DEPTH + EXECUTION_PIPE_DEPTH),
       .RST_EN    (0)
   ) decode_to_round_pipe (
       .clk   (clk),
@@ -133,7 +136,7 @@ module mac_float #(
 
   data_pipeline #(
       .DATA_W    (FULL_SUM_CARRY_W),
-      .PIPE_DEPTH(1),
+      .PIPE_DEPTH(EXECUTION_PIPE_DEPTH),
       .RST_EN    (0)
   ) execution_to_round_pipe (
       .clk   (clk),
@@ -172,7 +175,7 @@ module mac_float #(
 
   data_pipeline #(
       .DATA_W    (1 + 1 + DATA_W + SUM_FLOAT_FLAGS_W),
-      .PIPE_DEPTH(2),
+      .PIPE_DEPTH(ALGIN_OUT_PIPE_DEPTH),
       .RST_EN    (0)
   ) round_to_output_pipe (
       .clk(clk),
