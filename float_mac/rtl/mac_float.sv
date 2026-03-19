@@ -187,7 +187,7 @@ module mac_float #(
   ) round_to_output_pipe (
       .clk(clk),
       .rst_n(1'b1),
-      .clk_en(1'b1),
+      .clk_en('1),
       .data_i({float_sum_rounded, sum_rounded_exp_ovfl, sum_rounded_exp_unfl, sum_float_flags_2q}),
       .data_o({
         float_sum_rounded_q, sum_rounded_exp_ovfl_q, sum_rounded_exp_unfl_q, sum_float_flags_3q
