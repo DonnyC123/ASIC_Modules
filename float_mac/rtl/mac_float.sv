@@ -38,28 +38,47 @@ module mac_float #(
     logic [FRAC_W-1:0] frac;
   } float_t;
 
-  float_t float_a, float_b, float_c;
-  float_t float_c_2q, float_z;
+  float_t                                    float_a;
+  float_t                                    float_b;
+  float_t                                    float_c;
+  float_t                                    float_c_2q;
+  float_t                                    float_z;
 
-  sum_float_flags_t sum_float_flags, sum_float_flags_2q, sum_float_flags_3q;
+  sum_float_flags_t                          sum_float_flags;
+  sum_float_flags_t                          sum_float_flags_2q;
+  sum_float_flags_t                          sum_float_flags_3q;
 
-  logic [MANTISSA_W-1:0] norm_mant_a, norm_mant_a_q;
-  logic [MANTISSA_W-1:0] norm_mant_b, norm_mant_b_q;
-  logic [PRODUCT_MANTISSA_W-1:0] csa_c, csa_c_q;
-  logic [PARTIAL_SUM_HIGH_W-1:0] c_upper_slice, c_upper_slice_q;
+  logic             [        MANTISSA_W-1:0] norm_mant_a;
+  logic             [        MANTISSA_W-1:0] norm_mant_a_q;
+  logic             [        MANTISSA_W-1:0] norm_mant_b;
+  logic             [        MANTISSA_W-1:0] norm_mant_b_q;
+  logic             [PRODUCT_MANTISSA_W-1:0] csa_c;
+  logic             [PRODUCT_MANTISSA_W-1:0] csa_c_q;
+  logic             [PARTIAL_SUM_HIGH_W-1:0] c_upper_slice;
+  logic             [PARTIAL_SUM_HIGH_W-1:0] c_upper_slice_q;
 
-  logic product_sign, product_sign_2q;
-  logic signed [SIGNED_EXP_W-1:0] product_exp, product_exp_2q;
+  logic                                      product_sign;
+  logic                                      product_sign_2q;
+  logic signed      [      SIGNED_EXP_W-1:0] product_exp;
+  logic signed      [      SIGNED_EXP_W-1:0] product_exp_2q;
 
-  logic [FULL_SUM_CARRY_W-1:0] mantissa_sum_raw, mantissa_sum_raw_q, mantissa_sum_raw_neg;
-  logic [FULL_SUM_W-1:0] unsigned_mantissa_sum;
-  logic                  sum_signed;
+  logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw;
+  logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_q;
+  logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_neg;
+  logic             [        FULL_SUM_W-1:0] unsigned_mantissa_sum;
+  logic                                      sum_signed;
 
-  float_t float_sum_rounded, float_sum_rounded_q;
-  logic sum_rounded_exp_ovfl, sum_rounded_exp_ovfl_q;
-  logic sum_rounded_exp_unfl, sum_rounded_exp_unfl_q;
+  float_t                                    float_sum_rounded;
+  float_t                                    float_sum_rounded_q;
+  logic                                      sum_rounded_exp_ovfl;
+  logic                                      sum_rounded_exp_ovfl_q;
+  logic                                      sum_rounded_exp_unfl;
+  logic                                      sum_rounded_exp_unfl_q;
 
-  logic valid_decode_q, valid_exec_q, valid_round_q, valid_final_q;
+  logic                                      valid_decode_q;
+  logic                                      valid_exec_q;
+  logic                                      valid_round_q;
+  logic                                      valid_final_q;
 
   always_comb begin
     float_a = float_t'(a);
