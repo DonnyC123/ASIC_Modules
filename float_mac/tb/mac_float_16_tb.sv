@@ -8,7 +8,6 @@ module tb_mac_float;
   localparam FRAC_W  = 10;
   localparam FLOAT_W = EXP_W + FRAC_W + 1;
 
-  // PIPELINE_STAGES is now handled by the valid_o signal
   localparam PIPELINE_STAGES = 4;
 
   logic clk;
@@ -32,7 +31,6 @@ module tb_mac_float;
       .z      (z)
   );
 
-  // Queues for golden references
   logic   [FLOAT_W-1:0] expected_queue[$];
   string                name_queue    [$];
 
@@ -42,13 +40,11 @@ module tb_mac_float;
   initial clk = 0;
   always #5 clk = ~clk;
 
-  // --- Stimulus Task ---
   task send_stimulus(input string name, input logic [FLOAT_W-1:0] test_a,
                      input logic [FLOAT_W-1:0] test_b, input logic [FLOAT_W-1:0] test_c);
     real real_a, real_b, real_c, expected;
     logic [FLOAT_W-1:0] expected_bits;
 
-    // Calculate golden reference
     real_a        = upscale_to_double(test_a);
     real_b        = upscale_to_double(test_b);
     real_c        = upscale_to_double(test_c);
@@ -56,11 +52,9 @@ module tb_mac_float;
     expected      = (real_a * real_b) + real_c;
     expected_bits = downscale_double(expected);
 
-    // Push into queue
     expected_queue.push_back(expected_bits);
     name_queue.push_back(name);
 
-    // Drive Ports
     a       = test_a;
     b       = test_b;
     c       = test_c;
@@ -70,8 +64,6 @@ module tb_mac_float;
     valid_i = 1'b0;  // Pull valid low if you want to test non-back-to-back
   endtask
 
-  // --- Checker Thread ---
-  // Now triggers on valid_o instead of queue size
   initial begin : checker_thread
     logic  [FLOAT_W-1:0] expected_bits;
     string               test_name;
@@ -81,7 +73,6 @@ module tb_mac_float;
     forever begin
       @(posedge clk);
 
-      // Whenever the DUT signals an output is ready
       if (valid_o) begin
         if (expected_queue.size() == 0) begin
           $error("FAIL: valid_o asserted but expected_queue is empty!");
@@ -113,11 +104,9 @@ module tb_mac_float;
     end
   end
 
-  // --- Main Test Sequence ---
   initial begin
     $display("=== STARTING PIPELINED MAC TEST WITH VALID SIGNALS ===");
 
-    // Initialize
     rst_n   = 0;
     valid_i = 0;
     a       = 0;
@@ -158,8 +147,6 @@ module tb_mac_float;
     end
     valid_i = 1'b0;
 
-    // Wait until all outputs have been caught by the checker
-    // We wait for the queue to empty because valid_o handles the timing
     wait (expected_queue.size() == 0);
     repeat (5) @(posedge clk);
 

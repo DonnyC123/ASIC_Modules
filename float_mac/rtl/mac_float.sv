@@ -81,6 +81,7 @@ module mac_float #(
   logic                                      sum_rounded_exp_unfl;
   logic                                      sum_rounded_exp_unfl_q;
 
+  logic                                      intermediate_valid;
 
   always_comb begin
     float_a = float_t'(a);
@@ -219,27 +220,28 @@ module mac_float #(
 
   data_pipeline #(
       .DATA_W    (1),
-      .PIPE_DEPTH(TOTAL_LATENCY),
+      .PIPE_DEPTH(TOTAL_LATENCY - OUT_PIPE_DEPTH),
       .RST_EN    (1)
-  ) valid_pipe_inst (
+  ) intermediate_valid_pipe (
       .clk   (clk),
       .rst_n (rst_n),
       .clk_en('1),
       .data_i(valid_i),
-      .data_o(valid_o)
+      .data_o(intermediate_valid)
   );
 
   data_pipeline #(
-      .DATA_W    (DATA_W),
+      .DATA_W    (DATA_W + 1),
       .PIPE_DEPTH(OUT_PIPE_DEPTH),
-      .RST_EN    (0),
+      .RST_EN    (1),
       .CLK_EN    (0)
-  ) output_pipe (
+  ) final_output_pipe (
       .clk   (clk),
+      .rst_n (rst_n),
       .clk_en('1),
-      .rst_n (1'b1),
-      .data_i(float_z),
-      .data_o(z)
+      .data_i({intermediate_valid, DATA_W'(float_z)}),
+      .data_o({valid_o, z})
   );
+
 endmodule
 
