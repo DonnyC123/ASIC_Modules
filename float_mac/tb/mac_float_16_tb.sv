@@ -58,10 +58,9 @@ module tb_mac_float;
     a       = test_a;
     b       = test_b;
     c       = test_c;
-    valid_i = 1'b1;  // Signal that this input is valid
-
+    valid_i = 1'b1;
     @(posedge clk);
-    valid_i = 1'b0;  // Pull valid low if you want to test non-back-to-back
+    valid_i = 1'b0;
   endtask
 
   initial begin : checker_thread
@@ -116,7 +115,6 @@ module tb_mac_float;
     rst_n = 1;
     repeat (2) @(posedge clk);
 
-    // Directed Tests
     send_stimulus("Simple Mult", downscale_double(1.5), downscale_double(2.0), 16'h0000);
     send_stimulus("Simple Add", downscale_double(1.0), downscale_double(1.0), downscale_double(3.5
                   ));
@@ -125,18 +123,16 @@ module tb_mac_float;
     send_stimulus("Previous Error 2", 16'hEDCD, 16'h8000, 16'h0679);
 
     $display("--- Random Stress Test (Back-to-Back) ---");
-    for (i = 0; i < 1000000; i++) begin
+    for (i = 0; i < 100000000; i++) begin
       logic [FLOAT_W-1:0] ra, rb, rc;
       void'(std::randomize(ra, rb, rc));
       if (i % 10 == 0) rc = 0;
 
-      // Drive valid_i high every cycle for back-to-back testing
       a       = ra;
       b       = rb;
       c       = rc;
       valid_i = 1'b1;
 
-      // Calculate and push reference
       expected_queue.push_back(
           downscale_double((upscale_to_double(ra) * upscale_to_double(rb)) + upscale_to_double(rc)
           ));
