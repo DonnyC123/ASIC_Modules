@@ -19,12 +19,9 @@ module mac_float #(
   localparam EXECUTION_PIPE_DEPTH = 1;
   localparam ALGIN_OUT_PIPE_DEPTH = 1;
   localparam OUT_PIPE_DEPTH       = 1;
-  localparam TOTAL_LATENCY        = DECODE_PIPE_DEPTH + 
-                                    EXECUTION_PIPE_DEPTH + 
-                                    ALGIN_OUT_PIPE_DEPTH + 
-                                    OUT_PIPE_DEPTH;
 
-  localparam MANTISSA_W         = FRAC_W + MANTISSA_INT_W;
+  localparam MANTISSA_W = FRAC_W + MANTISSA_INT_W;
+
   localparam PRODUCT_MANTISSA_W = 2 * MANTISSA_W;
   localparam FULL_SUM_W         = 3 * MANTISSA_W + SIGN_W + 2 * CARRY_W;
   localparam FULL_SUM_CARRY_W   = FULL_SUM_W + CARRY_W;
@@ -41,47 +38,43 @@ module mac_float #(
     logic [FRAC_W-1:0] frac;
   } float_t;
 
-  float_t                                    float_a;
-  float_t                                    float_b;
-  float_t                                    float_c;
-  float_t                                    float_c_2q;
-  float_t                                    float_z;
+  float_t float_a, float_b, float_c;
+  float_t float_c_2q, float_z;
 
+  sum_float_flags_t sum_float_flags, sum_float_flags_2q, sum_float_flags_3q;
 
-  sum_float_flags_t                          sum_float_flags;
-  sum_float_flags_t                          sum_float_flags_2q;
-  sum_float_flags_t                          sum_float_flags_3q;
+  logic        [        MANTISSA_W-1:0] norm_mant_a;
+  logic        [        MANTISSA_W-1:0] norm_mant_a_q;
+  logic        [        MANTISSA_W-1:0] norm_mant_b;
+  logic        [        MANTISSA_W-1:0] norm_mant_b_q;
+  logic        [PRODUCT_MANTISSA_W-1:0] csa_c;
+  logic        [PRODUCT_MANTISSA_W-1:0] csa_c_q;
+  logic        [PARTIAL_SUM_HIGH_W-1:0] c_upper_slice;
+  logic        [PARTIAL_SUM_HIGH_W-1:0] c_upper_slice_q;
 
-  logic             [        MANTISSA_W-1:0] norm_mant_a;
-  logic             [        MANTISSA_W-1:0] norm_mant_a_q;
-  logic             [        MANTISSA_W-1:0] norm_mant_b;
-  logic             [        MANTISSA_W-1:0] norm_mant_b_q;
-  logic             [PRODUCT_MANTISSA_W-1:0] csa_c;
-  logic             [PRODUCT_MANTISSA_W-1:0] csa_c_q;
+  logic                                 product_sign;
+  logic                                 product_sign_2q;
+  logic signed [      SIGNED_EXP_W-1:0] product_exp;
+  logic signed [      SIGNED_EXP_W-1:0] product_exp_2q;
 
-  logic             [PARTIAL_SUM_HIGH_W-1:0] c_upper_slice;
-  logic             [PARTIAL_SUM_HIGH_W-1:0] c_upper_slice_q;
+  logic [FULL_SUM_CARRY_W-1:0] mantissa_sum_raw, mantissa_sum_raw_q, mantissa_sum_raw_neg;
+  logic   [FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_q;
+  logic   [FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_neg;
+  logic   [      FULL_SUM_W-1:0] unsigned_mantissa_sum;
+  logic                          sum_signed;
 
-  logic                                      product_sign;
-  logic                                      product_sign_2q;
-  logic signed      [      SIGNED_EXP_W-1:0] product_exp;
-  logic signed      [      SIGNED_EXP_W-1:0] product_exp_2q;
+  float_t                        float_sum_rounded;
+  float_t                        float_sum_rounded_q;
+  logic                          sum_rounded_exp_ovfl;
+  logic                          sum_rounded_exp_ovfl_q;
 
-  logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw;
-  logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_q;
-  logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_neg;
+  logic                          sum_rounded_exp_unfl;
+  logic                          sum_rounded_exp_unfl_q;
 
-  logic             [        FULL_SUM_W-1:0] unsigned_mantissa_sum;
-  logic                                      sum_signed;
-
-  float_t                                    float_sum_rounded;
-  float_t                                    float_sum_rounded_q;
-  logic                                      sum_rounded_exp_ovfl;
-  logic                                      sum_rounded_exp_ovfl_q;
-  logic                                      sum_rounded_exp_unfl;
-  logic                                      sum_rounded_exp_unfl_q;
-
-  logic                                      intermediate_valid;
+  logic                          valid_decode_q;
+  logic                          valid_exec_q;
+  logic                          valid_round_q;
+  logic                          valid_final_q;
 
   always_comb begin
     float_a = float_t'(a);
@@ -109,29 +102,28 @@ module mac_float #(
       .norm_mant_b_o    (norm_mant_b)
   );
 
-
   data_pipeline #(
-      .DATA_W    (MANTISSA_W + MANTISSA_W + PRODUCT_MANTISSA_W + PARTIAL_SUM_HIGH_W),
+      .DATA_W(1 + MANTISSA_W + MANTISSA_W + PRODUCT_MANTISSA_W + PARTIAL_SUM_HIGH_W),
       .PIPE_DEPTH(DECODE_PIPE_DEPTH),
-      .RST_EN    (0)
+      .RST_EN(1)
   ) decode_to_execution_pipe (
       .clk   (clk),
-      .rst_n (1'b1),
+      .rst_n (rst_n),
       .clk_en('1),
-      .data_i({c_upper_slice, csa_c, norm_mant_a, norm_mant_b}),
-      .data_o({c_upper_slice_q, csa_c_q, norm_mant_a_q, norm_mant_b_q})
+      .data_i({valid_i, c_upper_slice, csa_c, norm_mant_a, norm_mant_b}),
+      .data_o({valid_decode_q, c_upper_slice_q, csa_c_q, norm_mant_a_q, norm_mant_b_q})
   );
 
   data_pipeline #(
-      .DATA_W    (1 + SIGNED_EXP_W + SUM_FLOAT_FLAGS_W + DATA_W),
+      .DATA_W    (1 + SUM_FLOAT_FLAGS_W + 1 + SIGNED_EXP_W + DATA_W),
       .PIPE_DEPTH(DECODE_PIPE_DEPTH + EXECUTION_PIPE_DEPTH),
-      .RST_EN    (0)
+      .RST_EN    (1)
   ) decode_to_round_pipe (
       .clk   (clk),
-      .rst_n (1'b1),
+      .rst_n (rst_n),
       .clk_en('1),
-      .data_i({sum_float_flags, product_sign, product_exp, float_c}),
-      .data_o({sum_float_flags_2q, product_sign_2q, product_exp_2q, float_c_2q})
+      .data_i({valid_i, sum_float_flags, product_sign, product_exp, float_c}),
+      .data_o({valid_round_q, sum_float_flags_2q, product_sign_2q, product_exp_2q, float_c_2q})
   );
 
   mac_float_execution #(
@@ -148,15 +140,15 @@ module mac_float #(
   );
 
   data_pipeline #(
-      .DATA_W    (FULL_SUM_CARRY_W),
+      .DATA_W    (1 + FULL_SUM_CARRY_W),
       .PIPE_DEPTH(EXECUTION_PIPE_DEPTH),
-      .RST_EN    (0)
+      .RST_EN    (1)
   ) execution_to_round_pipe (
       .clk   (clk),
+      .rst_n (rst_n),
       .clk_en('1),
-      .rst_n (1'b1),
-      .data_i(mantissa_sum_raw),
-      .data_o(mantissa_sum_raw_q)
+      .data_i({valid_decode_q, mantissa_sum_raw}),
+      .data_o({valid_exec_q, mantissa_sum_raw_q})
   );
 
   always_comb begin
@@ -187,16 +179,26 @@ module mac_float #(
   );
 
   data_pipeline #(
-      .DATA_W    (1 + 1 + DATA_W + SUM_FLOAT_FLAGS_W),
+      .DATA_W    (1 + DATA_W + 1 + 1 + SUM_FLOAT_FLAGS_W),
       .PIPE_DEPTH(ALGIN_OUT_PIPE_DEPTH),
-      .RST_EN    (0)
+      .RST_EN    (1)
   ) round_to_output_pipe (
       .clk(clk),
-      .rst_n(1'b1),
+      .rst_n(rst_n),
       .clk_en('1),
-      .data_i({float_sum_rounded, sum_rounded_exp_ovfl, sum_rounded_exp_unfl, sum_float_flags_2q}),
+      .data_i({
+        valid_round_q,
+        float_sum_rounded,
+        sum_rounded_exp_ovfl,
+        sum_rounded_exp_unfl,
+        sum_float_flags_2q
+      }),
       .data_o({
-        float_sum_rounded_q, sum_rounded_exp_ovfl_q, sum_rounded_exp_unfl_q, sum_float_flags_3q
+        valid_final_q,
+        float_sum_rounded_q,
+        sum_rounded_exp_ovfl_q,
+        sum_rounded_exp_unfl_q,
+        sum_float_flags_3q
       })
   );
 
@@ -218,29 +220,15 @@ module mac_float #(
   end
 
   data_pipeline #(
-      .DATA_W    (1),
-      .PIPE_DEPTH(TOTAL_LATENCY - OUT_PIPE_DEPTH),
-      .RST_EN    (1)
-  ) intermediate_valid_pipe (
-      .clk   (clk),
-      .rst_n (rst_n),
-      .clk_en('1),
-      .data_i(valid_i),
-      .data_o(intermediate_valid)
-  );
-
-  data_pipeline #(
-      .DATA_W    (DATA_W + 1),
+      .DATA_W    (1 + DATA_W),
       .PIPE_DEPTH(OUT_PIPE_DEPTH),
-      .RST_EN    (1),
-      .CLK_EN    (0)
-  ) final_output_pipe (
+      .RST_EN    (1)
+  ) output_pipe (
       .clk   (clk),
       .rst_n (rst_n),
       .clk_en('1),
-      .data_i({intermediate_valid, DATA_W'(float_z)}),
+      .data_i({valid_final_q, DATA_W'(float_z)}),
       .data_o({valid_o, z})
   );
 
 endmodule
-
