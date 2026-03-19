@@ -4,17 +4,16 @@ module mac_float #(
     localparam DATA_W = FRAC_W + EXP_W + 1
 ) (
     input  logic              clk,
-    input  logic              rst_n,    // Added reset for the valid pipeline
-    input  logic              valid_i,  // Input valid
+    input  logic              rst_n,
+    input  logic              valid_i,
     input  logic [DATA_W-1:0] a,
     input  logic [DATA_W-1:0] b,
     input  logic [DATA_W-1:0] c,
-    output logic              valid_o,  // Output valid
+    output logic              valid_o,
     output logic [DATA_W-1:0] z
 );
 
   import mac_float_pkg::*;
-  // Pipeline delay parameters
 
   localparam DECODE_PIPE_DEPTH    = 0;
   localparam EXECUTION_PIPE_DEPTH = 0;
@@ -217,6 +216,7 @@ module mac_float #(
       end
     end
   end
+
   data_pipeline #(
       .DATA_W    (1),
       .PIPE_DEPTH(TOTAL_LATENCY),
