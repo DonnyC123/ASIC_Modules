@@ -110,6 +110,11 @@ module tb_divider_float;
     a = 16'hBBFF;
     b = 16'h7400;
 
+    check_result("Test Divide 5");
+
+    a = 16'h626F;
+    b = 16'h7aef;
+
     check_result("Past Error Case 1");
 
     $display("--- Random Stress Test ---");

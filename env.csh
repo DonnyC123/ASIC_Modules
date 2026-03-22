@@ -21,7 +21,6 @@ else
     echo "Warning: xrun still not found in PATH."
 endif
 
-# --- Genus synthesis ---------------------------------------------------------
 setenv GENUS_BASE /vol/cadence2018/GENUS211
 
 setenv PATH ${GENUS_BASE}/tools/bin:${GENUS_BASE}/tools.lnx86/bin:$PATH
