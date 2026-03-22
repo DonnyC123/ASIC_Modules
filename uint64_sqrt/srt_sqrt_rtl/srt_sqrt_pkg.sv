@@ -13,7 +13,6 @@ package srt_sqrt_pkg;
   localparam Q_DIGIT_W         = RADIX_W + SIGN_W;
   localparam CONST_TABLE_DEPTH = 2 ** Q_IDX_W;
 
-  localparam ESTIMATE_CS_LSB = 61;
 
   localparam int REGISTERED_STEPS[3] = '{4, 14, 24};
 
