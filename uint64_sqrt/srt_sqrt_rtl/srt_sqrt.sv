@@ -157,7 +157,7 @@ module srt_sqrt #(
 
   always_comb begin
     full_final_rem = $signed({rem_sum_stage[ITERATIONS][DATA_W-1], rem_sum_stage[ITERATIONS]}) +
-        $signed({rem_carry_stage[ITERATIONS], 1'b0});
+        $signed({1'b0, rem_carry_stage[ITERATIONS]});
     final_root_vec = (full_final_rem[DATA_W]) ? root_qm_stage[ITERATIONS] : root_q_stage[ITERATIONS];
 
     if (is_zero_stage[ITERATIONS]) begin
