@@ -26,7 +26,9 @@ endif
 setenv GENUS_BASE /vol/cadence2018/GENUS211
 
 #Set the timing
+echo "=========================="
 echo "Setting pdk env to GPDK045"
+echo "=========================="
 source /vol/eecs391/GPDK045/cadence231.env                                                    
 setenv TECH_LIB /vol/eecs391/GPDK045/gsclib045_all_v4.8/gsclib045/timing/gsclib045_tt.lib     
 
