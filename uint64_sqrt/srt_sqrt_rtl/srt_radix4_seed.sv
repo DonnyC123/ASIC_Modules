@@ -1,15 +1,15 @@
 module srt_radix4_seed
   import srt_sqrt_pkg::*;
 (
-    input  logic [   INT_W-1:0] seed_idx_i,
-    output logic [   INT_W-1:0] root_seed_o,
-    output logic [SQ_INT_W-1:0] root_sq_seed_o
+    input  logic [SEED_IDX_W-1:0] seed_idx_i,
+    output logic [SEED_IDX_W-1:0] root_seed_o,
+    output logic [  SQ_INT_W-1:0] root_sq_seed_o
 );
 
-  localparam ROM_DEPTH = 2 ** INT_W;
+  localparam ROM_DEPTH = 2 ** SEED_IDX_W;
 
-  logic [   INT_W-1:0] root_seed_rom   [ROM_DEPTH];
-  logic [SQ_INT_W-1:0] root_sq_seed_rom[ROM_DEPTH];
+  logic [SEED_IDX_W-1:0] root_seed_rom   [ROM_DEPTH];
+  logic [  SQ_INT_W-1:0] root_sq_seed_rom[ROM_DEPTH];
 
   always_comb begin
     root_seed_rom[0]  = 6'd0;

@@ -20,7 +20,7 @@ module srt_sqrt #(
   localparam LZ_RAD_COUNT_W  = LZ_PAIR_COUNT_W + 1;
 
   localparam Q_SQ_PAD_W   = FRAC_BITS - SQ_INT_W;
-  localparam Q_SEED_PAD_W = FRAC_BITS - INT_W;
+  localparam Q_SEED_PAD_W = FRAC_BITS - SEED_IDX_W;
   localparam SHIFT_OUT_W  = FRAC_BITS - DOUT_W;
 
   logic        [    DIN_PAIRS_W-1:0] rad_or_pairs;
@@ -28,8 +28,8 @@ module srt_sqrt #(
   logic        [ LZ_RAD_COUNT_W-1:0] rad_leading_zero_count;
 
   logic        [          DIN_W-1:0] norm_rad;
-  logic        [          INT_W-1:0] seed_idx;
-  logic        [          INT_W-1:0] root_seed;
+  logic        [     SEED_IDX_W-1:0] seed_idx;
+  logic        [     SEED_IDX_W-1:0] root_seed;
   logic        [       SQ_INT_W-1:0] root_sq_seed;
 
   logic        [         DATA_W-1:0] norm_rad_padded;
@@ -70,7 +70,7 @@ module srt_sqrt #(
   always_comb begin
     rad_leading_zero_count = {pair_leading_zero_count, 1'b0};
     norm_rad               = rad_i << rad_leading_zero_count;
-    seed_idx               = norm_rad[DIN_W-1 : DIN_W-INT_W];
+    seed_idx               = norm_rad[DIN_W-1 : DIN_W-SEED_IDX_W];
   end
 
   srt_radix4_seed srt_radix4_seed_inst (

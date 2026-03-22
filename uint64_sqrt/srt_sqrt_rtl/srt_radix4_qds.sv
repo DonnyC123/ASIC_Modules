@@ -9,6 +9,9 @@ module srt_radix4_qds
     input  logic        [  Q_IDX_W-1:0] q_idx_i,
     output logic signed [Q_DIGIT_W-1:0] q_digit_o
 );
+
+  localparam ESTIMATE_CS_LSB = RAD_W - 1 - 2;
+
   localparam ESTIMATE_CS_W = DATA_W - ESTIMATE_CS_LSB;
   localparam ESTIMATE_W    = ESTIMATE_CS_W + 1;
 

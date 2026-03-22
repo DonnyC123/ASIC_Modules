@@ -17,29 +17,30 @@ module srt_sqrt_stage
     output logic signed [DATA_W-1:0] root_qm_o
 );
 
-  localparam STEP_BIT = FRAC_BITS - 2 * STAGE;
+  localparam STEP_BIT    = FRAC_BITS - 2 * STAGE;
+  localparam ROOT_IDX_W  = Q_IDX_W + 2;
 
   logic signed [   DATA_W-1:0] rem_sum_shift;
   logic signed [   DATA_W-1:0] rem_carry_shift;
   logic signed [Q_DIGIT_W-1:0] q_digit;
   logic        [  Q_IDX_W-1:0] q_idx;
 
-  logic        [    INT_W-1:0] raw_q_idx;
-  logic signed [   DATA_W-1:0] two_root_q;
-  logic signed [   DATA_W-1:0] q_sq_term;
-  logic signed [   DATA_W-1:0] neg_sub;
+  logic        [ROOT_IDX_W-1:0] raw_q_idx;
+  logic signed [    DATA_W-1:0] two_root_q;
+  logic signed [    DATA_W-1:0] q_sq_term;
+  logic signed [    DATA_W-1:0] neg_sub;
 
   assign rem_sum_shift   = rem_sum_i << RADIX_W;
   assign rem_carry_shift = rem_carry_i << RADIX_W;
-  assign raw_q_idx       = root_q_i[FRAC_BITS-:6];
+  assign raw_q_idx       = root_q_i[FRAC_BITS-:ROOT_IDX_W];
 
   always_comb begin
-    if (raw_q_idx[INT_W-1]) begin
+    if (raw_q_idx[ROOT_IDX_W-1]) begin
       q_idx = 4'd15;
-    end else if (!raw_q_idx[INT_W-2]) begin
+    end else if (!raw_q_idx[ROOT_IDX_W-2]) begin
       q_idx = 4'd0;
     end else begin
-      q_idx = raw_q_idx[INT_W-3:0];
+      q_idx = raw_q_idx[ROOT_IDX_W-3:0];
     end
   end
 
