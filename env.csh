@@ -30,7 +30,7 @@ echo "=========================="
 echo "Setting pdk env to GPDK045"
 echo "=========================="
 source /vol/eecs391/GPDK045/cadence231.env                                                    
-setenv TECH_LIB /vol/eecs391/GPDK045/gsclib045_all_v4.8/gsclib045/timing/gsclib045_tt.lib     
+setenv TECH_LIB /vol/eecs391/GPDK045/gsclib045_all_v4.8/gsclib045/timing/fast_vdd1v0_basicCells.lib     
 
 setenv PATH ${GENUS_BASE}/tools/bin:${GENUS_BASE}/tools.lnx86/bin:$PATH
 
