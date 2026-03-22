@@ -67,6 +67,7 @@ module sqrt_srt_mantissa #(
       srt_sqrt_stage #(
           .DATA_W   (DATA_W),
           .FRAC_BITS(FRAC_BITS),
+          .RAD_W    (MANTISSA_W),
           .STAGE    (stage_idx + 3),
           .USE_ADDER(stage_idx == 0)
       ) srt_sqrt_stage_inst (
