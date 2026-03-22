@@ -1,5 +1,7 @@
 #!/bin/csh
 
+
+
 setenv CADENCE_BASE /vol/cadence2018/XCELIUM2109
 setenv CDS_LIC_FILE /vol/cadence2018/license/share/license/license.2025
 setenv VRST_HOME $CADENCE_BASE
@@ -22,6 +24,11 @@ else
 endif
 
 setenv GENUS_BASE /vol/cadence2018/GENUS211
+
+#Set the timing
+echo "Setting pdk env to GPDK045"
+source /vol/eecs391/GPDK045/cadence231.env                                                    
+setenv TECH_LIB /vol/eecs391/GPDK045/gsclib045_all_v4.8/gsclib045/timing/gsclib045_tt.lib     
 
 setenv PATH ${GENUS_BASE}/tools/bin:${GENUS_BASE}/tools.lnx86/bin:$PATH
 
