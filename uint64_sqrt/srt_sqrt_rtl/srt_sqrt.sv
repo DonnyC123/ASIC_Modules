@@ -13,7 +13,7 @@ module srt_sqrt #(
 
   localparam FRAC_BITS   = DIN_W + RADIX_W;
   localparam DATA_W      = INT_W + FRAC_BITS;
-  localparam ITERATIONS  = DOUT_W / 2 - 3;
+  localparam ITERATIONS  = DOUT_W / 2 - 2;
   localparam DIN_PAIRS_W = DIN_W / 2;
 
   localparam LZ_PAIR_COUNT_W = $clog2(DIN_PAIRS_W);
@@ -157,7 +157,7 @@ module srt_sqrt #(
 
   always_comb begin
     full_final_rem = $signed({rem_sum_stage[ITERATIONS][DATA_W-1], rem_sum_stage[ITERATIONS]}) +
-        $signed({rem_carry_stage[ITERATIONS][DATA_W-1], rem_carry_stage[ITERATIONS]});
+        $signed({rem_carry_stage[ITERATIONS], 1'b0});
     final_root_vec = (full_final_rem[DATA_W]) ? root_qm_stage[ITERATIONS] : root_q_stage[ITERATIONS];
 
     if (is_zero_stage[ITERATIONS]) begin

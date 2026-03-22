@@ -4,7 +4,7 @@ package srt_sqrt_pkg;
   localparam RADIX   = 4;
   localparam RADIX_W = $clog2(RADIX);
 
-  localparam INT_W             = 3;
+  localparam INT_W             = 6;
   localparam SEED_IDX_W        = 6;
   localparam SQ_INT_W          = SEED_IDX_W * 2;
   localparam Q_IDX_W           = RADIX;
