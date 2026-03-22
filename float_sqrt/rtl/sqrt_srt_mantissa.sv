@@ -37,9 +37,8 @@ module sqrt_srt_mantissa #(
   logic signed [  DATA_W-1:0] root_q_stage    [ITERATIONS+1];
   logic signed [  DATA_W-1:0] root_qm_stage   [ITERATIONS+1];
 
-  logic signed [DATA_W+1-1:0] full_final_rem;
+  logic signed [  DATA_W-1:0] full_final_rem;
   logic signed [  DATA_W-1:0] final_root_vec;
-  logic        [  DATA_W-1:0] root_raw;
 
   assign seed_idx = mantissa_rad_i[MANTISSA_W-1 : MANTISSA_W-INT_W];
 
@@ -85,9 +84,8 @@ module sqrt_srt_mantissa #(
   endgenerate
 
   always_comb begin
-    full_final_rem = $signed({rem_sum_stage[ITERATIONS][DATA_W-1], rem_sum_stage[ITERATIONS]}) +
-        $signed({rem_carry_stage[ITERATIONS][DATA_W-1], rem_carry_stage[ITERATIONS]});
-    final_root_vec = (full_final_rem[DATA_W]) ? root_qm_stage[ITERATIONS] : root_q_stage[ITERATIONS];
+    full_final_rem = rem_sum_stage[ITERATIONS] + rem_carry_stage[ITERATIONS];
+    final_root_vec = (full_final_rem[DATA_W-1]) ? root_qm_stage[ITERATIONS] : root_q_stage[ITERATIONS];
   end
 
   // data_status_pipeline #(
