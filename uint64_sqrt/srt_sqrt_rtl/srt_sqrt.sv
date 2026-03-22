@@ -49,7 +49,7 @@ module srt_sqrt #(
   logic        [LZ_PAIR_COUNT_W-1:0] pair_lz_count_stage     [ITERATIONS+1];
   logic                              is_zero_stage           [ITERATIONS+1];
 
-  logic signed [       DATA_W+1-1:0] full_final_rem;
+  logic        [         DATA_W-1:0] full_final_rem;
   logic signed [         DATA_W-1:0] final_root_vec;
   logic        [         DATA_W-1:0] root_raw;
 
@@ -156,9 +156,8 @@ module srt_sqrt #(
   endgenerate
 
   always_comb begin
-    full_final_rem = $signed({rem_sum_stage[ITERATIONS][DATA_W-1], rem_sum_stage[ITERATIONS]}) +
-        $signed({1'b0, rem_carry_stage[ITERATIONS]});
-    final_root_vec = (full_final_rem[DATA_W]) ? root_qm_stage[ITERATIONS] : root_q_stage[ITERATIONS];
+    full_final_rem = rem_sum_stage[ITERATIONS] + rem_carry_stage[ITERATIONS];
+    final_root_vec = (full_final_rem[DATA_W-1]) ? root_qm_stage[ITERATIONS] : root_q_stage[ITERATIONS];
 
     if (is_zero_stage[ITERATIONS]) begin
       root_raw = '0;
