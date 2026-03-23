@@ -83,7 +83,7 @@ proc read_rtl_from_runf {runf_path {extra_exclude {}}} {
 
         if {$skip} {
             puts "  \[filtered\] skipping TB file: [file tail $abs]"
-        } else {
+        } elseif {$abs ni $rtl_files} {
             lappend rtl_files $abs
         }
     }
@@ -125,7 +125,6 @@ check_design -unresolved
 log_section "Applying Constraints  (period = ${CLK_PERIOD_NS} ns  /  [expr {1000.0/$CLK_PERIOD_NS}] MHz)"
 
 create_clock -name clk -period $CLK_PERIOD_NS [get_db [get_ports $CLK_PORT]]
-set_db [get_db [get_ports $CLK_PORT]] .port_is_clock true
 
 set io_delay [expr {$CLK_PERIOD_NS * 0.1}]
 set_input_delay  -clock clk $io_delay \
