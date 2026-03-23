@@ -35,17 +35,16 @@ module mantissa_divider_stage
     divisor_scaled_neg_1_5 = divisor_padded_neg + divisor_scaled_neg_0_5;
 
     remainder_shifted = remainder_i <<< REDUCTION_FACTOR;
-    remainder_shifted_h = $signed(remainder_shifted[REMAINDER_W-1:1]);
 
     quotient_digit = QUOTIENT_DIGIT_W'(0);
-    if (remainder_shifted_h >= $signed(divisor_scaled_pos_0_5[REMAINDER_W-1:1])) begin
+    if (remainder_shifted >= divisor_scaled_pos_0_5) begin
       quotient_digit = QUOTIENT_DIGIT_W'(1);
-      if (remainder_shifted_h >= $signed(divisor_scaled_pos_1_5[REMAINDER_W-1:1])) begin
+      if (remainder_shifted >= divisor_scaled_pos_1_5) begin
         quotient_digit = QUOTIENT_DIGIT_W'(2);
       end
-    end else if (remainder_shifted_h <= $signed(divisor_scaled_neg_0_5[REMAINDER_W-1:1])) begin
+    end else if (remainder_shifted <= divisor_scaled_neg_0_5) begin
       quotient_digit = QUOTIENT_DIGIT_W'(-1);
-      if (remainder_shifted_h <= $signed(divisor_scaled_neg_1_5[REMAINDER_W-1:1])) begin
+      if (remainder_shifted <= divisor_scaled_neg_1_5) begin
         quotient_digit = QUOTIENT_DIGIT_W'(-2);
       end
     end
