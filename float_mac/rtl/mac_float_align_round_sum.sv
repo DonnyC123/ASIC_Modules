@@ -65,7 +65,7 @@ module mac_float_align_round_sum
   always_comb begin
     sum_rounded_signed = sum_signed_i;
 
-    sum_exp = product_exp_i - $signed({1'b0, mantissa_sum_lz}) + (SUM_EXP_ADD_OFFSET) +
+    sum_exp = product_exp_i - $signed({2'b0, mantissa_sum_lz}) + (SUM_EXP_ADD_OFFSET) +
         (MANTISSA_W - FRAC_W);
     sum_exp_ovfl = sum_exp[EXP_OVFL_IDX] && !sum_exp[EXP_SIGN_IDX];
     sum_exp_unfl = sum_exp[EXP_OVFL_IDX] && sum_exp[EXP_SIGN_IDX];
@@ -88,7 +88,7 @@ module mac_float_align_round_sum
       sum_frac_raw       = float_c_i.frac;
       sticky_sum         = '0;
       guard              = '0;
-      sum_exp            = $signed({2'b0, float_c_i.exp});
+      sum_exp            = $signed({3'b0, float_c_i.exp});
       sum_rounded_signed = float_c_i.sign;
 
     end else if (sum_exp_unfl || sum_exp == 0) begin
