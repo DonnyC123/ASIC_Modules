@@ -20,7 +20,7 @@ package divider_float_pkg;
     DONE   = 3'b100
   } mantissa_divider_state_t;
  
-  typedef struct {
+  typedef struct packed {
     logic sign;
     logic inf;
     logic nan;

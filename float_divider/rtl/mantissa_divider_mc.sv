@@ -18,10 +18,16 @@ module mantissa_divider_mc
   localparam COUNTER_LEN = (QUOTIENT_RAW_W + (REDUCTION_W - 1)) / REDUCTION_W;
   localparam COUNTER_W   = $clog2(COUNTER_LEN) + 1;
 
-  logic signed [REMAINDER_W-1:0] remainder_d, remainder_q;
-  logic signed [QUOTIENT_RAW_W-1:0] quotient_d, quotient_q;
-  logic [MANTISSA_W-1:0] divisor_d, divisor_q;
-  logic [COUNTER_W-1:0] counter_d, counter_q;
+  logic signed [   REMAINDER_W-1:0] remainder_d;
+  logic signed [   REMAINDER_W-1:0] remainder_q;
+
+  logic signed [QUOTIENT_RAW_W-1:0] quotient_d;
+  logic signed [QUOTIENT_RAW_W-1:0] quotient_q;
+
+  logic        [    MANTISSA_W-1:0] divisor_d;
+  logic        [    MANTISSA_W-1:0] divisor_q;
+  logic        [     COUNTER_W-1:0] counter_q;
+  logic        [     COUNTER_W-1:0] counter_d;
 
   mantissa_divider_state_t state_d, state_q;
 

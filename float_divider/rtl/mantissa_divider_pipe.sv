@@ -1,5 +1,3 @@
-// Combinational SRT radix-4 mantissa divider.
-// Chains COUNTER_LEN mantissa_divider_stage instances with no registers.
 module mantissa_divider_pipe
   import divider_float_pkg::*;
 #(

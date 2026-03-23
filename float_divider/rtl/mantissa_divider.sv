@@ -60,7 +60,7 @@ module mantissa_divider
     quotient_digit         = QUOTIENT_DIGIT_W'(0);
     remainder_shifted      = remainder_q <<< REDUCTION_FACTOR;
 
-    if (remainder_shifted >= divisor_scaled_pos_0_5) begin  // Can make this unqiue0
+    if (remainder_shifted >= divisor_scaled_pos_0_5) begin
       quotient_digit = QUOTIENT_DIGIT_W'(1);
       if (remainder_shifted >= divisor_scaled_pos_1_5) begin
         quotient_digit = QUOTIENT_DIGIT_W'(2);
