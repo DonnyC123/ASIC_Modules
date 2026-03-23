@@ -8,11 +8,11 @@
                                              
 ../../common/rtl/leading_zero_counter.sv     
 ../../common/rtl/leading_zero_counter_top.sv 
+../../common/rtl/carry_save_row_adder.sv 
         
 ../../uint64_sqrt/srt_sqrt_rtl/srt_sqrt_pkg.sv             
 ../../uint64_sqrt/srt_sqrt_rtl/srt_radix4_qds.sv           
 ../../uint64_sqrt/srt_sqrt_rtl/srt_radix4_seed.sv          
-../../uint64_sqrt/srt_sqrt_rtl/carry_save_row_adder.sv     
 ../../uint64_sqrt/srt_sqrt_rtl/srt_sqrt_stage.sv           
 
 ../../uint64_sqrt/restoring_sqrt_rtl/sqrt_restoring_stage.sv
