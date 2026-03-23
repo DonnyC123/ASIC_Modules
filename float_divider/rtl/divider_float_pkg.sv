@@ -7,6 +7,7 @@ package divider_float_pkg;
   localparam CARRY_W                 = 1;
   localparam OFFSET_BIT_W            = 1;
   localparam RADIX                   = 4;
+  localparam FLOAT_FLAGS_W           = 4;
   localparam REDUCTION_FACTOR        = $clog2(RADIX);
   localparam REDUCTION_W             = REDUCTION_FACTOR;
   localparam QUOTIENT_DIGIT_W        = REDUCTION_FACTOR + SIGN_W;

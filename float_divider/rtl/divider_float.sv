@@ -73,7 +73,7 @@ module divider_float #(
 
 
   data_status_pipeline #(
-      .DATA_W    (2 * MANTISSA_W + NUM_MANTISSA_DIV_STATES + SIGNED_EXP_W),
+      .DATA_W    (2 * MANTISSA_W + REDUCTION_W + SIGNED_EXP_W),
       .STATUS_W  (1),
       .PIPE_DEPTH(DECODE_PIPE_DEPTH)
   ) decode_to_divider_pipe (
