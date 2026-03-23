@@ -31,7 +31,6 @@ module divider_float #(
   float_t                                     float_a;
   float_t                                     float_b;
   float_t                                     float_quotient;
-  float_t                                     float_z;
 
   quotient_float_flags_t                      float_quotient_flags_d;
   quotient_float_flags_t                      float_quotient_flags_q;
@@ -45,12 +44,12 @@ module divider_float #(
   logic signed           [  SIGNED_EXP_W-1:0] quotient_exp_q;
 
   logic                                       start_divider_q;
-
-  logic                                       divider_done;
   logic                                       divider_done_q;
 
   logic                  [QUOTIENT_RAW_W-1:0] quotient_raw;
   logic                  [QUOTIENT_RAW_W-1:0] quotient_raw_q;
+  logic                                       sticky;
+  logic                                       sticky_q;
 
 
   always_comb begin
@@ -74,7 +73,7 @@ module divider_float #(
 
 
   data_status_pipeline #(
-      .DATA_W    (MANTISSA_W + MANTISSA_W),
+      .DATA_W    (2 * MANTISSA_W + NUM_MANTISSA_DIV_STATES + SIGNED_EXP_W),
       .STATUS_W  (1),
       .PIPE_DEPTH(DECODE_PIPE_DEPTH)
   ) decode_to_divider_pipe (
