@@ -207,35 +207,21 @@ module mac_float #(
       })
   );
 
-  logic out_nan;
-  logic out_unfl;
-  logic out_inf;
-
   always_comb begin
-    out_nan = sum_float_flags_3q.nan;
-    out_unfl = !out_nan && sum_rounded_exp_unfl_q;
-    out_inf  = !out_nan && !out_unfl &&
-               (sum_float_flags_3q.inf || sum_rounded_exp_ovfl_q ||
-                float_sum_rounded_q.exp == '1);
+    float_z = float_sum_rounded_q;
 
-    float_z.sign = (out_inf && sum_float_flags_3q.inf) ?
-                   sum_float_flags_3q.sign : float_sum_rounded_q.sign;
-
-    unique casez ({
-      out_nan | out_inf, out_unfl
-    })
-      2'b1?:   float_z.exp = '1;
-      2'b01:   float_z.exp = '0;
-      default: float_z.exp = float_sum_rounded_q.exp;
-    endcase
-
-    unique casez ({
-      out_nan, out_inf
-    })
-      2'b1?:   float_z.frac = '1;
-      2'b01:   float_z.frac = '0;
-      default: float_z.frac = float_sum_rounded_q.frac;
-    endcase
+    if (sum_float_flags_3q.nan) begin
+      float_z.exp  = '1;
+      float_z.frac = '1;
+    end else if (sum_rounded_exp_unfl_q) begin
+      float_z.exp = '0;
+    end else if (sum_float_flags_3q.inf || sum_rounded_exp_ovfl_q || (float_sum_rounded_q.exp == '1)) begin
+      float_z.exp  = '1;
+      float_z.frac = '0;
+      if (sum_float_flags_3q.inf) begin
+        float_z.sign = sum_float_flags_3q.sign;
+      end
+    end
   end
 
   data_pipeline #(
