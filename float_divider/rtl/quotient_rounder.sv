@@ -42,9 +42,6 @@ module quotient_rounder
   logic                                    guard;
   logic                                    sticky;
 
-  // Might be able to check if we will round and then do one add instead of
-  // mutliple
-
   always_comb begin
     quotient_exp_extended = quotient_exp_i;
     quotient_extended     = quotient_raw_i[QUOTIENT_RAW_W-1:1];
@@ -87,23 +84,28 @@ module quotient_rounder
 
   end
 
+  // Mutually exclusive output-type flags, in the same priority order as the
+  // original if/else if chain. Making them mutually exclusive allows Genus to
+  // implement exp and frac as two independent parallel muxes.
   logic out_nan;
   logic out_zero;
+  logic out_unfl;
   logic out_inf;
   logic out_subnorm;
 
   always_comb begin
-    out_nan = float_quotient_flags_i.nan;
-    out_zero = float_quotient_flags_i.zero;
-    out_inf    = float_quotient_flags_i.inf || quotient_exp_rounded_ovfl
-                 || (quotient_exp_rounded[EXP_W-1:0] == '1);
-    out_subnorm = (quotient_exp_rounded == '0) && quotient_mantissa[MANTISSA_W-1];
+    out_nan     = float_quotient_flags_i.nan;
+    out_zero    = !out_nan && float_quotient_flags_i.zero;
+    out_unfl    = !out_nan && !out_zero && quotient_exp_rounded_unfl;
+    out_inf     = !out_nan && !out_zero && !out_unfl &&
+                  (float_quotient_flags_i.inf || quotient_exp_rounded_ovfl ||
+                   quotient_exp_rounded[EXP_W-1:0] == '1);
+    out_subnorm = !out_nan && !out_zero && !out_unfl && !out_inf &&
+                  (quotient_exp_rounded == '0) && quotient_mantissa[MANTISSA_W-1];
 
     quotient_o.sign = float_quotient_flags_i.sign;
 
-    unique casez ({
-      out_nan, out_inf, quotient_exp_rounded_unfl | out_zero, out_subnorm
-    })
+    unique casez ({out_nan, out_inf, out_zero | out_unfl, out_subnorm})
       4'b1???: quotient_o.exp = '1;
       4'b01??: quotient_o.exp = '1;
       4'b001?: quotient_o.exp = '0;
@@ -111,12 +113,10 @@ module quotient_rounder
       default: quotient_o.exp = quotient_exp_rounded[EXP_W-1:0];
     endcase
 
-    unique casez ({
-      out_nan, out_inf, out_zero
-    })
-      3'b1??:  quotient_o.frac = '1;
-      3'b01?:  quotient_o.frac = '0;
-      3'b001:  quotient_o.frac = '0;
+    unique casez ({out_nan, out_inf, out_zero})
+      3'b1??: quotient_o.frac = '1;
+      3'b01?: quotient_o.frac = '0;
+      3'b001: quotient_o.frac = '0;
       default: quotient_o.frac = quotient_mantissa[FRAC_W-1:0];
     endcase
   end
