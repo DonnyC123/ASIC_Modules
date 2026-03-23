@@ -58,18 +58,15 @@ module mantissa_divider_stage
     end
 
     unique case (quotient_digit)
-      3'sd2:  subtrahend = divisor_padded * 2;
-      3'sd1:  subtrahend = divisor_padded;
-      3'sd0:  subtrahend = '0;
-      -3'sd1: subtrahend = divisor_padded_neg;
-      -3'sd2: subtrahend = divisor_padded_neg * 2;
+      3'sd2:  neg_subtrahend = divisor_padded_neg * 2;
+      3'sd1:  neg_subtrahend = divisor_padded_neg;
+      3'sd0:  neg_subtrahend = '0;
+      -3'sd1: neg_subtrahend = divisor_padded;
+      -3'sd2: neg_subtrahend = divisor_padded * 2;
     endcase
-
-    neg_subtrahend = -subtrahend;
-    quotient_o     = (quotient_i <<< REDUCTION_FACTOR) + QUOTIENT_RAW_W'(quotient_digit);
+    quotient_o = (quotient_i <<< REDUCTION_FACTOR) + QUOTIENT_RAW_W'(quotient_digit);
   end
 
-  // CSA: (rem_sum_o + rem_carry_o) = rem_sum_shifted + rem_carry_shifted - subtrahend
   carry_save_row_adder #(
       .DATA_W(REMAINDER_W)
   ) csa_inst (
