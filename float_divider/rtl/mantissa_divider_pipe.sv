@@ -1,3 +1,5 @@
+// Combinational SRT radix-4 mantissa divider.
+// Chains COUNTER_LEN mantissa_divider_stage instances with no registers.
 module mantissa_divider_pipe
   import divider_float_pkg::*;
 #(
@@ -13,13 +15,11 @@ module mantissa_divider_pipe
   localparam REMAINDER_W = SIGN_W + MANTISSA_W + REDUCTION_W + GUARD_W;
   localparam COUNTER_LEN = (QUOTIENT_RAW_W + (REDUCTION_W - 1)) / REDUCTION_W;
 
-  logic signed [   REMAINDER_W-1:0] rem_sum_w  [COUNTER_LEN+1];
-  logic signed [   REMAINDER_W-1:0] rem_carry_w[COUNTER_LEN+1];
-  logic signed [QUOTIENT_RAW_W-1:0] quot_w     [COUNTER_LEN+1];
+  logic signed [   REMAINDER_W-1:0] rem_w [COUNTER_LEN+1];
+  logic signed [QUOTIENT_RAW_W-1:0] quot_w[COUNTER_LEN+1];
 
-  assign rem_sum_w[0]   = $signed({(SIGN_W + GUARD_W + REDUCTION_FACTOR)'(1'b0), dividend_i});
-  assign rem_carry_w[0] = '0;
-  assign quot_w[0]      = '0;
+  assign rem_w[0]  = $signed({(SIGN_W + GUARD_W + REDUCTION_FACTOR)'(1'b0), dividend_i});
+  assign quot_w[0] = '0;
 
   genvar i;
   generate
@@ -27,26 +27,22 @@ module mantissa_divider_pipe
       mantissa_divider_stage #(
           .MANTISSA_W(MANTISSA_W)
       ) stage_inst (
-          .rem_sum_i  (rem_sum_w[i]),
-          .rem_carry_i(rem_carry_w[i]),
+          .remainder_i(rem_w[i]),
           .quotient_i (quot_w[i]),
           .divisor_i  (divisor_i),
-          .rem_sum_o  (rem_sum_w[i+1]),
-          .rem_carry_o(rem_carry_w[i+1]),
+          .remainder_o(rem_w[i+1]),
           .quotient_o (quot_w[i+1])
       );
     end
   endgenerate
 
   always_comb begin
-    logic signed [REMAINDER_W-1:0] final_rem;
-    final_rem = rem_sum_w[COUNTER_LEN] + rem_carry_w[COUNTER_LEN];
-    if (final_rem[REMAINDER_W-1]) begin
+    if (rem_w[COUNTER_LEN][REMAINDER_W-1]) begin
       quotient_raw_o = quot_w[COUNTER_LEN] - 1;
       sticky_o       = 1'b1;
     end else begin
       quotient_raw_o = quot_w[COUNTER_LEN];
-      sticky_o       = (final_rem != '0);
+      sticky_o       = (rem_w[COUNTER_LEN] != '0);
     end
   end
 
