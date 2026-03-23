@@ -2,6 +2,8 @@
 ../../common/rtl/shift_reg.sv
 ../../common/rtl/data_status_pipeline.sv
 
+../../common/rtl/carry_save_row_adder.sv.sv
+
 ../srt_sqrt_rtl/srt_sqrt_pkg.sv
 ../srt_sqrt_rtl/srt_radix4_qds.sv
 ../srt_sqrt_rtl/srt_radix4_seed.sv
