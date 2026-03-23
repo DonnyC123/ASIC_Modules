@@ -4,6 +4,7 @@
 ../../common/tb/float_16_tb_pkg.sv
 
 ../../common/rtl/leading_zero_counter.sv
+../../common/rtl/carry_save_row_adder.sv
 ../../common/rtl/leading_zero_counter_top.sv
 
 ../rtl/divider_float_pkg.sv

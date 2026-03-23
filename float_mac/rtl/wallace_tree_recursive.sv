@@ -35,7 +35,7 @@ module wallace_tree_recursive #(
         );
 
         assign partial_sums_next[row_idx*2]   = csa_sum;
-        assign partial_sums_next[row_idx*2+1] = {csa_carry[DATA_W-2:0], 1'b0};
+        assign partial_sums_next[row_idx*2+1] = csa_carry;
       end
 
       for (row_idx = 0; row_idx < LEFTOVER_ROWS; row_idx++) begin
