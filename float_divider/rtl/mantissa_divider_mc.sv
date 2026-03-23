@@ -1,3 +1,5 @@
+// Multi-cycle SRT radix-4 mantissa divider with carry-save remainder.
+// Drop-in replacement for mantissa_divider.sv.
 module mantissa_divider_mc
   import divider_float_pkg::*;
 #(
@@ -18,36 +20,34 @@ module mantissa_divider_mc
   localparam COUNTER_LEN = (QUOTIENT_RAW_W + (REDUCTION_W - 1)) / REDUCTION_W;
   localparam COUNTER_W   = $clog2(COUNTER_LEN) + 1;
 
-  logic signed [   REMAINDER_W-1:0] remainder_d;
-  logic signed [   REMAINDER_W-1:0] remainder_q;
+  logic signed [   REMAINDER_W-1:0] rem_sum_d,  rem_sum_q;
+  logic signed [   REMAINDER_W-1:0] rem_carry_d, rem_carry_q;
+  logic signed [QUOTIENT_RAW_W-1:0] quotient_d,  quotient_q;
+  logic        [    MANTISSA_W-1:0] divisor_d,   divisor_q;
+  logic        [     COUNTER_W-1:0] counter_d,   counter_q;
+  mantissa_divider_state_t          state_d,     state_q;
 
-  logic signed [QUOTIENT_RAW_W-1:0] quotient_d;
-  logic signed [QUOTIENT_RAW_W-1:0] quotient_q;
-
-  logic        [    MANTISSA_W-1:0] divisor_d;
-  logic        [    MANTISSA_W-1:0] divisor_q;
-  logic        [     COUNTER_W-1:0] counter_q;
-  logic        [     COUNTER_W-1:0] counter_d;
-
-  mantissa_divider_state_t state_d, state_q;
-
-  logic signed [   REMAINDER_W-1:0] stage_rem_o;
+  logic signed [   REMAINDER_W-1:0] stage_rem_sum_o;
+  logic signed [   REMAINDER_W-1:0] stage_rem_carry_o;
   logic signed [QUOTIENT_RAW_W-1:0] stage_quot_o;
 
   mantissa_divider_stage #(
       .MANTISSA_W(MANTISSA_W)
   ) stage_inst (
-      .remainder_i(remainder_q),
+      .rem_sum_i  (rem_sum_q),
+      .rem_carry_i(rem_carry_q),
       .quotient_i (quotient_q),
       .divisor_i  (divisor_q),
-      .remainder_o(stage_rem_o),
+      .rem_sum_o  (stage_rem_sum_o),
+      .rem_carry_o(stage_rem_carry_o),
       .quotient_o (stage_quot_o)
   );
 
   always_comb begin
     state_d     = state_q;
     divisor_d   = divisor_q;
-    remainder_d = remainder_q;
+    rem_sum_d   = rem_sum_q;
+    rem_carry_d = rem_carry_q;
     quotient_d  = quotient_q;
     counter_d   = '0;
     done_o      = '0;
@@ -58,13 +58,15 @@ module mantissa_divider_mc
         if (start_i) begin
           state_d     = ACTIVE;
           divisor_d   = divisor_i;
-          remainder_d = $signed({(SIGN_W + GUARD_W + REDUCTION_FACTOR)'(1'b0), dividend_i});
+          rem_sum_d   = $signed({(SIGN_W + GUARD_W + REDUCTION_FACTOR)'(1'b0), dividend_i});
+          rem_carry_d = '0;
           quotient_d  = '0;
         end
       end
       ACTIVE: begin
         counter_d   = counter_q + 1;
-        remainder_d = stage_rem_o;
+        rem_sum_d   = stage_rem_sum_o;
+        rem_carry_d = stage_rem_carry_o;
         quotient_d  = stage_quot_o;
         if (counter_q == COUNTER_W'($unsigned(COUNTER_LEN - 1))) begin
           state_d = DONE;
@@ -73,12 +75,17 @@ module mantissa_divider_mc
       DONE: begin
         done_o  = 1'b1;
         state_d = IDLE;
-        if (remainder_q[REMAINDER_W-1]) begin
-          quotient_d = quotient_q - 1;
-          sticky_o   = 1'b1;
-        end else begin
-          quotient_d = quotient_q;
-          sticky_o   = (remainder_q != '0);
+        // Resolve carry-save remainder to check sign
+        begin
+          logic signed [REMAINDER_W-1:0] final_rem;
+          final_rem = rem_sum_q + rem_carry_q;
+          if (final_rem[REMAINDER_W-1]) begin
+            quotient_d = quotient_q - 1;
+            sticky_o   = 1'b1;
+          end else begin
+            quotient_d = quotient_q;
+            sticky_o   = (final_rem != '0);
+          end
         end
       end
     endcase
@@ -92,7 +99,8 @@ module mantissa_divider_mc
     end else begin
       state_q     <= state_d;
       divisor_q   <= divisor_d;
-      remainder_q <= remainder_d;
+      rem_sum_q   <= rem_sum_d;
+      rem_carry_q <= rem_carry_d;
       quotient_q  <= quotient_d;
       counter_q   <= counter_d;
     end
