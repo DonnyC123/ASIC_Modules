@@ -35,7 +35,6 @@ module quotient_rounder
   logic signed [         SIGNED_EXP_W-1:0] quotient_exp_rounded;
 
   logic                                    quotient_exp_extended_unfl;
-  logic                                    quotient_exp_extended_ovfl;
 
   logic                                    quotient_exp_rounded_unfl;
   logic                                    quotient_exp_rounded_ovfl;
@@ -58,7 +57,6 @@ module quotient_rounder
     end
 
     quotient_exp_extended_unfl = quotient_exp_extended[SIGNED_EXP_W-1];
-    quotient_exp_extended_ovfl = |quotient_exp_extended[SIGNED_EXP_W-2-:2];
     quotient_extended_normalized = quotient_extended;
 
     temp_shift_reg = {quotient_extended, {QUOTIENT_EXTENDED_W{1'b0}}}  >> (1 - quotient_exp_extended);
@@ -89,25 +87,38 @@ module quotient_rounder
 
   end
 
-  always_comb begin
-    quotient_o.sign = float_quotient_flags_i.sign;
-    quotient_o.frac = quotient_mantissa[FRAC_W-1:0];
-    quotient_o.exp  = quotient_exp_rounded[EXP_W-1:0];
+  logic out_nan;
+  logic out_zero;
+  logic out_inf;
+  logic out_subnorm;
 
-    if (float_quotient_flags_i.nan) begin  // unique0?
-      quotient_o.exp  = '1;
-      quotient_o.frac = '1;
-    end else if (float_quotient_flags_i.zero || quotient_exp_rounded_unfl) begin
-      quotient_o.exp = '0;
-      if (float_quotient_flags_i.zero) begin
-        quotient_o.frac = '0;
-      end
-    end else if (float_quotient_flags_i.inf || quotient_exp_rounded_ovfl || quotient_exp_rounded[EXP_W-1:0] == '1) begin
-      quotient_o.exp  = '1;
-      quotient_o.frac = '0;
-    end else if (quotient_exp_rounded == '0 && quotient_mantissa[MANTISSA_W-1]) begin
-      quotient_o.exp = 1;
-    end
+  always_comb begin
+    out_nan = float_quotient_flags_i.nan;
+    out_zero = float_quotient_flags_i.zero;
+    out_inf    = float_quotient_flags_i.inf || quotient_exp_rounded_ovfl
+                 || (quotient_exp_rounded[EXP_W-1:0] == '1);
+    out_subnorm = (quotient_exp_rounded == '0) && quotient_mantissa[MANTISSA_W-1];
+
+    quotient_o.sign = float_quotient_flags_i.sign;
+
+    unique casez ({
+      out_nan, out_inf, quotient_exp_rounded_unfl | out_zero, out_subnorm
+    })
+      4'b1???: quotient_o.exp = '1;
+      4'b01??: quotient_o.exp = '1;
+      4'b001?: quotient_o.exp = '0;
+      4'b0001: quotient_o.exp = EXP_W'(1);
+      default: quotient_o.exp = quotient_exp_rounded[EXP_W-1:0];
+    endcase
+
+    unique casez ({
+      out_nan, out_inf, out_zero
+    })
+      3'b1??:  quotient_o.frac = '1;
+      3'b01?:  quotient_o.frac = '0;
+      3'b001:  quotient_o.frac = '0;
+      default: quotient_o.frac = quotient_mantissa[FRAC_W-1:0];
+    endcase
   end
 
 endmodule
