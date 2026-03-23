@@ -155,14 +155,14 @@ syn_opt
 # =============================================================================
 log_section "Writing Reports  ->  $WORK_DIR"
 
-report_timing -num_paths 10 > $WORK_DIR/timing.rpt
+report_timing -max_paths 10 > $WORK_DIR/timing.rpt
 report_area                 > $WORK_DIR/area.rpt
 report_gates                > $WORK_DIR/gates.rpt
 report_power  -hierarchy    > $WORK_DIR/power.rpt
 report_qor                  > $WORK_DIR/qor.rpt
 
 report_qor
-report_timing -num_paths 5
+report_timing -max_paths 5
 
 # =============================================================================
 # 7. Write Outputs
