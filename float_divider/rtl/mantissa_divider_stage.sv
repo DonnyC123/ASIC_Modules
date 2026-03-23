@@ -14,16 +14,15 @@ module mantissa_divider_stage
 
   localparam DIVISOR_SCALED_W = REMAINDER_W;
 
-  logic signed [REMAINDER_W-1:0] divisor_padded;
-  logic signed [REMAINDER_W-1:0] divisor_padded_neg;
+  logic signed [     REMAINDER_W-1:0] divisor_padded;
+  logic signed [     REMAINDER_W-1:0] divisor_padded_neg;
   logic signed [DIVISOR_SCALED_W-1:0] divisor_scaled_pos_1_5;
   logic signed [DIVISOR_SCALED_W-1:0] divisor_scaled_pos_0_5;
   logic signed [DIVISOR_SCALED_W-1:0] divisor_scaled_neg_0_5;
   logic signed [DIVISOR_SCALED_W-1:0] divisor_scaled_neg_1_5;
   logic signed [QUOTIENT_DIGIT_W-1:0] quotient_digit;
-  logic signed [REMAINDER_W-1:0] remainder_shifted;
-  logic signed [REMAINDER_W-2:0] remainder_shifted_h;  // upper REMAINDER_W-1 bits (LSB always 0)
-  logic signed [REMAINDER_W-1:0] neg_subtrahend;
+  logic signed [     REMAINDER_W-1:0] remainder_shifted;
+  logic signed [     REMAINDER_W-1:0] neg_subtrahend;
 
   always_comb begin
     divisor_padded =
