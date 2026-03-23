@@ -15,7 +15,6 @@
 #   TB_EXCLUDE     - extra glob patterns to filter from run.f (default: {})
 # =============================================================================
 
-# --- Defaults ----------------------------------------------------------------
 if {![info exists CLK_PORT]}      { set CLK_PORT      "clk" }
 if {![info exists CLK_PERIOD_NS]} { set CLK_PERIOD_NS  2.0  }
 if {![info exists TB_EXCLUDE]}    { set TB_EXCLUDE     {}   }

@@ -82,11 +82,13 @@ module mantissa_divider
   end
 
   always_comb begin
-    divider_state_d   = divider_state_q;
-    divisor_d         = divisor_q;
-    remainder_d       = remainder_q;
-    divider_counter_d = '0;
-    done_o            = '0;
+    divider_state_d     = divider_state_q;
+    divisor_d           = divisor_q;
+    remainder_d         = remainder_q;
+    quotient_extended_d = quotient_extended_q;
+    divider_counter_d   = '0;
+    done_o              = '0;
+    sticky_o            = '0;
 
     unique case (divider_state_q)
       IDLE: begin
