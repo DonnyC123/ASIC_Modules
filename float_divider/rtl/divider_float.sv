@@ -14,6 +14,10 @@ module divider_float #(
 
   import divider_float_pkg::*;
 
+  localparam DECODE_PIPE_DEPTH  = 0;
+  localparam DIVIDER_PIPE_DEPTH = 0;
+  localparam OUT_PIPE_DEPTH     = 1;
+
   localparam MANTISSA_W     = FRAC_W + 1;
   localparam SIGNED_EXP_W   = EXP_W + SIGN_W + 2 * CARRY_W;
   localparam QUOTIENT_RAW_W = OFFSET_BIT_W + MANTISSA_W + GUARD_W;
@@ -68,48 +72,38 @@ module divider_float #(
       .quotient_exp_o        (quotient_exp_d)
   );
 
-  always_ff @(posedge clk) begin
-    if (start_i) begin
-      float_quotient_flags_q <= float_quotient_flags_d;
-      quotient_exp_q         <= quotient_exp_d;
-    end
-  end
 
   data_status_pipeline #(
       .DATA_W    (MANTISSA_W + MANTISSA_W),
       .STATUS_W  (1),
-      .PIPE_DEPTH(1)
+      .PIPE_DEPTH(DECODE_PIPE_DEPTH)
   ) decode_to_divider_pipe (
       .clk     (clk),
       .rst_n   (rst_n),
-      .data_i  ({norm_mant_a, norm_mant_b}),
+      .data_i  ({norm_mant_a, norm_mant_b, float_quotient_flags_d, quotient_exp_d}),
       .status_i(start_i),
-      .data_o  ({norm_mant_a_q, norm_mant_b_q}),
+      .data_o  ({norm_mant_a_q, norm_mant_b_q, float_quotient_flags_q, quotient_exp_q}),
       .status_o(start_divider_q)
   );
 
-  mantissa_divider #(
+  mantissa_divider_pipe #(
       .MANTISSA_W(MANTISSA_W)
   ) mantissa_divider_inst (
-      .clk           (clk),
-      .rst_n         (rst_n),
-      .start_i       (start_divider_q),
       .dividend_i    (norm_mant_a_q),
       .divisor_i     (norm_mant_b_q),
       .quotient_raw_o(quotient_raw),
-      .sticky_o      (sticky),
-      .done_o        (divider_done)
+      .sticky_o      (sticky)
   );
 
   data_status_pipeline #(
       .DATA_W    (QUOTIENT_RAW_W + 1),
       .STATUS_W  (1),
-      .PIPE_DEPTH(1)
+      .PIPE_DEPTH(DIVIDER_PIPE_DEPTH)
   ) divider_to_round_pipe (
       .clk     (clk),
       .rst_n   (rst_n),
       .data_i  ({quotient_raw, sticky}),
-      .status_i(divider_done),
+      .status_i(start_divider_q),
       .data_o  ({quotient_raw_q, sticky_q}),
       .status_o(divider_done_q)
   );
@@ -130,7 +124,7 @@ module divider_float #(
   data_status_pipeline #(
       .DATA_W    (DATA_W),
       .STATUS_W  (1),
-      .PIPE_DEPTH(1)
+      .PIPE_DEPTH(OUT_PIPE_DEPTH)
   ) round_to_out_pipe (
       .clk     (clk),
       .rst_n   (rst_n),
