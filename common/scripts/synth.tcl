@@ -82,7 +82,7 @@ proc read_rtl_from_runf {runf_path {extra_exclude {}}} {
         }
 
         if {$skip} {
-            puts "  [filter] skipping TB file: [file tail $abs]"
+            puts "  \[filtered\] skipping TB file: [file tail $abs]"
         } else {
             lappend rtl_files $abs
         }
