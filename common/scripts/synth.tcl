@@ -155,14 +155,17 @@ syn_opt
 # =============================================================================
 log_section "Writing Reports  ->  $WORK_DIR"
 
-report_timing -max_paths 10 -hdl_output > $WORK_DIR/timing.rpt
+report_timing -max_paths 10 \
+    -fields {timing_point flags arc cell fanout load transition delay arrival frc} \
+    > $WORK_DIR/timing.rpt
 report_area                 > $WORK_DIR/area.rpt
 report_gates                > $WORK_DIR/gates.rpt
 report_power               > $WORK_DIR/power.rpt
 report_qor                  > $WORK_DIR/qor.rpt
 
 report_qor
-report_timing -max_paths 5
+report_timing -max_paths 5 \
+    -fields {timing_point flags arc cell fanout load transition delay arrival frc}
 
 # =============================================================================
 # 7. Write Outputs
