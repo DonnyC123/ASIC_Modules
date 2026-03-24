@@ -175,6 +175,14 @@ log_section "Writing Netlist and SDC"
 write_hdl > $WORK_DIR/${DESIGN_NAME}_netlist.v
 write_sdc > $WORK_DIR/${DESIGN_NAME}.sdc
 
+# =============================================================================
+# 8. Save Database for GUI Inspection (ADD THIS SECTION)
+# =============================================================================
+log_section "Saving Database for GUI Optimization"
+
+# This saves the fully mapped and optimized design
+write_db -all $WORK_DIR/${DESIGN_NAME}_final.db
+
 puts "\n[string repeat = 60]"
 puts "  Done.  Results in: $WORK_DIR"
 puts "[string repeat = 60]\n"
