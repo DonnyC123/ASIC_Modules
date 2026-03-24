@@ -18,9 +18,8 @@ module align_addend #(
     input  unpacked_float_t                          unpacked_c_i,
     input  logic signed     [     PRODUCT_EXP_W-1:0] product_exp_i,
     input  logic                                     product_sign_i,
-    output logic            [     UPPER_SLICE_W-1:0] c_upper_slice_o,
-    output logic            [PRODUCT_MANTISSA_W-1:0] csa_c_o,
-    output logic                                     c_lower_sticky_o,
+    output logic            [UPPER_SLICE_W+PRODUCT_MANTISSA_W-1:0] aligned_c_o,
+    output logic                                                   c_lower_sticky_o,
     output logic                                     c_dominates_o,
     output logic                                     ignore_round_even_o
 );
@@ -69,8 +68,7 @@ module align_addend #(
     c_shifted_raw    = c_wide_prep << c_shift_amount;
     c_shifted_struct = c_shifted_raw;
 
-    c_upper_slice_o  = '0;
-    csa_c_o          = '0;
+    aligned_c_o = '0;
 
     if (c_shift_unfl) begin
       c_lower_sticky_o = |unpacked_c_i.mantissa;
@@ -78,8 +76,7 @@ module align_addend #(
     end else if (c_shift_ovfl) begin
       c_lower_sticky_o = '0;
     end else begin
-      c_upper_slice_o  = c_shifted_struct.upper_c;
-      csa_c_o          = c_shifted_struct.product_aligned_c;
+      aligned_c_o      = {c_shifted_struct.upper_c, c_shifted_struct.product_aligned_c};
       c_lower_sticky_o = |c_shifted_struct.rounding_c;
     end
   end

@@ -12,12 +12,11 @@ module mac_float_decode
     input  float_t                          float_b_i,
     input  float_t                          float_c_i,
     output sum_float_flags_t                sum_float_flags_o,
-    output logic                            product_sign_o,
-    output logic signed [SIGNED_EXP_W-1:0]  product_exp_o,
-    output logic [PARTIAL_SUM_HIGH_W-1:0]   c_upper_slice_o,
-    output logic [PRODUCT_MANTISSA_W-1:0]   csa_c_o,
-    output logic         [  MANTISSA_W-1:0] norm_mant_a_o,
-    output logic         [  MANTISSA_W-1:0] norm_mant_b_o
+    output logic                                                      product_sign_o,
+    output logic signed [SIGNED_EXP_W-1:0]                           product_exp_o,
+    output logic        [PARTIAL_SUM_HIGH_W+PRODUCT_MANTISSA_W-1:0]  aligned_c_o,
+    output logic        [MANTISSA_W-1:0]                             norm_mant_a_o,
+    output logic        [MANTISSA_W-1:0]                             norm_mant_b_o
 );
 
   localparam LZ_COUNTER_W         = $clog2(MANTISSA_W);
@@ -170,8 +169,7 @@ module mac_float_decode
       .unpacked_c_i       (unpacked_c),
       .product_exp_i      (product_exp_o),
       .product_sign_i     (product_sign_o),
-      .c_upper_slice_o    (c_upper_slice_o),
-      .csa_c_o            (csa_c_o),
+      .aligned_c_o        (aligned_c_o),
       .c_lower_sticky_o   (sum_float_flags_o.sticky_c),
       .c_dominates_o      (c_dominates),
       .ignore_round_even_o(sum_float_flags_o.ignore_round_even)
