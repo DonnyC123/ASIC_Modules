@@ -75,7 +75,7 @@ module mac_float_align_round_sum
       mantissa_sum_shift = mantissa_sum_lz;
     end
 
-    normalized_mantissa = unsigned_mantissa_sum_i[mantissa_sum_shift+:FULL_SUM_W];
+    normalized_mantissa = unsigned_mantissa_sum_i[(FULL_SUM_W-mantissa_sum_shift)+:FULL_SUM_W];
     sum_frac_raw        = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_W];
     sticky_sum          = |normalized_mantissa[GUARD_IDX-1:0];
     guard               = normalized_mantissa[GUARD_IDX];
