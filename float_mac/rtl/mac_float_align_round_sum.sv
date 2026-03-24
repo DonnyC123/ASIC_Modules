@@ -69,8 +69,8 @@ module mac_float_align_round_sum
     sum_exp_unfl = sum_exp[EXP_OVFL_IDX] && sum_exp[EXP_SIGN_IDX];
 
     if (sum_exp_unfl) begin
-      mantissa_sum_shift = LZC_COUNT_W
-          '($unsigned(product_exp_i) + LZC_COUNT_W'(SUM_EXP_ADD_OFFSET + MANTISSA_W - FRAC_W));
+      mantissa_sum_shift = LZC_COUNT_W'($unsigned(product_exp_i)) +
+          LZC_COUNT_W'($unsigned(SUM_EXP_ADD_OFFSET + MANTISSA_W - FRAC_W));
     end else begin
       mantissa_sum_shift = mantissa_sum_lz;
     end
