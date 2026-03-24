@@ -52,8 +52,6 @@ module mac_float_align_round_sum
   logic                           guard;
   logic                           round_mantissa;
 
-  logic        [2*FULL_SUM_W-1:0] padded_sum;
-
   leading_zero_counter_top #(
       .DATA_W          (FULL_SUM_W),
       .LZC_DATA_BLOCK_W(4)
@@ -61,7 +59,6 @@ module mac_float_align_round_sum
       .data_i              (unsigned_mantissa_sum_i),
       .leading_zero_count_o(mantissa_sum_lz)
   );
-
 
   always_comb begin
     sum_rounded_signed = sum_signed_i;
@@ -78,9 +75,7 @@ module mac_float_align_round_sum
       mantissa_sum_shift = mantissa_sum_lz;
     end
 
-    padded_sum          = {unsigned_mantissa_sum_i, {FULL_SUM_W{1'b0}}};
-
-    normalized_mantissa = padded_sum[(FULL_SUM_W-mantissa_sum_shift)+:FULL_SUM_W];
+    normalized_mantissa = unsigned_mantissa_sum_i << mantissa_sum_shift;
     sum_frac_raw        = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_W];
     sticky_sum          = |normalized_mantissa[GUARD_IDX-1:0];
     guard               = normalized_mantissa[GUARD_IDX];
