@@ -52,8 +52,10 @@ module mac_float #(
   logic             [        MANTISSA_W-1:0] norm_mant_a_q;
   logic             [        MANTISSA_W-1:0] norm_mant_b;
   logic             [        MANTISSA_W-1:0] norm_mant_b_q;
-  logic             [PARTIAL_SUM_HIGH_W+PRODUCT_MANTISSA_W-1:0] aligned_c;
-  logic             [PARTIAL_SUM_HIGH_W+PRODUCT_MANTISSA_W-1:0] aligned_c_q;
+  logic             [PRODUCT_MANTISSA_W-1:0] csa_c;
+  logic             [PRODUCT_MANTISSA_W-1:0] csa_c_q;
+  logic             [PARTIAL_SUM_HIGH_W-1:0] c_upper_slice;
+  logic             [PARTIAL_SUM_HIGH_W-1:0] c_upper_slice_q;
 
   logic                                      product_sign;
   logic                                      product_sign_2q;
@@ -99,21 +101,22 @@ module mac_float #(
       .sum_float_flags_o(sum_float_flags),
       .product_sign_o   (product_sign),
       .product_exp_o    (product_exp),
-      .aligned_c_o      (aligned_c),
+      .c_upper_slice_o  (c_upper_slice),
+      .csa_c_o          (csa_c),
       .norm_mant_a_o    (norm_mant_a),
       .norm_mant_b_o    (norm_mant_b)
   );
 
   data_pipeline #(
-      .DATA_W(1 + MANTISSA_W + MANTISSA_W + (PARTIAL_SUM_HIGH_W + PRODUCT_MANTISSA_W)),
+      .DATA_W(1 + MANTISSA_W + MANTISSA_W + PRODUCT_MANTISSA_W + PARTIAL_SUM_HIGH_W),
       .PIPE_DEPTH(DECODE_PIPE_DEPTH),
       .RST_EN(1)
   ) decode_to_execution_pipe (
       .clk   (clk),
       .rst_n (rst_n),
       .clk_en('1),
-      .data_i({valid_i, aligned_c, norm_mant_a, norm_mant_b}),
-      .data_o({valid_decode_q, aligned_c_q, norm_mant_a_q, norm_mant_b_q})
+      .data_i({valid_i, c_upper_slice, csa_c, norm_mant_a, norm_mant_b}),
+      .data_o({valid_decode_q, c_upper_slice_q, csa_c_q, norm_mant_a_q, norm_mant_b_q})
   );
 
   data_pipeline #(
@@ -134,7 +137,8 @@ module mac_float #(
       .FULL_SUM_W        (FULL_SUM_W),
       .FULL_SUM_CARRY_W  (FULL_SUM_CARRY_W)
   ) mac_float_execution_inst (
-      .aligned_c_i       (aligned_c_q),
+      .c_upper_slice_i   (c_upper_slice_q),
+      .csa_c_i           (csa_c_q),
       .norm_mant_a_i     (norm_mant_a_q),
       .norm_mant_b_i     (norm_mant_b_q),
       .mantissa_sum_raw_o(mantissa_sum_raw)
