@@ -17,23 +17,20 @@ module mac_float_execution
 );
 
   logic [PRODUCT_MANTISSA_W-1:0] mult_result;
-  logic [ PARTIAL_SUM_LOW_W-1:0] mantissa_sum_lower;
-  logic [  PARTIAL_SUM_HIGH_W:0] upper_sum_temp;
-  logic [PARTIAL_SUM_HIGH_W-1:0] mantissa_sum_upper;
 
   always_comb begin
     mult_result = norm_mant_a_i * norm_mant_b_i;
 
-    mantissa_sum_lower = PARTIAL_SUM_LOW_W'(mult_result) + PARTIAL_SUM_LOW_W'(csa_c_i);
-
-    upper_sum_temp = {c_upper_slice_i[PARTIAL_SUM_HIGH_W-1], c_upper_slice_i}
-                   + (PARTIAL_SUM_HIGH_W + 1)'(mantissa_sum_lower[PARTIAL_SUM_LOW_W-1 : PARTIAL_SUM_LOW_W-2]);
-
-    mantissa_sum_upper = upper_sum_temp[PARTIAL_SUM_HIGH_W:1];
-
-    mantissa_sum_raw_o = {
-      mantissa_sum_upper, upper_sum_temp[0], mantissa_sum_lower[PARTIAL_SUM_LOW_W-3:0]
-    };
+    // Single full-width 3-input sum: eliminates the lower/upper split and the
+    // part-select that was blocking CSA optimization (CSAGEN-QOR warning).
+    // Equivalent to the original split: sign-extend c_upper_slice by 1 bit,
+    // left-shift by PARTIAL_SUM_LOW_W, then add mult_result and csa_c_i.
+    mantissa_sum_raw_o =
+        FULL_SUM_CARRY_W'({c_upper_slice_i[PARTIAL_SUM_HIGH_W-1],
+                           c_upper_slice_i,
+                           {PARTIAL_SUM_LOW_W{1'b0}}})
+      + FULL_SUM_CARRY_W'(mult_result)
+      + FULL_SUM_CARRY_W'(csa_c_i);
   end
 
 endmodule
