@@ -12,7 +12,7 @@ module tb_divider_float;
   logic               start;
   logic               z_valid;
 
-  divider_float16_top divider_float_inst (
+  divider_float_16_top divider_float_inst (
       .clk    (clk),
       .rst_n  (rst_n),
       .start_i(start),
