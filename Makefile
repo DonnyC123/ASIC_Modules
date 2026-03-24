@@ -15,6 +15,13 @@ $(TB_DIRS):
 # Run synthesis for all designs: make synth
 synth: $(SYNTH_DIRS:%=synth-%)
 
+synth-interactive:
+	mkdir -p out
+	$(GENUS) -no_gui -files design.tcl -log out/genus.log
+
+
+
+
 # Run synthesis for one design: make synth-float_sqrt
 $(SYNTH_DIRS:%=synth-%):
 	@echo "================================================="
