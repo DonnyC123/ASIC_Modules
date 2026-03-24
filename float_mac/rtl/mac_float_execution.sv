@@ -16,39 +16,15 @@ module mac_float_execution
     output logic [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_o
 );
 
-  // MANTISSA_W partial product rows + 1 row for csa_c
-  localparam NUM_WT_ROWS = MANTISSA_W + 1;
-
-  // Wallace tree runs at PARTIAL_SUM_LOW_W (not PRODUCT_MANTISSA_W) so that
-  // carry shifts within carry_save_row_adder cannot overflow: product + csa_c
-  // can sum to PRODUCT_MANTISSA_W+1 bits, which fits in PARTIAL_SUM_LOW_W.
-  logic [ PARTIAL_SUM_LOW_W-1:0] partial_products   [NUM_WT_ROWS];
-  logic [ PARTIAL_SUM_LOW_W-1:0] wt_sum;
-  logic [ PARTIAL_SUM_LOW_W-1:0] wt_carry;
+  logic [PRODUCT_MANTISSA_W-1:0] mult_result;
   logic [ PARTIAL_SUM_LOW_W-1:0] mantissa_sum_lower;
   logic [  PARTIAL_SUM_HIGH_W:0] upper_sum_temp;
   logic [PARTIAL_SUM_HIGH_W-1:0] mantissa_sum_upper;
 
   always_comb begin
-    for (int i = 0; i < MANTISSA_W; i++) begin
-      partial_products[i] = norm_mant_b_i[i] ? (PARTIAL_SUM_LOW_W'(norm_mant_a_i) << i) : '0;
-    end
+    mult_result = norm_mant_a_i * norm_mant_b_i;
 
-    partial_products[MANTISSA_W] = PARTIAL_SUM_LOW_W'(csa_c_i);
-  end
-
-  wallace_tree_recursive #(
-      .DATA_W  (PARTIAL_SUM_LOW_W),
-      .NUM_ROWS(NUM_WT_ROWS)
-  ) wallace_tree_inst (
-      .partial_sums(partial_products),
-      .sum         (wt_sum),
-      .carry       (wt_carry)
-  );
-
-  always_comb begin
-    // Single final carry-propagate adder for the lower portion
-    mantissa_sum_lower = wt_sum + wt_carry;
+    mantissa_sum_lower = PARTIAL_SUM_LOW_W'(mult_result) + PARTIAL_SUM_LOW_W'(csa_c_i);
 
     upper_sum_temp = {c_upper_slice_i[PARTIAL_SUM_HIGH_W-1], c_upper_slice_i}
                    + (PARTIAL_SUM_HIGH_W + 1)'(mantissa_sum_lower[PARTIAL_SUM_LOW_W-1 : PARTIAL_SUM_LOW_W-2]);

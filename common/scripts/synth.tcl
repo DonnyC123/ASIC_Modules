@@ -1,8 +1,3 @@
-# =============================================================================
-# Common Genus Synthesis Script
-# =============================================================================
-# Variables expected to be set by design.tcl before sourcing:
-#
 #   DESIGN_NAME    - top-level module name (e.g. srt_sqrt)
 #   REPO_ROOT      - absolute path to repo root
 #   RUN_F          - absolute path to sim run.f  (TB files auto-filtered)
@@ -13,7 +8,6 @@
 #   CLK_PERIOD_NS  - target period in ns    (default: 2.0 = 500 MHz)
 #   TECH_LIB       - Liberty file path      (default: $env(TECH_LIB))
 #   TB_EXCLUDE     - extra glob patterns to filter from run.f (default: {})
-# =============================================================================
 
 if {![info exists CLK_PORT]}      { set CLK_PORT      "clk" }
 if {![info exists CLK_PERIOD_NS]} { set CLK_PERIOD_NS  2.0  }
@@ -32,7 +26,6 @@ if {![info exists TECH_LIB]} {
 
 file mkdir $WORK_DIR
 
-# --- Helpers -----------------------------------------------------------------
 proc log_section {title} {
     puts "\n[string repeat = 60]"
     puts "  $title"
@@ -54,15 +47,13 @@ proc read_rtl_from_runf {runf_path {extra_exclude {}}} {
     while {[gets $fh line] >= 0} {
         set line [string trim $line]
 
-        # Skip blank lines and comments (// or #)
+        # Skip blank lines and comments (g/ or #)
         if {$line eq ""}                      continue
         if {[string match "//*" $line]}       continue
         if {[string match "#*"  $line]}       continue
 
-        # Resolve relative to the run.f directory
         set abs [file normalize [file join $runf_dir $line]]
 
-        # Built-in TB filters
         set skip 0
         foreach pat {
             "*/tb/*"
@@ -73,7 +64,6 @@ proc read_rtl_from_runf {runf_path {extra_exclude {}}} {
             if {[string match $pat $abs]} { set skip 1; break }
         }
 
-        # Extra user-supplied filters
         if {!$skip} {
             foreach pat $extra_exclude {
                 if {[string match $pat $abs]} { set skip 1; break }
@@ -90,17 +80,14 @@ proc read_rtl_from_runf {runf_path {extra_exclude {}}} {
     return $rtl_files
 }
 
-# =============================================================================
-# 1. Technology Library
-# =============================================================================
+# Tech Liby
 log_section "Reading Technology Library"
 
 set_db init_lib_search_path [file dirname $TECH_LIB]
 read_libs $TECH_LIB
 
-# =============================================================================
-# 2. Read RTL  (filtered from run.f)
-# =============================================================================
+# Read RTL  (filtered from run.f)
+#
 log_section "Reading RTL from $RUN_F"
 
 set rtl_files [read_rtl_from_runf $RUN_F $TB_EXCLUDE]
@@ -111,17 +98,13 @@ puts ""
 set_db hdl_track_filename_row_col true
 read_hdl -sv {*}$rtl_files
 
-# =============================================================================
-# 3. Elaborate
-# =============================================================================
+# Elaborate
 log_section "Elaborating $DESIGN_NAME"
 
 elaborate $DESIGN_NAME
 check_design -unresolved
 
-# =============================================================================
-# 4. Timing Constraints
-# =============================================================================
+# Timing Constraints
 log_section "Applying Constraints  (period = ${CLK_PERIOD_NS} ns  /  [expr {1000.0/$CLK_PERIOD_NS}] MHz)"
 
 create_clock -name clk -period $CLK_PERIOD_NS [get_db [get_ports $CLK_PORT]]
@@ -135,9 +118,8 @@ set_load        0.05 [all_outputs]
 set_drive       0    [get_ports $CLK_PORT]
 set_max_fanout  20   [current_design]
 
-# =============================================================================
-# 5. Synthesis
-# =============================================================================
+# Synthesis
+
 log_section "Synthesis - Generic"
 set_db syn_generic_effort medium
 syn_generic
@@ -150,9 +132,7 @@ log_section "Synthesis - Optimization"
 set_db syn_opt_effort medium
 syn_opt
 
-# =============================================================================
-# 6. Reports
-# =============================================================================
+# Write Ouputs
 log_section "Writing Reports  ->  $WORK_DIR"
 
 report_timing -max_paths 10 \
@@ -167,20 +147,13 @@ report_qor
 report_timing -max_paths 5 \
     -fields {timing_point flags arc cell fanout load transition delay arrival frc}
 
-# =============================================================================
-# 7. Write Outputs
-# =============================================================================
 log_section "Writing Netlist and SDC"
 
 write_hdl > $WORK_DIR/${DESIGN_NAME}_netlist.v
 write_sdc > $WORK_DIR/${DESIGN_NAME}.sdc
 
-# =============================================================================
-# 8. Save Database for GUI Inspection (ADD THIS SECTION)
-# =============================================================================
 log_section "Saving Database for GUI Optimization"
 
-# This saves the fully mapped and optimized design
 write_db -all $WORK_DIR/${DESIGN_NAME}_final.db
 
 puts "\n[string repeat = 60]"
