@@ -53,7 +53,7 @@ module align_addend #(
   logic            subtract_c;
 
   always_comb begin
-    c_shift_amount = c_shift_factor_t'(unpacked_c_i.exp) - c_shift_factor_t'(product_exp_i)
+    c_shift_amount = c_shift_factor_t'(unpacked_c_i.exp) - c_shift_factor_t'($unsigned(product_exp_i))
         + c_shift_factor_t'(PRODUCT_ZERO_POINT_OFFSET) + c_shift_factor_t'(SHIFT_ZERO_POINT_OFFSET);
 
     c_shift_unfl = &c_shift_amount.ovfl[2:1];
