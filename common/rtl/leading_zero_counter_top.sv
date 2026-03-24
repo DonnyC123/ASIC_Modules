@@ -1,6 +1,3 @@
-// Parallel-prefix (binary-tree) leading-zero counter.
-// Replaces the linear block-chain implementation.
-// LZC_DATA_BLOCK_W kept in the port list for interface compatibility but unused.
 module leading_zero_counter_top #(
     parameter  DATA_W           = 29,
     parameter  LZC_DATA_BLOCK_W = 4,
@@ -10,47 +7,67 @@ module leading_zero_counter_top #(
     output logic [LZ_COUNT_W-1:0] leading_zero_count_o
 );
 
-  // Round up to next power-of-2 so every level halves cleanly.
-  localparam PAD_W  = (DATA_W > 1) ? (1 << $clog2(DATA_W)) : 2;
-  localparam LEVELS = $clog2(PAD_W);
+  localparam NUM_LZC_UNITS         = (DATA_W + LZC_DATA_BLOCK_W - 1) / LZC_DATA_BLOCK_W;
+  localparam LAST_LZC_DATA_BLOCK_W = DATA_W - LZC_DATA_BLOCK_W * (NUM_LZC_UNITS - 1);
+  localparam BLOCK_LZ_COUNT_W      = $clog2(LZC_DATA_BLOCK_W);
+  localparam LAST_BLOCK_LZ_COUNT_W = $clog2(LAST_LZC_DATA_BLOCK_W);
+  localparam UPPER_LZ_COUNT_W      = LZ_COUNT_W - BLOCK_LZ_COUNT_W;
 
-  // Each tree node stores {has_one, lz_count}.
-  // Level 0 = leaves (one per padded bit, MSB first).
-  // Level LEVELS = root (index 0 only).
-  logic [PAD_W-1:0]      node_has_one [LEVELS+1];
-  logic [LZ_COUNT_W-1:0] node_lz      [LEVELS+1][PAD_W];
-
-  genvar l, i;
   generate
-    // -----------------------------------------------------------------------
-    // Leaves
-    // -----------------------------------------------------------------------
-    for (i = 0; i < PAD_W; i++) begin : g_leaf
-      if (i < DATA_W) begin
-        // index 0 = MSB of data_i
-        assign node_has_one[0][i] = data_i[DATA_W-1-i];
-        assign node_lz[0][i]      = node_has_one[0][i] ? '0 : LZ_COUNT_W'(1);
-      end else begin
-        // Padding: sentinel "1" so it does not inflate the zero count.
-        assign node_has_one[0][i] = 1'b1;
-        assign node_lz[0][i]      = '0;
-      end
+    if (NUM_LZC_UNITS < 2) begin : min_lzc_check
+      $error(
+          "Config Error: Module expects NUM_LZC_UNITS to be >= 2. Current value: %0d", NUM_LZC_UNITS
+      );
     end
-
-    // -----------------------------------------------------------------------
-    // Internal levels
-    // -----------------------------------------------------------------------
-    for (l = 0; l < LEVELS; l++) begin : g_level
-      for (i = 0; i < PAD_W >> (l + 1); i++) begin : g_node
-        // Left child = 2*i (MSB side), right child = 2*i+1
-        assign node_has_one[l+1][i] = node_has_one[l][2*i] | node_has_one[l][2*i+1];
-        assign node_lz[l+1][i]      = node_has_one[l][2*i] ?
-                                        node_lz[l][2*i] :
-                                        node_lz[l][2*i] + node_lz[l][2*i+1];
-      end
+    if (1 << $clog2(LZC_DATA_BLOCK_W) != LZC_DATA_BLOCK_W) begin : power_2_lzc_check
+      $error(
+          "Config Error: Module expects LZC_DATA_BLOCK_W to be a power of 2. Current value: %0d",
+          LZC_DATA_BLOCK_W
+      );
     end
   endgenerate
 
-  assign leading_zero_count_o = node_lz[LEVELS][0];
+  logic [   NUM_LZC_UNITS-1:0] block_contains_one;
+  logic [BLOCK_LZ_COUNT_W-1:0] block_lz_count     [NUM_LZC_UNITS];
+  logic [UPPER_LZ_COUNT_W-1:0] upper_lz_count;
+  logic [UPPER_LZ_COUNT_W-1:0] lower_lz_idx;
+
+  genvar data_idx;
+  generate
+    for (data_idx = NUM_LZC_UNITS - 1; data_idx >= 1; data_idx--) begin
+      leading_zero_counter #(
+          .DATA_W(LZC_DATA_BLOCK_W)
+      ) leading_zero_counter_inst (
+          .data_i(data_i[LAST_LZC_DATA_BLOCK_W+(data_idx-1)*LZC_DATA_BLOCK_W+:LZC_DATA_BLOCK_W]),
+          .contains_one_o(block_contains_one[data_idx]),
+          .leading_zero_count_o(block_lz_count[NUM_LZC_UNITS-1-data_idx])
+      );
+    end
+
+    leading_zero_counter #(
+        .DATA_W(LAST_LZC_DATA_BLOCK_W)
+    ) leading_zero_counter_inst_last (
+        .data_i              (data_i[LAST_LZC_DATA_BLOCK_W-1:0]),
+        .contains_one_o      (block_contains_one[0]),
+        .leading_zero_count_o(block_lz_count[NUM_LZC_UNITS-1][LAST_BLOCK_LZ_COUNT_W-1:0])
+    );
+    if (LAST_LZC_DATA_BLOCK_W < LZC_DATA_BLOCK_W) begin
+      assign block_lz_count[NUM_LZC_UNITS-1][BLOCK_LZ_COUNT_W-1:LAST_BLOCK_LZ_COUNT_W] = '0;
+    end
+  endgenerate
+
+  leading_zero_counter #(
+      .DATA_W(NUM_LZC_UNITS)
+  ) leading_zero_counter_block_contains_one (
+      .data_i              (block_contains_one),
+      .contains_one_o      (),
+      .leading_zero_count_o(upper_lz_count)
+  );
+
+  always_comb begin
+    lower_lz_idx                                        = upper_lz_count;
+    leading_zero_count_o[BLOCK_LZ_COUNT_W-1:0]          = block_lz_count[lower_lz_idx];
+    leading_zero_count_o[LZ_COUNT_W-1:BLOCK_LZ_COUNT_W] = upper_lz_count;
+  end
 
 endmodule
