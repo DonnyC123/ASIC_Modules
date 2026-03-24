@@ -42,7 +42,7 @@ module mac_float_align_round_sum
   // Speculative sticky: suffix OR precomputed before the barrel shift.
   // suffix_or[k] = |unsigned_mantissa_sum_i[k:0]
   // Indexed by (GUARD_IDX-1-shift) to get the sticky without waiting for the shift output.
-  logic [FULL_SUM_W-1:0] suffix_or;
+  logic        [      FULL_SUM_W-1:0] suffix_or;
 
   logic signed [    SIGNED_EXP_W-1:0] sum_exp;
   logic                               sum_exp_ovfl;
@@ -59,6 +59,10 @@ module mac_float_align_round_sum
   logic                               guard;
   logic                               round_mantissa;
 
+  logic        [          FRAC_W-1:0] sum_frac_plus1;
+  logic                               sum_frac_plus1_ovfl;
+  logic signed [    SIGNED_EXP_W-1:0] sum_exp_plus1;
+
   leading_zero_counter_top #(
       .DATA_W          (FULL_SUM_W),
       .LZC_DATA_BLOCK_W(4)
@@ -68,8 +72,7 @@ module mac_float_align_round_sum
   );
 
   always_comb begin
-    // Build suffix OR in parallel with LZC and barrel shift.
-    // suffix_or[k] = |unsigned_mantissa_sum_i[k:0]
+
     suffix_or[0] = unsigned_mantissa_sum_i[0];
     for (int k = 1; k < FULL_SUM_W; k++) begin
       suffix_or[k] = suffix_or[k-1] | unsigned_mantissa_sum_i[k];
@@ -96,12 +99,8 @@ module mac_float_align_round_sum
     normalized_mantissa = unsigned_mantissa_sum_i << mantissa_sum_shift;
     sum_frac_raw        = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_W];
 
-    // Speculative sticky: use suffix OR addressed by shift amount instead of
-    // waiting for barrel-shift output. Removes the shift→sticky critical path.
-    // suffix_or[GUARD_IDX-1-shift] = |unsigned_mantissa_sum_i[GUARD_IDX-1-shift:0]
-    //                              = |normalized_mantissa[GUARD_IDX-1:0] (equivalent).
     if (mantissa_sum_shift < LZC_COUNT_W'(GUARD_IDX)) begin
-      sticky_sum = suffix_or[GUARD_IDX - 1 - mantissa_sum_shift];
+      sticky_sum = suffix_or[GUARD_IDX-1-mantissa_sum_shift];
     end else begin
       sticky_sum = 1'b0;
     end
@@ -121,9 +120,18 @@ module mac_float_align_round_sum
     end
 
     round_mantissa = guard && (sticky_sum || sum_float_flags_i.sticky_c || (sum_frac_raw[0] && !sum_float_flags_i.ignore_round_even));
-    sum_frac_carry = sum_frac_raw + FRAC_W'(round_mantissa);
 
-    sum_rounded_exp_raw = (sum_frac_carry[MANTISSA_W-1] && !sum_exp_ovfl) ? sum_exp + 1 : sum_exp;
+    // Speculative rounding: precompute sum_frac_raw+1 in parallel with
+    // round_mantissa, then mux. round_mantissa drives only a mux (1 gate)
+    // instead of feeding into the adder carry chain.
+    {sum_frac_plus1_ovfl, sum_frac_plus1} = sum_frac_raw + 1'b1;
+    sum_frac_carry = round_mantissa ? {sum_frac_plus1_ovfl, sum_frac_plus1}
+                                    : {1'b0, sum_frac_raw};
+
+    // Speculative exponent increment: precompute sum_exp+1 in parallel with
+    // sum_frac_carry, then mux on the carry-out bit.
+    sum_exp_plus1       = sum_exp + 1;
+    sum_rounded_exp_raw = (sum_frac_carry[MANTISSA_W-1] && !sum_exp_ovfl) ? sum_exp_plus1 : sum_exp;
 
     sum_rounded_exp_ovfl_o = sum_rounded_exp_raw[EXP_OVFL_IDX] && !sum_exp[EXP_SIGN_IDX];
     sum_rounded_exp_unfl_o = sum_rounded_exp_raw[EXP_OVFL_IDX] && sum_exp[EXP_SIGN_IDX];
