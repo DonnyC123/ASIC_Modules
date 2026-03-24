@@ -29,18 +29,22 @@ module quotient_rounder
   logic        [           MANTISSA_W-1:0] quotient_rounded;
   logic        [           MANTISSA_W-1:0] quotient_mantissa;
 
-  logic        [      SIGNED_EXP_W-1:0] subnorm_shift;
+  logic        [2*QUOTIENT_EXTENDED_W-1:0] temp_shift_reg;
 
   logic signed [         SIGNED_EXP_W-1:0] quotient_exp_extended;
   logic signed [         SIGNED_EXP_W-1:0] quotient_exp_rounded;
 
   logic                                    quotient_exp_extended_unfl;
+  logic                                    quotient_exp_extended_ovfl;
 
   logic                                    quotient_exp_rounded_unfl;
   logic                                    quotient_exp_rounded_ovfl;
 
   logic                                    guard;
   logic                                    sticky;
+
+  // Might be able to check if we will round and then do one add instead of
+  // mutliple
 
   always_comb begin
     quotient_exp_extended = quotient_exp_i;
@@ -54,13 +58,14 @@ module quotient_rounder
     end
 
     quotient_exp_extended_unfl = quotient_exp_extended[SIGNED_EXP_W-1];
+    quotient_exp_extended_ovfl = |quotient_exp_extended[SIGNED_EXP_W-2-:2];
     quotient_extended_normalized = quotient_extended;
 
-    subnorm_shift = SIGNED_EXP_W'(1) - quotient_exp_extended;
+    temp_shift_reg = {quotient_extended, {QUOTIENT_EXTENDED_W{1'b0}}}  >> (1 - quotient_exp_extended);
 
     if (quotient_exp_extended_unfl || quotient_exp_extended == '0) begin
-      quotient_extended_normalized = quotient_extended >> subnorm_shift;
-      sticky                       = sticky || |(quotient_extended & ~({QUOTIENT_EXTENDED_W{1'b1}} << subnorm_shift));
+      quotient_extended_normalized = temp_shift_reg[2*QUOTIENT_EXTENDED_W-1-:QUOTIENT_EXTENDED_W];
+      sticky                       = sticky || (|temp_shift_reg[QUOTIENT_EXTENDED_W-1:0]);
     end
 
     guard = quotient_extended_normalized[0];
@@ -84,42 +89,25 @@ module quotient_rounder
 
   end
 
-  logic out_nan;
-  logic out_zero;
-  logic out_unfl;
-  logic out_inf;
-  logic out_subnorm;
-
   always_comb begin
-    out_nan = float_quotient_flags_i.nan;
-    out_zero = !out_nan && float_quotient_flags_i.zero;
-    out_unfl = !out_nan && !out_zero && quotient_exp_rounded_unfl;
-    out_inf     = !out_nan && !out_zero && !out_unfl &&
-                  (float_quotient_flags_i.inf || quotient_exp_rounded_ovfl ||
-                   quotient_exp_rounded[EXP_W-1:0] == '1);
-    out_subnorm = !out_nan && !out_zero && !out_unfl && !out_inf &&
-                  (quotient_exp_rounded == '0) && quotient_mantissa[MANTISSA_W-1];
-
     quotient_o.sign = float_quotient_flags_i.sign;
+    quotient_o.frac = quotient_mantissa[FRAC_W-1:0];
+    quotient_o.exp  = quotient_exp_rounded[EXP_W-1:0];
 
-    unique casez ({
-      out_nan, out_inf, out_zero | out_unfl, out_subnorm
-    })
-      4'b1???: quotient_o.exp = '1;
-      4'b01??: quotient_o.exp = '1;
-      4'b001?: quotient_o.exp = '0;
-      4'b0001: quotient_o.exp = EXP_W'(1);
-      default: quotient_o.exp = quotient_exp_rounded[EXP_W-1:0];
-    endcase
-
-    unique casez ({
-      out_nan, out_inf, out_zero
-    })
-      3'b1??:  quotient_o.frac = '1;
-      3'b01?:  quotient_o.frac = '0;
-      3'b001:  quotient_o.frac = '0;
-      default: quotient_o.frac = quotient_mantissa[FRAC_W-1:0];
-    endcase
+    if (float_quotient_flags_i.nan) begin  // unique0?
+      quotient_o.exp  = '1;
+      quotient_o.frac = '1;
+    end else if (float_quotient_flags_i.zero || quotient_exp_rounded_unfl) begin
+      quotient_o.exp = '0;
+      if (float_quotient_flags_i.zero) begin
+        quotient_o.frac = '0;
+      end
+    end else if (float_quotient_flags_i.inf || quotient_exp_rounded_ovfl || quotient_exp_rounded[EXP_W-1:0] == '1) begin
+      quotient_o.exp  = '1;
+      quotient_o.frac = '0;
+    end else if (quotient_exp_rounded == '0 && quotient_mantissa[MANTISSA_W-1]) begin
+      quotient_o.exp = 1;
+    end
   end
 
 endmodule
