@@ -16,7 +16,7 @@ module mac_float #(
   import mac_float_pkg::*;
 
   localparam DECODE_PIPE_DEPTH    = 0;
-  localparam EXECUTION_PIPE_DEPTH = 1;
+  localparam EXECUTION_PIPE_DEPTH = 0;
   localparam ALGIN_OUT_PIPE_DEPTH = 0;
   localparam OUT_PIPE_DEPTH       = 1;
 
