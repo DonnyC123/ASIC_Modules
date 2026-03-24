@@ -34,25 +34,25 @@ module mac_float_align_round_sum
   localparam NORMAL_FRAC_LSB_IDX = FULL_SUM_W - 1 - FRAC_W;
   localparam GUARD_IDX           = NORMAL_FRAC_LSB_IDX - 1;
 
-  logic        [      LZC_COUNT_W-1:0] mantissa_sum_lz;
-  logic        [      LZC_COUNT_W-1:0] mantissa_sum_shift;
+  logic        [ LZC_COUNT_W-1:0] mantissa_sum_lz;
+  logic        [ LZC_COUNT_W-1:0] mantissa_sum_shift;
 
-  logic signed [     SIGNED_EXP_W-1:0] sum_exp;
-  logic                                sum_exp_ovfl;
-  logic                                sum_exp_unfl;
+  logic signed [SIGNED_EXP_W-1:0] sum_exp;
+  logic                           sum_exp_ovfl;
+  logic                           sum_exp_unfl;
 
-  logic                                sum_rounded_signed;
-  logic        [       FULL_SUM_W-1:0] normalized_mantissa;
-  logic signed [     SIGNED_EXP_W-1:0] sum_rounded_exp_raw;
-  logic        [           FRAC_W-1:0] sum_frac_raw;
-  logic        [       MANTISSA_W-1:0] sum_frac_carry;
-  logic        [           FRAC_W-1:0] sum_frac_rounded;
+  logic                           sum_rounded_signed;
+  logic        [  FULL_SUM_W-1:0] normalized_mantissa;
+  logic signed [SIGNED_EXP_W-1:0] sum_rounded_exp_raw;
+  logic        [      FRAC_W-1:0] sum_frac_raw;
+  logic        [  MANTISSA_W-1:0] sum_frac_carry;
+  logic        [      FRAC_W-1:0] sum_frac_rounded;
 
-  logic                                sticky_sum;
-  logic                                guard;
-  logic                                round_mantissa;
+  logic                           sticky_sum;
+  logic                           guard;
+  logic                           round_mantissa;
 
-  logic        [FULL_SUM_W+FRAC_W-1:0] padded_sum;
+  logic        [2*FULL_SUM_W-1:0] padded_sum;
 
   leading_zero_counter_top #(
       .DATA_W          (FULL_SUM_W),
@@ -78,7 +78,7 @@ module mac_float_align_round_sum
       mantissa_sum_shift = mantissa_sum_lz;
     end
 
-    padded_sum          = {unsigned_mantissa_sum_i, {FRAC_W{1'b0}}};
+    padded_sum          = {unsigned_mantissa_sum_i, {FULL_SUM_W{1'b0}}};
 
     normalized_mantissa = padded_sum[(FULL_SUM_W-mantissa_sum_shift)+:FULL_SUM_W];
     sum_frac_raw        = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_W];
