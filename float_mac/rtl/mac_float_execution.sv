@@ -24,7 +24,7 @@ module mac_float_execution
   always_comb begin
     mult_result = norm_mant_a_i * norm_mant_b_i;
 
-    mantissa_sum_lower = PARTIAL_SUM_LOW_W'(norm_mant_a_i * norm_mant_b_i) + PARTIAL_SUM_LOW_W'(csa_c_i);
+    mantissa_sum_lower = PARTIAL_SUM_LOW_W'(mult_result) + PARTIAL_SUM_LOW_W'(csa_c_i);
 
     upper_sum_temp = {c_upper_slice_i[PARTIAL_SUM_HIGH_W-1], c_upper_slice_i}
                    + (PARTIAL_SUM_HIGH_W + 1)'(mantissa_sum_lower[PARTIAL_SUM_LOW_W-1 : PARTIAL_SUM_LOW_W-2]);
