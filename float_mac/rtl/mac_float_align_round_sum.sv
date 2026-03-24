@@ -34,23 +34,23 @@ module mac_float_align_round_sum
   localparam NORMAL_FRAC_LSB_IDX = FULL_SUM_W - 1 - FRAC_W;
   localparam GUARD_IDX           = NORMAL_FRAC_LSB_IDX - 1;
 
-  logic        [ LZC_COUNT_W-1:0] mantissa_sum_lz;
-  logic        [ LZC_COUNT_W-1:0] mantissa_sum_shift;
+  logic        [LZC_COUNT_W-1:0] mantissa_sum_lz;
+  logic        [LZC_COUNT_W-1:0] mantissa_sum_shift;
 
-  logic signed [SIGNED_EXP_W-1:0] sum_exp;
-  logic                           sum_exp_ovfl;
-  logic                           sum_exp_unfl;
+  logic signed [    SIGNED_EXP_W-1:0] sum_exp;
+  logic                               sum_exp_ovfl;
+  logic                               sum_exp_unfl;
 
-  logic                           sum_rounded_signed;
-  logic        [  FULL_SUM_W-1:0] normalized_mantissa;
-  logic signed [SIGNED_EXP_W-1:0] sum_rounded_exp_raw;
-  logic        [      FRAC_W-1:0] sum_frac_raw;
-  logic        [  MANTISSA_W-1:0] sum_frac_carry;
-  logic        [      FRAC_W-1:0] sum_frac_rounded;
+  logic                               sum_rounded_signed;
+  logic        [      FULL_SUM_W-1:0] normalized_mantissa;
+  logic signed [    SIGNED_EXP_W-1:0] sum_rounded_exp_raw;
+  logic        [          FRAC_W-1:0] sum_frac_raw;
+  logic        [      MANTISSA_W-1:0] sum_frac_carry;
+  logic        [          FRAC_W-1:0] sum_frac_rounded;
 
-  logic                           sticky_sum;
-  logic                           guard;
-  logic                           round_mantissa;
+  logic                               sticky_sum;
+  logic                               guard;
+  logic                               round_mantissa;
 
   leading_zero_counter_top #(
       .DATA_W          (FULL_SUM_W),
@@ -68,14 +68,15 @@ module mac_float_align_round_sum
     sum_exp_ovfl = sum_exp[EXP_OVFL_IDX] && !sum_exp[EXP_SIGN_IDX];
     sum_exp_unfl = sum_exp[EXP_OVFL_IDX] && sum_exp[EXP_SIGN_IDX];
 
+    // Underflow shift computed independently of the LZC path at LZC_COUNT_W bits.
+    // Overflow of this shift amount into normalized_mantissa is asserted to never occur.
     if (sum_exp_unfl) begin
-      mantissa_sum_shift = LZC_COUNT_W
-          '($unsigned(product_exp_i) + LZC_COUNT_W'(SUM_EXP_ADD_OFFSET + MANTISSA_W - FRAC_W));
+      mantissa_sum_shift = LZC_COUNT_W'($unsigned(product_exp_i) + LZC_COUNT_W'(SUM_EXP_ADD_OFFSET + MANTISSA_W - FRAC_W));
     end else begin
       mantissa_sum_shift = mantissa_sum_lz;
     end
 
-    normalized_mantissa = unsigned_mantissa_sum_i[mantissa_sum_shift+:FULL_SUM_W];
+    normalized_mantissa = unsigned_mantissa_sum_i << mantissa_sum_shift;
     sum_frac_raw        = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_W];
     sticky_sum          = |normalized_mantissa[GUARD_IDX-1:0];
     guard               = normalized_mantissa[GUARD_IDX];
