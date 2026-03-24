@@ -59,7 +59,7 @@ module mac_float_align_round_sum
       .data_i              (unsigned_mantissa_sum_i),
       .leading_zero_count_o(mantissa_sum_lz)
   );
-  wire [(2*FULL_SUM_W)-1:0] padded_sum;
+  logic [(2*FULL_SUM_W)-1:0] padded_sum;
 
 
   always_comb begin
