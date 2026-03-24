@@ -68,6 +68,8 @@ module mac_float_align_round_sum
     sum_exp_ovfl = sum_exp[EXP_OVFL_IDX] && !sum_exp[EXP_SIGN_IDX];
     sum_exp_unfl = sum_exp[EXP_OVFL_IDX] && sum_exp[EXP_SIGN_IDX];
 
+    // Underflow shift computed independently of the LZC path at LZC_COUNT_W bits.
+    // Overflow of this shift amount into normalized_mantissa is asserted to never occur.
     if (sum_exp_unfl) begin
       mantissa_sum_shift = LZC_COUNT_W
           '($unsigned(product_exp_i) + LZC_COUNT_W'(SUM_EXP_ADD_OFFSET + MANTISSA_W - FRAC_W));
