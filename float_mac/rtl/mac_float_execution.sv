@@ -25,10 +25,11 @@ module mac_float_execution
     // part-select that was blocking CSA optimization (CSAGEN-QOR warning).
     // Equivalent to the original split: sign-extend c_upper_slice by 1 bit,
     // left-shift by PARTIAL_SUM_LOW_W, then add mult_result and csa_c_i.
+    // c_upper_slice sits at bits [36:22] of the output (shifted by PRODUCT_MANTISSA_W=22).
     mantissa_sum_raw_o =
         FULL_SUM_CARRY_W'({c_upper_slice_i[PARTIAL_SUM_HIGH_W-1],
                            c_upper_slice_i,
-                           {PARTIAL_SUM_LOW_W{1'b0}}})
+                           {PRODUCT_MANTISSA_W{1'b0}}})
       + FULL_SUM_CARRY_W'(mult_result)
       + FULL_SUM_CARRY_W'(csa_c_i);
   end
