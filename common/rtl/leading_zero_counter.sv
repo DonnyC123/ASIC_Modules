@@ -7,23 +7,23 @@ module leading_zero_counter #(
     output logic [ZERO_COUNTER_W-1:0] leading_zero_count_o
 );
 
-  logic [ZERO_COUNTER_W-1:0] leading_zero_count;
-  logic                      found_one;
+  logic [ZERO_COUNTER_W:0] leading_zero_count;
+  logic                    found_one;
 
   always_comb begin
     leading_zero_count = '0;
-    found_one          = 1'b0;
+    found_one          = 'b0;
 
     for (int idx = DATA_W - 1; idx >= 0; idx--) begin
-      if (!found_one && data_i[idx]) begin
-        leading_zero_count = ZERO_COUNTER_W'(DATA_W - 1 - idx);
-        found_one          = 1'b1;
+      found_one |= data_i[idx];
+      if (!found_one) begin
+        leading_zero_count++;
       end
     end
   end
 
   assign contains_one_o       = found_one;
-  assign leading_zero_count_o = leading_zero_count;
+  assign leading_zero_count_o = leading_zero_count[ZERO_COUNTER_W-1:0];
 
 endmodule
 
