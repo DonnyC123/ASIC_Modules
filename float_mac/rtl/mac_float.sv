@@ -63,8 +63,9 @@ module mac_float #(
   logic signed      [      SIGNED_EXP_W-1:0] product_exp_2q;
 
   logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw;
-  logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_q;
   logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_neg;
+  logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_q;
+  logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_neg_q;
   logic             [        FULL_SUM_W-1:0] unsigned_mantissa_sum;
   logic                                      sum_signed;
 
@@ -144,24 +145,28 @@ module mac_float #(
       .mantissa_sum_raw_o(mantissa_sum_raw)
   );
 
+  // Negation computed alongside the execution result, before the pipeline register.
+  // With EXECUTION_PIPE_DEPTH=1 this moves the negation carry chain into the
+  // execution stage, leaving only a mux in the round-stage critical path.
+  assign mantissa_sum_raw_neg = $unsigned(-$signed(mantissa_sum_raw));
+
   data_pipeline #(
-      .DATA_W    (1 + FULL_SUM_CARRY_W),
+      .DATA_W    (1 + 2 * FULL_SUM_CARRY_W),
       .PIPE_DEPTH(EXECUTION_PIPE_DEPTH),
       .RST_EN    (1)
   ) execution_to_round_pipe (
       .clk   (clk),
       .rst_n (rst_n),
       .clk_en('1),
-      .data_i({valid_decode_q, mantissa_sum_raw}),
-      .data_o({valid_exec_q, mantissa_sum_raw_q})
+      .data_i({valid_decode_q, mantissa_sum_raw, mantissa_sum_raw_neg}),
+      .data_o({valid_exec_q, mantissa_sum_raw_q, mantissa_sum_raw_neg_q})
   );
 
   always_comb begin
     unsigned_mantissa_sum = mantissa_sum_raw_q[FULL_SUM_W-1:0];
     sum_signed            = product_sign_2q;
-    mantissa_sum_raw_neg  = $unsigned(-$signed(mantissa_sum_raw_q));
     if (mantissa_sum_raw_q[FULL_SUM_CARRY_W-1]) begin
-      unsigned_mantissa_sum = mantissa_sum_raw_neg[FULL_SUM_W-1:0];
+      unsigned_mantissa_sum = mantissa_sum_raw_neg_q[FULL_SUM_W-1:0];
       sum_signed            = ~product_sign_2q;
     end
   end
