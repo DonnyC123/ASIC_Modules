@@ -108,6 +108,7 @@ puts "  Files to elaborate:"
 foreach f $rtl_files { puts "    $f" }
 puts ""
 
+set_db hdl_track_filename_row_col true
 read_hdl -sv {*}$rtl_files
 
 # =============================================================================
@@ -154,7 +155,7 @@ syn_opt
 # =============================================================================
 log_section "Writing Reports  ->  $WORK_DIR"
 
-report_timing -max_paths 10 > $WORK_DIR/timing.rpt
+report_timing -max_paths 10 -hdl_output > $WORK_DIR/timing.rpt
 report_area                 > $WORK_DIR/area.rpt
 report_gates                > $WORK_DIR/gates.rpt
 report_power               > $WORK_DIR/power.rpt
