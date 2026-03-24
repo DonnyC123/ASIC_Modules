@@ -18,10 +18,6 @@ module mac_float_align_round_sum
     input  float_t                              float_c_i,
     input  sum_float_flags_t                    sum_float_flags_i,
     input  logic                                sum_signed_i,
-    // 1 when unsigned_mantissa_sum_i is one's complement (needs +1 correction).
-    // The +1 lands in the sticky region (shift≈0 when sign_bit=1), so ORing
-    // it into sticky_sum is exact for normal results.
-    input  logic                                sum_onescomp_i,
     input  logic signed      [SIGNED_EXP_W-1:0] product_exp_i,
     input  logic             [  FULL_SUM_W-1:0] unsigned_mantissa_sum_i,
     output float_t                              float_sum_rounded,
@@ -43,10 +39,9 @@ module mac_float_align_round_sum
   logic        [     LZC_COUNT_W-1:0] mantissa_sum_shift;
   logic        [LZC_COUNT_OVFL_W-1:0] mantissa_sum_shift_ovfl;
 
-  // Speculative sticky: suffix OR tree computed before barrel shift.
+  // Speculative sticky: suffix OR precomputed before the barrel shift.
   // suffix_or[k] = |unsigned_mantissa_sum_i[k:0]
-  // sticky_sum = suffix_or[GUARD_IDX - 1 - shift] when shift < GUARD_IDX, else 0.
-  // Runs in parallel with barrel shift, removing shift→sticky critical path.
+  // Indexed by (GUARD_IDX-1-shift) to get the sticky without waiting for the shift output.
   logic [FULL_SUM_W-1:0] suffix_or;
 
   logic signed [    SIGNED_EXP_W-1:0] sum_exp;
@@ -102,15 +97,13 @@ module mac_float_align_round_sum
     sum_frac_raw        = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_W];
 
     // Speculative sticky: use suffix OR addressed by shift amount instead of
-    // waiting for barrel-shift output. Removes the shift→OR dependency.
-    // When sum_onescomp_i=1 the mantissa is one's complement; the +1 correction
-    // lands at bit mantissa_sum_shift of normalized_mantissa. Since sign_bit=1
-    // implies the MSB was set so mantissa_sum_shift≈0, the +1 is always in the
-    // sticky region — OR it in directly.
+    // waiting for barrel-shift output. Removes the shift→sticky critical path.
+    // suffix_or[GUARD_IDX-1-shift] = |unsigned_mantissa_sum_i[GUARD_IDX-1-shift:0]
+    //                              = |normalized_mantissa[GUARD_IDX-1:0] (equivalent).
     if (mantissa_sum_shift < LZC_COUNT_W'(GUARD_IDX)) begin
-      sticky_sum = suffix_or[GUARD_IDX - 1 - mantissa_sum_shift] | sum_onescomp_i;
+      sticky_sum = suffix_or[GUARD_IDX - 1 - mantissa_sum_shift];
     end else begin
-      sticky_sum = sum_onescomp_i;
+      sticky_sum = 1'b0;
     end
     guard = normalized_mantissa[GUARD_IDX];
 
@@ -123,7 +116,7 @@ module mac_float_align_round_sum
 
     end else if (sum_exp_unfl || sum_exp == 0) begin
       sum_frac_raw = normalized_mantissa[FULL_SUM_W-1-:FRAC_W];
-      sticky_sum   = |normalized_mantissa[GUARD_IDX:0] | sum_onescomp_i;
+      sticky_sum   = |normalized_mantissa[GUARD_IDX:0];
       guard        = normalized_mantissa[GUARD_IDX+1];
     end
 

@@ -64,9 +64,9 @@ module mac_float #(
 
   logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw;
   logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_q;
+  logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_neg;
   logic             [        FULL_SUM_W-1:0] unsigned_mantissa_sum;
   logic                                      sum_signed;
-  logic                                      sum_sign_bit;
 
   float_t                                    float_sum_rounded;
   float_t                                    float_sum_rounded_q;
@@ -157,12 +157,13 @@ module mac_float #(
   );
 
   always_comb begin
-    // One's-complement negation via XOR: avoids ripple-carry negation.
-    // The +1 (two's → one's complement correction) is folded into the
-    // rounding adder inside mac_float_align_round_sum via sum_sign_bit.
-    sum_sign_bit          = mantissa_sum_raw_q[FULL_SUM_CARRY_W-1];
-    unsigned_mantissa_sum = mantissa_sum_raw_q[FULL_SUM_W-1:0] ^ {FULL_SUM_W{sum_sign_bit}};
-    sum_signed            = product_sign_2q ^ sum_sign_bit;
+    unsigned_mantissa_sum = mantissa_sum_raw_q[FULL_SUM_W-1:0];
+    sum_signed            = product_sign_2q;
+    mantissa_sum_raw_neg  = $unsigned(-$signed(mantissa_sum_raw_q));
+    if (mantissa_sum_raw_q[FULL_SUM_CARRY_W-1]) begin
+      unsigned_mantissa_sum = mantissa_sum_raw_neg[FULL_SUM_W-1:0];
+      sum_signed            = ~product_sign_2q;
+    end
   end
 
   mac_float_align_round_sum #(
@@ -175,7 +176,6 @@ module mac_float #(
       .float_c_i              (float_c_2q),
       .sum_float_flags_i      (sum_float_flags_2q),
       .sum_signed_i           (sum_signed),
-      .sum_onescomp_i         (sum_sign_bit),
       .product_exp_i          (product_exp_2q),
       .unsigned_mantissa_sum_i(unsigned_mantissa_sum),
       .float_sum_rounded      (float_sum_rounded),
