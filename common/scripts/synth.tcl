@@ -87,7 +87,7 @@ set_db init_lib_search_path [file dirname $TECH_LIB]
 read_libs $TECH_LIB
 
 # Read RTL  (filtered from run.f)
-#
+
 log_section "Reading RTL from $RUN_F"
 
 set rtl_files [read_rtl_from_runf $RUN_F $TB_EXCLUDE]
