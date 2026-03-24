@@ -31,9 +31,7 @@ module mac_float_execution
 
     mantissa_sum_upper = upper_sum_temp[PARTIAL_SUM_HIGH_W:1];
 
-    mantissa_sum_raw_o = {
-      mantissa_sum_upper, upper_sum_temp[0], mantissa_sum_lower[PARTIAL_SUM_LOW_W-3:0]
-    };
+    mantissa_sum_raw_o = {c_upper_slice_i, csa_c_i} + mult_result;
   end
 
 endmodule
