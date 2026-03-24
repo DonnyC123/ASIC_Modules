@@ -1,7 +1,6 @@
 ../../common/rtl/data_pipeline.sv
 ../../common/rtl/data_status_pipeline.sv
 ../../common/rtl/data_status_pipeline.sv
-../../common/tb/float_16_tb_pkg.sv
 
 ../../common/rtl/leading_zero_counter.sv
 ../../common/rtl/carry_save_row_adder.sv
