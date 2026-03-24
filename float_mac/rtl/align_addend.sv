@@ -63,7 +63,8 @@ module align_addend #(
     c_wide_prep = C_SHIFT_RAW_W'(unpacked_c_i.mantissa);
 
     if (subtract_c) begin
-      c_wide_prep = $unsigned(-$signed(c_wide_prep));
+      // Explicit two's complement: avoids $signed/$unsigned cast that blocks CSA.
+      c_wide_prep = shifted_c_t'(~c_wide_prep + C_SHIFT_RAW_W'(1));
     end
 
     c_shifted_raw    = c_wide_prep << c_shift_amount;
