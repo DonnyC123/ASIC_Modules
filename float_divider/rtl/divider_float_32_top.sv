@@ -15,7 +15,7 @@ module divider_float_32_top #(
   divider_float #(
       .EXP_W (EXP_W),
       .FRAC_W(FRAC_W)
-  ) divider_float16_inst (
+  ) divider_float32_inst (
       .clk    (clk),
       .rst_n  (rst_n),
       .start_i(start_i),
