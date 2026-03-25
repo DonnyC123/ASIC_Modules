@@ -11,7 +11,7 @@ module mantissa_divider_pipe
 );
   localparam QUOTIENT_DIV_W = QUOTIENT_RAW_W | 1;
   localparam REMAINDER_W    = REDUCTION_W + QUOTIENT_DIV_W;
-  localparam COUNTER_LEN    = (QUOTIENT_RAW_W + (REDUCTION_W - 1)) / REDUCTION_W;
+  localparam COUNTER_LEN    = (QUOTIENT_RAW_W + (REDUCTION_W)) / REDUCTION_W;
 
   logic signed [   REMAINDER_W-1:0] rem_w        [COUNTER_LEN+1];
   logic signed [QUOTIENT_DIV_W-1:0] quot_w       [COUNTER_LEN+1];
@@ -25,7 +25,7 @@ module mantissa_divider_pipe
   generate
     for (i = 0; i < COUNTER_LEN; i++) begin : g_stage
       mantissa_divider_stage #(
-          .MANTISSA_W(MANTISSA_W)
+          .MANTISSA_W(MANTISSA_W | 1)
       ) stage_inst (
           .remainder_i(rem_w[i]),
           .quotient_i (quot_w[i]),
