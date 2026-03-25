@@ -9,12 +9,12 @@ module mantissa_divider_pipe
     output logic [QUOTIENT_RAW_W-1:0] quotient_raw_o,
     output logic                      sticky_o
 );
-
-  localparam REMAINDER_W = SIGN_W + MANTISSA_W + REDUCTION_W + GUARD_W;
-  localparam COUNTER_LEN = (QUOTIENT_RAW_W + (REDUCTION_W)) / REDUCTION_W;
+  localparam QUOTIENT_DIV_W = QUOTIENT_RAW_W | 1;
+  localparam REMAINDER_W    = SIGN_W + MANTISSA_W + REDUCTION_W + GUARD_W;
+  localparam COUNTER_LEN    = (QUOTIENT_DIV_W + (REDUCTION_W)) / REDUCTION_W;
 
   logic signed [   REMAINDER_W-1:0] rem_w [COUNTER_LEN+1];
-  logic signed [QUOTIENT_RAW_W-1:0] quot_w[COUNTER_LEN+1];
+  logic signed [QUOTIENT_DIV_W-1:0] quot_w[COUNTER_LEN+1];
 
   assign rem_w[0]  = $signed({(SIGN_W + GUARD_W + REDUCTION_FACTOR)'(1'b0), dividend_i});
   assign quot_w[0] = '0;
@@ -32,16 +32,32 @@ module mantissa_divider_pipe
           .quotient_o (quot_w[i+1])
       );
     end
-  endgenerate
 
-  always_comb begin
-    if (rem_w[COUNTER_LEN][REMAINDER_W-1]) begin
-      quotient_raw_o = quot_w[COUNTER_LEN] - 1;
-      sticky_o       = 1'b1;
+    if (QUOTIENT_RAW_W % 2 == 1) begin
+      always_comb begin
+        if (rem_w[COUNTER_LEN][REMAINDER_W-1]) begin
+          quotient_raw_o = quot_w[COUNTER_LEN] - 1;
+          sticky_o       = 1'b1;
+        end else begin
+          quotient_raw_o = quot_w[COUNTER_LEN];
+          sticky_o       = (rem_w[COUNTER_LEN] != '0);
+        end
+      end
     end else begin
-      quotient_raw_o = quot_w[COUNTER_LEN];
-      sticky_o       = (rem_w[COUNTER_LEN] != '0);
+
+      logic [QUOTIENT_DIV_W-1:0] quotient_div;
+
+      always_comb begin
+        if (rem_w[COUNTER_LEN][REMAINDER_W-1]) begin
+          quotient_div = quot_w[COUNTER_LEN] - 1;
+          sticky_o     = 1'b1;
+        end else begin
+          quotient_div = quot_w[COUNTER_LEN];
+          sticky_o     = (rem_w[COUNTER_LEN] != '0) || quot_w[0];
+        end
+        quotient_div = quotient_div[QUOTIENT_DIV_W-1:1];
+      end
     end
-  end
+  endgenerate
 
 endmodule
