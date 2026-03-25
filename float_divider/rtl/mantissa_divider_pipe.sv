@@ -13,8 +13,10 @@ module mantissa_divider_pipe
   localparam REMAINDER_W    = REDUCTION_W + QUOTIENT_DIV_W;
   localparam COUNTER_LEN    = (QUOTIENT_DIV_W + (REDUCTION_W)) / REDUCTION_W;
 
-  logic signed [   REMAINDER_W-1:0] rem_w [COUNTER_LEN+1];
-  logic signed [QUOTIENT_DIV_W-1:0] quot_w[COUNTER_LEN+1];
+  logic signed [   REMAINDER_W-1:0] rem_w        [COUNTER_LEN+1];
+  logic signed [QUOTIENT_DIV_W-1:0] quot_w       [COUNTER_LEN+1];
+
+  logic        [QUOTIENT_DIV_W-1:0] quotient_div;
 
   assign rem_w[0]  = $signed({(SIGN_W + GUARD_W + REDUCTION_FACTOR)'(1'b0), dividend_i});
   assign quot_w[0] = '0;
