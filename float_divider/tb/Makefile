@@ -1,5 +1,5 @@
 XRUN = xrun
-TOP  = tb_divider_float
+TOP  = divider_float_tb
 
 BASE_FLAGS = -64bit -sv -timescale 1ns/1ps -access +rwc
 
@@ -8,16 +8,16 @@ BASE_FLAGS = -64bit -sv -timescale 1ns/1ps -access +rwc
 all: run-16
 
 run-16:
-	$(XRUN) $(BASE_FLAGS) -f ../file_list/divider_float_16_rtl.f -f ../file_list/divider_float_16_tb.f divider_float_16_tb.sv -top $(TOP) -l xrun_16bit.log
+	$(XRUN) $(BASE_FLAGS) -f ../file_list/sqrt_float_16_rtl.f -f ../file_list/sqrt_float_16_tb.f sqrt_float_16_tb.sv -top $(TOP) -l xrun_16bit.log
 
 run-32:
-	$(XRUN) $(BASE_FLAGS) -f ../file_list/divider_float_32_rtl.f -f ../file_list/divider_float_32_tb.f divider_float_32_tb.sv -top $(TOP) -l xrun_32bit.log
+	$(XRUN) $(BASE_FLAGS) -f ../file_list/sqrt_float_32_rtl.f -f ../file_list/sqrt_float_32_tb.f sqrt_float_32_tb.sv -top $(TOP) -l xrun_32bit.log
 
 gui-16:
-	$(XRUN) $(BASE_FLAGS) -f ../file_list/divider_float_16_rtl.f -f ../file_list/divider_float_16_tb.f divider_float_16_tb.sv -top $(TOP) -gui
+	$(XRUN) $(BASE_FLAGS) -f ../file_list/sqrt_float_16_rtl.f -f ../file_list/sqrt_float_16_tb.f sqrt_float_16_tb.sv -top $(TOP) -gui
 
 gui-32:
-	$(XRUN) $(BASE_FLAGS) -f ../file_list/divider_float_32_rtl.f -f ../file_list/divider_float_32_tb.f divider_float_32_tb.sv -top $(TOP) -gui
+	$(XRUN) $(BASE_FLAGS) -f ../file_list/sqrt_float_32_rtl.f -f ../file_list/sqrt_float_32_tb.f sqrt_float_32_tb.sv -top $(TOP) -gui
 
 clean:
 	@echo "Cleaning simulation files..."
