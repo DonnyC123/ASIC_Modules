@@ -10,7 +10,7 @@ module mantissa_divider_pipe
     output logic                      sticky_o
 );
   localparam QUOTIENT_DIV_W = QUOTIENT_RAW_W | 1;
-  localparam REMAINDER_W    = SIGN_W + MANTISSA_W + REDUCTION_W + GUARD_W;
+  localparam REMAINDER_W    = REDUCTION_W + QUOTIENT_DIV_W;
   localparam COUNTER_LEN    = (QUOTIENT_DIV_W + (REDUCTION_W)) / REDUCTION_W;
 
   logic signed [   REMAINDER_W-1:0] rem_w [COUNTER_LEN+1];
@@ -45,7 +45,6 @@ module mantissa_divider_pipe
       end
     end else begin
 
-      logic [QUOTIENT_DIV_W-1:0] quotient_div;
 
       always_comb begin
         if (rem_w[COUNTER_LEN][REMAINDER_W-1]) begin
