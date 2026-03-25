@@ -1,9 +1,9 @@
 module mantissa_divider_stage
   import divider_float_pkg::*;
 #(
-    parameter  MANTISSA_W     = 11,
-    localparam QUOTIENT_RAW_W = OFFSET_BIT_W + MANTISSA_W + GUARD_W,
-    localparam REMAINDER_W    = SIGN_W + MANTISSA_W + REDUCTION_W + GUARD_W
+    parameter MANTISSA_W     = 11,
+    parameter QUOTIENT_RAW_W = OFFSET_BIT_W + MANTISSA_W + GUARD_W,
+    parameter REMAINDER_W    = SIGN_W + MANTISSA_W + REDUCTION_W + GUARD_W
 ) (
     input  logic signed [   REMAINDER_W-1:0] remainder_i,
     input  logic signed [QUOTIENT_RAW_W-1:0] quotient_i,

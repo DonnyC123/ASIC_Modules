@@ -25,7 +25,9 @@ module mantissa_divider_pipe
   generate
     for (i = 0; i < COUNTER_LEN; i++) begin : g_stage
       mantissa_divider_stage #(
-          .MANTISSA_W(MANTISSA_W | 1)
+          .MANTISSA_W(MANTISSA_W),
+          .QUOTIENT_RAW_W(QUOTIENT_DIV_W),
+          .REMAINDER_W(REMAINDER_W)
       ) stage_inst (
           .remainder_i(rem_w[i]),
           .quotient_i (quot_w[i]),
