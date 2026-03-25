@@ -20,3 +20,4 @@
 ../rtl/sqrt_srt_mantissa.sv
 ../rtl/root_rounder.sv
 ../rtl/sqrt_float.sv
+../rtl/sqrt_float_32_top.sv
