@@ -15,5 +15,4 @@
 ../rtl/mantissa_divider.sv
 ../rtl/quotient_rounder.sv
 ../rtl/divider_float.sv
-../rtl/divider_float_16_top.sv
 

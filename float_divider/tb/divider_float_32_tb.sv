@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module tb_divider_float;
+module divider_float_tb;
 
   import float_32_tb_pkg::*;
 
