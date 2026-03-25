@@ -3,8 +3,8 @@ module sqrt_float_decoder
 #(
     parameter EXP_W         = 6,
     parameter FRAC_W        = 10,
-    parameter MANTISSA_W    = FRAC_W + MANTISSA_INT_W,
-    parameter SIGNED_EXP_W  = EXP_W + 1,
+    localparam MANTISSA_W   = FRAC_W + MANTISSA_INT_W,
+    localparam SIGNED_EXP_W = EXP_W + 1,
     localparam type float_t = struct packed {
       logic sign;
       logic [EXP_W-1:0] exp;
