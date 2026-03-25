@@ -55,7 +55,7 @@ module mantissa_divider_pipe
           quotient_div = quot_w[COUNTER_LEN];
           sticky_o     = (rem_w[COUNTER_LEN] != '0) || quot_w[0];
         end
-        quotient_div = quotient_div[QUOTIENT_DIV_W-1:1];
+        quotient_raw_o = quotient_div[QUOTIENT_DIV_W-1:1];
       end
     end
   endgenerate
