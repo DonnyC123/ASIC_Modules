@@ -7,8 +7,8 @@ module leading_zero_counter #(
     output logic [ZERO_COUNTER_W-1:0] leading_zero_count_o
 );
 
-  logic [ZERO_COUNTER_W-1:0] leading_zero_count;
-  logic                      found_one;
+  logic [ZERO_COUNTER_W:0] leading_zero_count;
+  logic                    found_one;
 
   always_comb begin
     leading_zero_count = '0;
@@ -23,7 +23,7 @@ module leading_zero_counter #(
   end
 
   assign contains_one_o       = found_one;
-  assign leading_zero_count_o = leading_zero_count;
+  assign leading_zero_count_o = leading_zero_count[ZERO_COUNTER_W-1:0];
 
 endmodule
 

@@ -6,7 +6,7 @@ set REPO_ROOT     [file normalize $SCRIPT_DIR/../..]
 
 set DESIGN_NAME   mac_float
 set CLK_PORT      clk
-set CLK_PERIOD_NS 2.0
+set CLK_PERIOD_NS 1.8
 
 set RUN_F         [file normalize $SCRIPT_DIR/../tb/run.f]
 set WORK_DIR      $SCRIPT_DIR/out

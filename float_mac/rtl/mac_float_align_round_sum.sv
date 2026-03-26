@@ -26,7 +26,6 @@ module mac_float_align_round_sum
 );
 
   localparam LZC_COUNT_W        = $clog2(FULL_SUM_W + 1);
-  localparam LZC_COUNT_OVFL_W   = LZC_COUNT_W + 1;
   localparam SUM_EXP_ADD_OFFSET = FULL_SUM_W - PRODUCT_MANTISSA_W;
 
   localparam EXP_OVFL_IDX = EXP_W + CARRY_W - 1;
@@ -35,24 +34,23 @@ module mac_float_align_round_sum
   localparam NORMAL_FRAC_LSB_IDX = FULL_SUM_W - 1 - FRAC_W;
   localparam GUARD_IDX           = NORMAL_FRAC_LSB_IDX - 1;
 
-  logic        [     LZC_COUNT_W-1:0] mantissa_sum_lz;
-  logic        [     LZC_COUNT_W-1:0] mantissa_sum_shift;
-  logic        [LZC_COUNT_OVFL_W-1:0] mantissa_sum_shift_ovfl;
+  logic        [ LZC_COUNT_W-1:0] mantissa_sum_lz;
+  logic        [ LZC_COUNT_W-1:0] mantissa_sum_shift;
 
-  logic signed [    SIGNED_EXP_W-1:0] sum_exp;
-  logic                               sum_exp_ovfl;
-  logic                               sum_exp_unfl;
+  logic signed [SIGNED_EXP_W-1:0] sum_exp;
+  logic                           sum_exp_ovfl;
+  logic                           sum_exp_unfl;
 
-  logic                               sum_rounded_signed;
-  logic        [      FULL_SUM_W-1:0] normalized_mantissa;
-  logic signed [    SIGNED_EXP_W-1:0] sum_rounded_exp_raw;
-  logic        [          FRAC_W-1:0] sum_frac_raw;
-  logic        [      MANTISSA_W-1:0] sum_frac_carry;
-  logic        [          FRAC_W-1:0] sum_frac_rounded;
+  logic                           sum_rounded_signed;
+  logic        [  FULL_SUM_W-1:0] normalized_mantissa;
+  logic signed [SIGNED_EXP_W-1:0] sum_rounded_exp_raw;
+  logic        [      FRAC_W-1:0] sum_frac_raw;
+  logic        [  MANTISSA_W-1:0] sum_frac_carry;
+  logic        [      FRAC_W-1:0] sum_frac_rounded;
 
-  logic                               sticky_sum;
-  logic                               guard;
-  logic                               round_mantissa;
+  logic                           sticky_sum;
+  logic                           guard;
+  logic                           round_mantissa;
 
   leading_zero_counter_top #(
       .DATA_W          (FULL_SUM_W),
@@ -70,11 +68,9 @@ module mac_float_align_round_sum
     sum_exp_ovfl = sum_exp[EXP_OVFL_IDX] && !sum_exp[EXP_SIGN_IDX];
     sum_exp_unfl = sum_exp[EXP_OVFL_IDX] && sum_exp[EXP_SIGN_IDX];
 
-    mantissa_sum_shift_ovfl = $unsigned(product_exp_i + LZC_COUNT_OVFL_W'(SUM_EXP_ADD_OFFSET) +
-                                        LZC_COUNT_OVFL_W'(MANTISSA_W - FRAC_W));
-
     if (sum_exp_unfl) begin
-      mantissa_sum_shift = mantissa_sum_shift_ovfl[LZC_COUNT_W-1:0];
+      mantissa_sum_shift = $unsigned(
+          LZC_COUNT_W'(product_exp_i + SIGNED_EXP_W'(SUM_EXP_ADD_OFFSET + MANTISSA_W - FRAC_W)));
     end else begin
       mantissa_sum_shift = mantissa_sum_lz;
     end

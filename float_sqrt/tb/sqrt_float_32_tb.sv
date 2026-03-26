@@ -2,10 +2,10 @@
 
 module sqrt_float_tb;
 
-  import float_16_tb_pkg::*;
+  import float_32_tb_pkg::*;
 
-  localparam EXP_W  = 5;
-  localparam FRAC_W = 10;
+  localparam EXP_W  = 8;
+  localparam FRAC_W = 23;
   localparam DATA_W = EXP_W + FRAC_W + 1;
 
   logic              clk;
@@ -15,7 +15,7 @@ module sqrt_float_tb;
   logic [DATA_W-1:0] root_o;
   logic              root_valid_o;
 
-  sqrt_float_16_top dut (
+  sqrt_float_32_top dut (
       .clk         (clk),
       .rst_n       (rst_n),
       .rad_valid_i (rad_valid_i),
@@ -104,7 +104,7 @@ module sqrt_float_tb;
     check_result("Sqrt(0.0)", downscale_double(0.0));
     check_result("Sqrt(-1.0)", downscale_double(-1.0));
 
-    check_result("Hex 0x3C00 (1.0)", 16'h3C00);
+    check_result("Hex 0x3C00 (1.0)", 32'h3C00);
 
     $display("--- Random Stress Test ---");
     for (i = 0; i < 10000000; i++) begin

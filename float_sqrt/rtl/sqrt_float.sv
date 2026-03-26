@@ -39,8 +39,8 @@ module sqrt_float #(
   assign float_rad = float_t'(rad_i);
 
   sqrt_float_decoder #(
-      .EXP_W     (EXP_W),
-      .MANTISSA_W(MANTISSA_W)
+      .EXP_W (EXP_W),
+      .FRAC_W(FRAC_W)
   ) sqrt_float_decoder_inst (
       .float_rad_i    (float_rad),
       .root_flags_o   (root_float_flags),

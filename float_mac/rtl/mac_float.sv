@@ -62,8 +62,8 @@ module mac_float #(
   logic signed      [      SIGNED_EXP_W-1:0] product_exp;
   logic signed      [      SIGNED_EXP_W-1:0] product_exp_2q;
 
-  logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw;
-  logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_q;
+  logic signed      [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw;
+  logic signed      [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_q;
   logic             [  FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_neg;
   logic             [        FULL_SUM_W-1:0] unsigned_mantissa_sum;
   logic                                      sum_signed;

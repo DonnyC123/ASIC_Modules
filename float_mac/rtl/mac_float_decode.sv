@@ -146,7 +146,7 @@ module mac_float_decode
       true_exp_a  = -$signed({1'b0, lz_a});
       norm_mant_a_o = {float_a_i.frac << lz_a, 1'b0};
     end else begin
-      true_exp_a  = a_flags.exp_zero ? $signed('0) : $signed({1'b0, unpacked_a.exp});
+      true_exp_a  = a_flags.exp_zero ? $signed('0) : $signed({3'b000, unpacked_a.exp});
       norm_mant_a_o = unpacked_a.mantissa;
     end
 
@@ -154,7 +154,7 @@ module mac_float_decode
       true_exp_b    = -$signed({1'b0, lz_b});
       norm_mant_b_o = {float_b_i.frac << lz_b, 1'b0};
    end else begin
-      true_exp_b    = b_flags.exp_zero ? $signed('0) : $signed({1'b0, unpacked_b.exp});
+      true_exp_b    = b_flags.exp_zero ? $signed('0) : $signed({3'b000, unpacked_b.exp});
       norm_mant_b_o = unpacked_b.mantissa;
      end
  
