@@ -1,6 +1,6 @@
 module align_addend #(
     parameter EXP_W  = 5,
-    parameter FRAC_W = 9,
+    parameter FRAC_W = 10,
 
     localparam SIGN_BIT           = 1,
     localparam ROUND_BITS         = 2,
@@ -19,7 +19,7 @@ module align_addend #(
     input  logic signed     [     PRODUCT_EXP_W-1:0] product_exp_i,
     input  logic                                     product_sign_i,
     output logic            [     UPPER_SLICE_W-1:0] c_upper_slice_o,
-    output logic            [PRODUCT_MANTISSA_W-1:0] csa_c_o,
+    output logic            [PRODUCT_MANTISSA_W-1:0] c_lower_slice_o,
     output logic                                     c_lower_sticky_o,
     output logic                                     c_dominates_o,
     output logic                                     ignore_round_even_o
@@ -70,7 +70,7 @@ module align_addend #(
     c_shifted_struct = c_shifted_raw;
 
     c_upper_slice_o  = '0;
-    csa_c_o          = '0;
+    c_lower_slice_o  = '0;
 
     if (c_shift_unfl) begin
       c_lower_sticky_o = |unpacked_c_i.mantissa;
@@ -79,7 +79,7 @@ module align_addend #(
       c_lower_sticky_o = '0;
     end else begin
       c_upper_slice_o  = c_shifted_struct.upper_c;
-      csa_c_o          = c_shifted_struct.product_aligned_c;
+      c_lower_slice_o  = c_shifted_struct.product_aligned_c;
       c_lower_sticky_o = |c_shifted_struct.rounding_c;
     end
   end

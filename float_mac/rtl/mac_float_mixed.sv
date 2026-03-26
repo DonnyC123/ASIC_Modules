@@ -1,16 +1,19 @@
-module mac_float #(
-    parameter  EXP_W  = 5,
-    parameter  FRAC_W = 10,
-    localparam DATA_W = FRAC_W + EXP_W + 1
+module mac_float_mixed #(
+    parameter  EXP_IN_W   = 5,
+    parameter  FRAC_IN_W  = 10,
+    parameter  EXP_OUT_W  = 5,
+    parameter  FRAC_OUT_W = 10,
+    localparam DIN_W      = FRAC_IN_W + EXP_IN_W + 1,
+    localparam DOUT_W     = FRAC_OUT_W + EXP_OUT_W + 1
 ) (
     input  logic              clk,
     input  logic              rst_n,
     input  logic              valid_i,
-    input  logic [DATA_W-1:0] a,
-    input  logic [DATA_W-1:0] b,
-    input  logic [DATA_W-1:0] c,
+    input  logic [ DIN_W-1:0] a,
+    input  logic [ DIN_W-1:0] b,
+    input  logic [ DIN_W-1:0] c,
     output logic              valid_o,
-    output logic [DATA_W-1:0] z
+    output logic [DOUT_W-1:0] z
 );
 
   import mac_float_pkg::*;
@@ -20,39 +23,45 @@ module mac_float #(
   localparam ALGIN_OUT_PIPE_DEPTH = 0;
   localparam OUT_PIPE_DEPTH       = 1;
 
-  localparam MANTISSA_W = FRAC_W + MANTISSA_INT_W;
+  localparam MANTISSA_IN_W = FRAC_IN_W + MANTISSA_INT_W;
 
-  localparam PRODUCT_MANTISSA_W = 2 * MANTISSA_W;
-  localparam FULL_SUM_W         = 3 * MANTISSA_W + SIGN_W + 2 * CARRY_W;
+  localparam PRODUCT_MANTISSA_W = 2 * MANTISSA_IN_W;
+  localparam FULL_SUM_W         = 3 * MANTISSA_IN_W + SIGN_W + 2 * CARRY_W;
   localparam FULL_SUM_CARRY_W   = FULL_SUM_W + CARRY_W;
   localparam LOW_SUM_W          = PRODUCT_MANTISSA_W + CARRY_W;
   localparam PARTIAL_SUM_LOW_W  = LOW_SUM_W + CARRY_W;
   localparam PARTIAL_SUM_HIGH_W = FULL_SUM_CARRY_W - PARTIAL_SUM_LOW_W + CARRY_W;
-  localparam SIGNED_EXP_W       = EXP_W + SIGN_W + 2 * CARRY_W;
+  localparam SIGNED_EXP_W       = EXP_IN_W + SIGN_W + 2 * CARRY_W;
 
   localparam SUM_FLOAT_FLAGS_W = $bits(sum_float_flags_t);
 
   typedef struct packed {
     logic sign;
-    logic [EXP_W-1:0] exp;
-    logic [FRAC_W-1:0] frac;
-  } float_t;
+    logic [EXP_IN_W-1:0] exp;
+    logic [FRAC_IN_W-1:0] frac;
+  } float_in_t;
 
-  float_t                                    float_a;
-  float_t                                    float_b;
-  float_t                                    float_c;
-  float_t                                    float_c_2q;
+  typedef struct packed {
+    logic sign;
+    logic [EXP_OUT_W-1:0] exp;
+    logic [FRAC_OUT_W-1:0] frac;
+  } float_out_t;
 
-  float_t                                    float_z;
+  float_in_t                                 float_a;
+  float_in_t                                 float_b;
+  float_in_t                                 float_c;
+  float_in_t                                 float_c_2q;
+
+  float_out_t                                float_z;
 
   sum_float_flags_t                          sum_float_flags;
   sum_float_flags_t                          sum_float_flags_2q;
   sum_float_flags_t                          sum_float_flags_3q;
 
-  logic             [        MANTISSA_W-1:0] norm_mant_a;
-  logic             [        MANTISSA_W-1:0] norm_mant_a_q;
-  logic             [        MANTISSA_W-1:0] norm_mant_b;
-  logic             [        MANTISSA_W-1:0] norm_mant_b_q;
+  logic             [     MANTISSA_IN_W-1:0] norm_mant_a;
+  logic             [     MANTISSA_IN_W-1:0] norm_mant_a_q;
+  logic             [     MANTISSA_IN_W-1:0] norm_mant_b;
+  logic             [     MANTISSA_IN_W-1:0] norm_mant_b_q;
   logic             [PRODUCT_MANTISSA_W-1:0] csa_c;
   logic             [PRODUCT_MANTISSA_W-1:0] csa_c_q;
   logic             [PARTIAL_SUM_HIGH_W-1:0] c_upper_slice;
@@ -69,8 +78,8 @@ module mac_float #(
   logic             [        FULL_SUM_W-1:0] unsigned_mantissa_sum;
   logic                                      sum_signed;
 
-  float_t                                    float_sum_rounded;
-  float_t                                    float_sum_rounded_q;
+  float_in_t                                 float_sum_rounded;
+  float_in_t                                 float_sum_rounded_q;
 
   logic                                      sum_rounded_exp_ovfl;
   logic                                      sum_rounded_exp_ovfl_q;
@@ -83,16 +92,16 @@ module mac_float #(
   logic                                      valid_final_q;
 
   always_comb begin
-    float_a = float_t'(a);
-    float_b = float_t'(b);
-    float_c = float_t'(c);
+    float_a = float_in_t'(a);
+    float_b = float_in_t'(b);
+    float_c = float_in_t'(c);
   end
 
   mac_float_decode #(
-      .float_t           (float_t),
+      .float_t           (float_in_t),
       .SIGNED_EXP_W      (SIGNED_EXP_W),
-      .MANTISSA_W        (MANTISSA_W),
-      .EXP_W             (EXP_W),
+      .MANTISSA_W        (MANTISSA_IN_W),
+      .EXP_W             (EXP_IN_W),
       .PARTIAL_SUM_HIGH_W(PARTIAL_SUM_HIGH_W),
       .PRODUCT_MANTISSA_W(PRODUCT_MANTISSA_W)
   ) mac_float_decode_inst (
@@ -109,7 +118,7 @@ module mac_float #(
   );
 
   data_pipeline #(
-      .DATA_W(1 + MANTISSA_W + MANTISSA_W + PRODUCT_MANTISSA_W + PARTIAL_SUM_HIGH_W),
+      .DATA_W(1 + 2 * MANTISSA_IN_W + PRODUCT_MANTISSA_W + PARTIAL_SUM_HIGH_W),
       .PIPE_DEPTH(DECODE_PIPE_DEPTH),
       .RST_EN(1)
   ) decode_to_execution_pipe (
@@ -121,7 +130,7 @@ module mac_float #(
   );
 
   data_pipeline #(
-      .DATA_W    (1 + SUM_FLOAT_FLAGS_W + 1 + SIGNED_EXP_W + DATA_W),
+      .DATA_W    (1 + SUM_FLOAT_FLAGS_W + 1 + SIGNED_EXP_W + DIN_W),
       .PIPE_DEPTH(DECODE_PIPE_DEPTH + EXECUTION_PIPE_DEPTH),
       .RST_EN    (1)
   ) decode_to_round_pipe (
@@ -133,7 +142,7 @@ module mac_float #(
   );
 
   mac_float_execution #(
-      .MANTISSA_W        (MANTISSA_W),
+      .MANTISSA_W        (MANTISSA_IN_W),
       .PRODUCT_MANTISSA_W(PRODUCT_MANTISSA_W),
       .FULL_SUM_W        (FULL_SUM_W),
       .FULL_SUM_CARRY_W  (FULL_SUM_CARRY_W)
@@ -168,8 +177,8 @@ module mac_float #(
   end
 
   mac_float_align_round_sum #(
-      .EXP_W       (EXP_W),
-      .FRAC_W      (FRAC_W),
+      .EXP_W       (EXP_IN_W),
+      .FRAC_W      (FRAC_IN_W),
       .FULL_SUM_W  (FULL_SUM_W),
       .SIGNED_EXP_W(SIGNED_EXP_W),
       .float_t     (float_t)
@@ -185,7 +194,7 @@ module mac_float #(
   );
 
   data_pipeline #(
-      .DATA_W    (1 + DATA_W + 1 + 1 + SUM_FLOAT_FLAGS_W),
+      .DATA_W    (1 + DIN_W + 1 + 1 + SUM_FLOAT_FLAGS_W),
       .PIPE_DEPTH(ALGIN_OUT_PIPE_DEPTH),
       .RST_EN    (1)
   ) round_to_output_pipe (
@@ -226,14 +235,14 @@ module mac_float #(
   end
 
   data_pipeline #(
-      .DATA_W    (1 + DATA_W),
+      .DATA_W    (1 + DOUT_W),
       .PIPE_DEPTH(OUT_PIPE_DEPTH),
       .RST_EN    (1)
   ) output_pipe (
       .clk   (clk),
       .rst_n (rst_n),
       .clk_en('1),
-      .data_i({valid_final_q, DATA_W'(float_z)}),
+      .data_i({valid_final_q, DOUT_W'(float_z)}),
       .data_o({valid_o, z})
   );
 

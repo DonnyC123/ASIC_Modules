@@ -1,12 +1,13 @@
 module mac_float_decode
   import mac_float_pkg::*;
 #(
-    parameter type float_t            = struct packed {logic sign; logic [5:0] exp; logic [9:0] frac;},
-    parameter      SIGNED_EXP_W       = 9,
-    parameter      MANTISSA_W         = 11,
-    parameter      EXP_W              = 5,
-    parameter      PARTIAL_SUM_HIGH_W = 14,
-    parameter      PRODUCT_MANTISSA_W = 2 * (MANTISSA_W)
+    parameter type float_t                     = struct packed {logic sign; logic [5:0] exp; logic [9:0] frac;},
+    parameter      SIGNED_EXP_W                = 9,
+    parameter      FRAC_IN_W                   = 10,
+    parameter      EXP_IN_W                    = 5,
+    parameter      PARTIAL_SUM_HIGH_W          = 14,
+    localparam     MANTISSA_IN_W               = FRAC_IN_W + 1,
+    parameter      PRODUCT_MANTISSA_W          = 2 * (MANTISSA_IN_W)
 ) (
     input  float_t                          float_a_i,
     input  float_t                          float_b_i,
@@ -15,20 +16,20 @@ module mac_float_decode
     output logic                            product_sign_o,
     output logic signed [SIGNED_EXP_W-1:0]  product_exp_o,
     output logic [PARTIAL_SUM_HIGH_W-1:0]   c_upper_slice_o,
-    output logic [PRODUCT_MANTISSA_W-1:0]   csa_c_o,
-    output logic         [  MANTISSA_W-1:0] norm_mant_a_o,
-    output logic         [  MANTISSA_W-1:0] norm_mant_b_o
+    output logic [PRODUCT_MANTISSA_W-1:0]   c_lower_slice_o,
+    output logic         [  MANTISSA_IN_W-1:0] norm_mant_a_o,
+    output logic         [  MANTISSA_IN_W-1:0] norm_mant_b_o
 );
 
-  localparam LZ_COUNTER_W         = $clog2(MANTISSA_W);
-  localparam BIAS                 = (1 << (EXP_W - 1)) - 1;
+  localparam LZ_COUNTER_W         = $clog2(MANTISSA_IN_W);
+  localparam BIAS                 = (1 << (EXP_IN_W - 1)) - 1;
  
   typedef struct packed {
     logic                  sign;
-    logic [EXP_W-1:0]      exp;
-    logic [MANTISSA_W-1:0] mantissa;
+    logic [EXP_IN_W-1:0]      exp;
+    logic [MANTISSA_IN_W-1:0] mantissa;
   } unpacked_float_t;
-  
+ 
   typedef struct {
     logic sign;
     logic inf;
@@ -37,7 +38,6 @@ module mac_float_decode
     logic frac_zero;
     logic exp_zero;
   } float_flags_t;
-
 
   function automatic float_flags_t deduce_float_flags(input float_t float_i);
     float_flags_t flags_o;
@@ -67,7 +67,7 @@ module mac_float_decode
 
     if (exp_zero_i) begin
       unpacked_o.exp[0]                 = 1'b1;
-      unpacked_o.mantissa[MANTISSA_W-1] = 1'b0;
+      unpacked_o.mantissa[MANTISSA_IN_W-1] = 1'b0;
     end
 
     return unpacked_o;
@@ -128,14 +128,14 @@ module mac_float_decode
   end
 
   leading_zero_counter_top #(
-      .DATA_W(MANTISSA_W-1)
+      .DATA_W(FRAC_IN_W)
   ) leading_zero_counter_a_top_inst (
       .data_i              (float_a_i.frac),
       .leading_zero_count_o(lz_a)
   );
 
   leading_zero_counter_top #(
-      .DATA_W(MANTISSA_W-1)
+      .DATA_W(FRAC_IN_W)
   ) leading_zero_counter_b_top_inst (
       .data_i              (float_b_i.frac),
       .leading_zero_count_o(lz_b)
@@ -163,15 +163,15 @@ module mac_float_decode
   end
 
     align_addend #(
-      .EXP_W (EXP_W),
-      .FRAC_W(MANTISSA_W-1),
+      .EXP_W (EXP_IN_W),
+      .FRAC_W(MANTISSA_IN_W-1),
       .unpacked_float_t(unpacked_float_t)
   ) align_addend_inst (
       .unpacked_c_i       (unpacked_c),
       .product_exp_i      (product_exp_o),
       .product_sign_i     (product_sign_o),
       .c_upper_slice_o    (c_upper_slice_o),
-      .csa_c_o            (csa_c_o),
+      .c_lower_slice_o    (c_lower_slice_o),
       .c_lower_sticky_o   (sum_float_flags_o.sticky_c),
       .c_dominates_o      (c_dominates),
       .ignore_round_even_o(sum_float_flags_o.ignore_round_even)
