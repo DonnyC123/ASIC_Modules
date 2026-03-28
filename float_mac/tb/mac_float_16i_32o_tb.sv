@@ -3,23 +3,30 @@
 module mac_float_tb;
 
   import float_16_tb_pkg::*;
+  import float_32_tb_pkg::*;
 
-  localparam EXP_W   = 5;
-  localparam FRAC_W  = 10;
-  localparam FLOAT_W = EXP_W + FRAC_W + 1;
+  localparam EXP_IN_W   = 5;
+  localparam FRAC_IN_W  = 10;
+  localparam FLOAT_IN_W = EXP_IN_W + FRAC_IN_W + 1;
+
+  localparam EXP_OUT_W   = 8;
+  localparam FRAC_OUT_W  = 23;
+  localparam FLOAT_OUT_W = EXP_OUT_W + FRAC_OUT_W + 1;
 
   localparam PIPELINE_STAGES = 4;
 
   logic clk;
   logic rst_n;
   logic valid_i;
-  logic [FLOAT_W-1:0] a, b, c;
-  logic               valid_o;
-  logic [FLOAT_W-1:0] z;
+  logic [FLOAT_IN_W-1:0] a, b, c;
+  logic                   valid_o;
+  logic [FLOAT_OUT_W-1:0] z;
 
-  mac_float #(
-      .EXP_W (EXP_W),
-      .FRAC_W(FRAC_W)
+  mac_float_mixed #(
+      .EXP_IN_W  (EXP_IN_W),
+      .FRAC_IN_W (FRAC_IN_W),
+      .EXP_OUT_W (EXP_OUT_W),
+      .FRAC_OUT_W(FRAC_OUT_W)
   ) dut (
       .clk    (clk),
       .rst_n  (rst_n),
@@ -31,26 +38,26 @@ module mac_float_tb;
       .z      (z)
   );
 
-  logic   [FLOAT_W-1:0] expected_queue[$];
-  string                name_queue    [$];
+  logic   [FLOAT_OUT_W-1:0] expected_queue[$];
+  string                    name_queue    [$];
 
-  integer               i;
-  integer               errors = 0;
+  integer                   i;
+  integer                   errors = 0;
 
   initial clk = 0;
   always #5 clk = ~clk;
 
-  task send_stimulus(input string name, input logic [FLOAT_W-1:0] test_a,
-                     input logic [FLOAT_W-1:0] test_b, input logic [FLOAT_W-1:0] test_c);
+  task send_stimulus(input string name, input logic [FLOAT_IN_W-1:0] test_a,
+                     input logic [FLOAT_IN_W-1:0] test_b, input logic [FLOAT_IN_W-1:0] test_c);
     real real_a, real_b, real_c, expected;
-    logic [FLOAT_W-1:0] expected_bits;
+    logic [FLOAT_OUT_W-1:0] expected_bits;
 
-    real_a        = upscale_to_double(test_a);
-    real_b        = upscale_to_double(test_b);
-    real_c        = upscale_to_double(test_c);
+    real_a        = float_16_tb_pkg::upscale_to_double(test_a);
+    real_b        = float_16_tb_pkg::upscale_to_double(test_b);
+    real_c        = float_16_tb_pkg::upscale_to_double(test_c);
 
     expected      = (real_a * real_b) + real_c;
-    expected_bits = downscale_double(expected);
+    expected_bits = float_32_tb_pkg::downscale_double(expected);
 
     expected_queue.push_back(expected_bits);
     name_queue.push_back(name);
@@ -64,8 +71,8 @@ module mac_float_tb;
   endtask
 
   initial begin : checker_thread
-    logic  [FLOAT_W-1:0] expected_bits;
-    string               test_name;
+    logic  [FLOAT_OUT_W-1:0] expected_bits;
+    string                   test_name;
     real real_z_dut, real_z_ref;
     bit check_pass;
 
@@ -80,13 +87,13 @@ module mac_float_tb;
           expected_bits = expected_queue.pop_front();
           test_name     = name_queue.pop_front();
 
-          real_z_dut    = upscale_to_double(z);
-          real_z_ref    = upscale_to_double(expected_bits);
+          real_z_dut    = float_32_tb_pkg::upscale_to_double(z);
+          real_z_ref    = float_32_tb_pkg::upscale_to_double(expected_bits);
 
           check_pass    = 0;
-          if ((real_z_dut == 0.0 && real_z_ref == 0.0) || (real_z_dut == real_z_ref) || (is_nan(
+          if ((real_z_dut == 0.0 && real_z_ref == 0.0) || (z == expected_bits) || (float_32_tb_pkg::is_nan(
                   real_z_dut
-              ) && is_nan(
+              ) && float_32_tb_pkg::is_nan(
                   real_z_ref
               ))) begin
             check_pass = 1;
@@ -115,27 +122,33 @@ module mac_float_tb;
     rst_n = 1;
     repeat (2) @(posedge clk);
 
-    send_stimulus("Simple Mult", downscale_double(1.5), downscale_double(2.0), 16'h0000);
-    send_stimulus("Simple Add", downscale_double(1.0), downscale_double(1.0), downscale_double(3.5
-                  ));
+    send_stimulus("Simple Mult", float_16_tb_pkg::downscale_double(1.5),
+                  float_16_tb_pkg::downscale_double(2.0), 16'h0000);
+
+    send_stimulus("Simple Add", float_16_tb_pkg::downscale_double(1.0),
+                  float_16_tb_pkg::downscale_double(1.0), float_16_tb_pkg::downscale_double(3.5));
 
     send_stimulus("Previous Error 1", 16'h6B6b, 16'h0801, 16'h01AB);
     send_stimulus("Previous Error 2", 16'hEDCD, 16'h8000, 16'h0679);
 
     $display("--- Random Stress Test (Back-to-Back) ---");
     for (i = 0; i < 100000000; i++) begin
-      logic [FLOAT_W-1:0] ra, rb, rc;
+      logic [FLOAT_IN_W-1:0] ra, rb, rc;
       void'(std::randomize(ra, rb, rc));
       if (i % 10 == 0) rc = 0;
-
       a       = ra;
       b       = rb;
       c       = rc;
       valid_i = 1'b1;
 
-      expected_queue.push_back(
-          downscale_double((upscale_to_double(ra) * upscale_to_double(rb)) + upscale_to_double(rc)
-          ));
+      expected_queue.push_back(float_32_tb_pkg::downscale_double(
+                               (float_16_tb_pkg::upscale_to_double(
+                                   ra
+                               ) * float_16_tb_pkg::upscale_to_double(
+                                   rb
+                               )) + float_16_tb_pkg::upscale_to_double(
+                                   rc)
+                               ));
       name_queue.push_back($sformatf("Rand #%0d", i));
 
       if (i % 100000 == 0) $display("Driving Test Case %0d...", i);

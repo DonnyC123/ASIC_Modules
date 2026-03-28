@@ -1,36 +1,39 @@
 module align_addend #(
-    parameter EXP_W  = 5,
-    parameter FRAC_W = 10,
-
+    parameter  FRAC_IN_W          = 10,
+    parameter  EXP_IN_W           = 5,
+    parameter  FRAC_OUT_W         = 10,
+    parameter  EXP_OUT_W          = 8,
     localparam SIGN_BIT           = 1,
     localparam ROUND_BITS         = 2,
-    localparam MANTISSA_W         = FRAC_W + 1,
-    localparam UPPER_SLICE_W      = MANTISSA_W + SIGN_BIT + ROUND_BITS,
-    localparam PRODUCT_EXP_W      = EXP_W + 3,
-    localparam PRODUCT_MANTISSA_W = 2 * MANTISSA_W,
+    localparam MANTISSA_IN_W      = FRAC_IN_W + 1,
+    localparam MANTISSA_OUT_W     = FRAC_OUT_W + 1,
+    localparam UPPER_SLICE_W      = MANTISSA_OUT_W + SIGN_BIT + ROUND_BITS,
+    localparam PRODUCT_EXP_W      = EXP_IN_W + 3,
+    localparam PRODUCT_MANTISSA_W = 2 * MANTISSA_IN_W,
+    localparam LOWER_SLICE_W      = PRODUCT_MANTISSA_W + FRAC_OUT_W - FRAC_IN_W,
 
     parameter type unpacked_float_t = struct packed {
-      logic                  sign;
-      logic [EXP_W-1:0]      exp;
-      logic [MANTISSA_W-1:0] mantissa;
+      logic                      sign;
+      logic [EXP_OUT_W-1:0]      exp;
+      logic [MANTISSA_OUT_W-1:0] mantissa;
     }
 ) (
-    input  unpacked_float_t                          unpacked_c_i,
-    input  logic signed     [     PRODUCT_EXP_W-1:0] product_exp_i,
-    input  logic                                     product_sign_i,
-    output logic            [     UPPER_SLICE_W-1:0] c_upper_slice_o,
-    output logic            [PRODUCT_MANTISSA_W-1:0] c_lower_slice_o,
-    output logic                                     c_lower_sticky_o,
-    output logic                                     c_dominates_o,
-    output logic                                     ignore_round_even_o
+    input  unpacked_float_t                     unpacked_c_i,
+    input  logic signed     [PRODUCT_EXP_W-1:0] product_exp_i,
+    input  logic                                product_sign_i,
+    output logic            [UPPER_SLICE_W-1:0] c_upper_slice_o,
+    output logic            [LOWER_SLICE_W-1:0] c_lower_slice_o,
+    output logic                                c_lower_sticky_o,
+    output logic                                c_dominates_o,
+    output logic                                ignore_round_even_o
 );
 
-  localparam C_SHIFT_RAW_W    = MANTISSA_W + PRODUCT_MANTISSA_W + UPPER_SLICE_W;
+  localparam C_SHIFT_RAW_W    = MANTISSA_OUT_W + PRODUCT_MANTISSA_W + UPPER_SLICE_W;
   localparam C_SHIFT_MAX      = PRODUCT_MANTISSA_W + UPPER_SLICE_W - SIGN_BIT;
   localparam C_SHIFT_FACTOR_W = $clog2(C_SHIFT_RAW_W);
 
-  localparam PRODUCT_ZERO_POINT_OFFSET = FRAC_W;
-  localparam SHIFT_ZERO_POINT_OFFSET   = MANTISSA_W;
+  localparam PRODUCT_ZERO_POINT_OFFSET = FRAC_OUT_W;
+  localparam SHIFT_ZERO_POINT_OFFSET   = MANTISSA_IN_W;
 
   typedef struct packed {
     logic [2:0]                  ovfl;
@@ -38,9 +41,9 @@ module align_addend #(
   } c_shift_factor_t;
 
   typedef struct packed {
-    logic [UPPER_SLICE_W-1:0]      upper_c;
-    logic [PRODUCT_MANTISSA_W-1:0] product_aligned_c;
-    logic [MANTISSA_W - 1:0]       rounding_c;
+    logic [UPPER_SLICE_W-1:0] upper_c;
+    logic [LOWER_SLICE_W-1:0] product_aligned_c;
+    logic [MANTISSA_IN_W-1:0] rounding_c;
   } shifted_c_t;
 
   c_shift_factor_t c_shift_amount;

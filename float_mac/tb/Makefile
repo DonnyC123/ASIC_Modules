@@ -1,30 +1,23 @@
 XRUN = xrun
+TOP  = mac_float_tb
 
-BITWIDTH ?= 16
+BASE_FLAGS = -64bit -sv -timescale 1ns/1ps -access +rwc
 
-TB_FILE = mac_float_$(BITWIDTH)_tb.sv
+.PHONY: all run-16 run-32 gui-16 gui-32 clean
 
-TOP = tb_mac_float
+all: run-16
 
-FLAGS = -64bit -sv -f run.f $(TB_FILE) -timescale 1ns/1ps -access +rwc -l xrun_$(BITWIDTH)bit.log
+run-16:
+	$(XRUN) $(BASE_FLAGS) -f ../file_list/mac_float_16_rtl.f -f ../file_list/mac_float_16_tb.f mac_float_16_tb.sv -top $(TOP) -l xrun_16bit.log
 
-.PHONY: all run gui clean check_tb
+run-16i-32o:
+	$(XRUN) $(BASE_FLAGS) -f ../file_list/mac_float_16i_32o_rtl.f -f ../file_list/mac_float_16i_32o_tb.f mac_float_16i_32o_tb.sv -top $(TOP) -l xrun_32bit.log
 
-all: run
+gui-16:
+	$(XRUN) $(BASE_FLAGS) -f ../file_list/mac_float_16_rtl.f -f ../file_list/mac_float_16_tb.f mac_float_16_tb.sv -top $(TOP) -gui
 
-check_tb:
-	@if [ ! -f $(TB_FILE) ]; then \
-		echo "ERROR: Testbench file $(TB_FILE) not found!"; \
-		exit 1; \
-	fi
-
-run: check_tb
-	@echo "Running simulation for $(BITWIDTH)-bit configuration..."
-	$(XRUN) $(FLAGS) -top $(TOP)
-
-gui: check_tb
-	@echo "Opening GUI for $(BITWIDTH)-bit configuration..."
-	$(XRUN) $(FLAGS) -top $(TOP) -gui
+gui-32:
+	$(XRUN) $(BASE_FLAGS) -f ../file_list/mac_float_16i_32o_rtl.f -f ../file_list/mac_float_16i_32o_tb.f mac_float_16i_32o_tb.sv -top $(TOP) -gui
 
 clean:
 	@echo "Cleaning simulation files..."

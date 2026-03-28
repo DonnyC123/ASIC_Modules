@@ -30,7 +30,7 @@ module mac_float_mixed #(
   localparam FULL_SUM_CARRY_W   = FULL_SUM_W + CARRY_W;
   localparam LOW_SUM_W          = PRODUCT_MANTISSA_W + CARRY_W;
   localparam PARTIAL_SUM_LOW_W  = LOW_SUM_W + CARRY_W;
-  localparam PARTIAL_SUM_HIGH_W = FULL_SUM_CARRY_W - PARTIAL_SUM_LOW_W + CARRY_W;
+  localparam C_UPPER_SLICE_W    = FULL_SUM_CARRY_W - PARTIAL_SUM_LOW_W + CARRY_W;
   localparam SIGNED_EXP_W       = EXP_IN_W + SIGN_W + 2 * CARRY_W;
 
   localparam SUM_FLOAT_FLAGS_W = $bits(sum_float_flags_t);
@@ -64,8 +64,8 @@ module mac_float_mixed #(
   logic             [     MANTISSA_IN_W-1:0] norm_mant_b_q;
   logic             [PRODUCT_MANTISSA_W-1:0] csa_c;
   logic             [PRODUCT_MANTISSA_W-1:0] csa_c_q;
-  logic             [PARTIAL_SUM_HIGH_W-1:0] c_upper_slice;
-  logic             [PARTIAL_SUM_HIGH_W-1:0] c_upper_slice_q;
+  logic             [   C_UPPER_SLICE_W-1:0] c_upper_slice;
+  logic             [   C_UPPER_SLICE_W-1:0] c_upper_slice_q;
 
   logic                                      product_sign;
   logic                                      product_sign_2q;
@@ -102,7 +102,7 @@ module mac_float_mixed #(
       .SIGNED_EXP_W      (SIGNED_EXP_W),
       .MANTISSA_W        (MANTISSA_IN_W),
       .EXP_W             (EXP_IN_W),
-      .PARTIAL_SUM_HIGH_W(PARTIAL_SUM_HIGH_W),
+      .C_UPPER_SLICE_W   (C_UPPER_SLICE_W),
       .PRODUCT_MANTISSA_W(PRODUCT_MANTISSA_W)
   ) mac_float_decode_inst (
       .float_a_i        (float_a),
@@ -118,7 +118,7 @@ module mac_float_mixed #(
   );
 
   data_pipeline #(
-      .DATA_W(1 + 2 * MANTISSA_IN_W + PRODUCT_MANTISSA_W + PARTIAL_SUM_HIGH_W),
+      .DATA_W(1 + 2 * MANTISSA_IN_W + PRODUCT_MANTISSA_W + C_UPPER_SLICE_W),
       .PIPE_DEPTH(DECODE_PIPE_DEPTH),
       .RST_EN(1)
   ) decode_to_execution_pipe (

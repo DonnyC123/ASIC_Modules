@@ -1,24 +1,28 @@
 module mac_float_decode
   import mac_float_pkg::*;
 #(
-    parameter type float_t                     = struct packed {logic sign; logic [5:0] exp; logic [9:0] frac;},
-    parameter      SIGNED_EXP_W                = 9,
-    parameter      FRAC_IN_W                   = 10,
-    parameter      EXP_IN_W                    = 5,
-    parameter      PARTIAL_SUM_HIGH_W          = 14,
-    localparam     MANTISSA_IN_W               = FRAC_IN_W + 1,
-    parameter      PRODUCT_MANTISSA_W          = 2 * (MANTISSA_IN_W)
+    parameter type float_t                      = struct packed {logic sign; logic [5:0] exp; logic [9:0] frac;},
+    parameter      SIGNED_EXP_W                 = 9,
+    parameter      FRAC_IN_W                    = 10,
+    parameter      EXP_IN_W                     = 5,
+    parameter      FRAC_OUT_W                   = 10,
+    parameter      EXP_OUT_W                    = 8,
+    localparam     MANTISSA_IN_W                = FRAC_IN_W + 1,
+    localparam     MANTISSA_OUT_W               = FRAC_OUT_W + 1,
+    localparam     C_UPPER_SLICE_W              = MANTISSA_OUT_W + 3,
+    localparam     PRODUCT_MANTISSA_W           = 2 * MANTISSA_IN_W,
+    localparam     C_LOWER_SLICE_W              = PRODUCT_MANTISSA_W + FRAC_OUT_W - FRAC_IN_W
 ) (
-    input  float_t                          float_a_i,
-    input  float_t                          float_b_i,
-    input  float_t                          float_c_i,
-    output sum_float_flags_t                sum_float_flags_o,
-    output logic                            product_sign_o,
-    output logic signed [SIGNED_EXP_W-1:0]  product_exp_o,
-    output logic [PARTIAL_SUM_HIGH_W-1:0]   c_upper_slice_o,
-    output logic [PRODUCT_MANTISSA_W-1:0]   c_lower_slice_o,
-    output logic         [  MANTISSA_IN_W-1:0] norm_mant_a_o,
-    output logic         [  MANTISSA_IN_W-1:0] norm_mant_b_o
+    input  float_t                            float_a_i,
+    input  float_t                            float_b_i,
+    input  float_t                            float_c_i,
+    output sum_float_flags_t                  sum_float_flags_o,
+    output logic                              product_sign_o,
+    output logic signed [   SIGNED_EXP_W-1:0] product_exp_o,
+    output logic        [C_UPPER_SLICE_W-1:0] c_upper_slice_o,
+    output logic        [C_LOWER_SLICE_W-1:0] c_lower_slice_o,
+    output logic        [  MANTISSA_IN_W-1:0] norm_mant_a_o,
+    output logic        [  MANTISSA_IN_W-1:0] norm_mant_b_o
 );
 
   localparam LZ_COUNTER_W         = $clog2(MANTISSA_IN_W);
@@ -163,8 +167,10 @@ module mac_float_decode
   end
 
     align_addend #(
-      .EXP_W (EXP_IN_W),
-      .FRAC_W(MANTISSA_IN_W-1),
+      .EXP_IN_W (EXP_IN_W),
+      .FRAC_IN_W(FRAC_IN_W),
+      .EXP_OUT_W (EXP_OUT_W),
+      .FRAC_OUT_W(FRAC_OUT_W),
       .unpacked_float_t(unpacked_float_t)
   ) align_addend_inst (
       .unpacked_c_i       (unpacked_c),
@@ -176,6 +182,7 @@ module mac_float_decode
       .c_dominates_o      (c_dominates),
       .ignore_round_even_o(sum_float_flags_o.ignore_round_even)
   );
+
   assign sum_float_flags_o.c_dominates = c_dominates || product_flags.zero;
 
 endmodule
