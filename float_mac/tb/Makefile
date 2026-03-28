@@ -16,7 +16,7 @@ run-16i-32o:
 gui-16:
 	$(XRUN) $(BASE_FLAGS) -f ../file_list/mac_float_16_rtl.f -f ../file_list/mac_float_16_tb.f mac_float_16_tb.sv -top $(TOP) -gui
 
-gui-32:
+gui-16i-32o:
 	$(XRUN) $(BASE_FLAGS) -f ../file_list/mac_float_16i_32o_rtl.f -f ../file_list/mac_float_16i_32o_tb.f mac_float_16i_32o_tb.sv -top $(TOP) -gui
 
 clean:

@@ -9,5 +9,5 @@
 ../rtl/mac_float_decode.sv
 ../rtl/mac_float_execution.sv
 ../rtl/mac_float_align_round_sum.sv
-../rtl/mac_float.sv
+../rtl/mac_float_mixed.sv
 
