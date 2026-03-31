@@ -28,8 +28,8 @@ module align_addend #(
     output logic                                ignore_round_even_o
 );
 
-  localparam C_SHIFT_RAW_W    = MANTISSA_OUT_W + PRODUCT_MANTISSA_W + UPPER_SLICE_W;
-  localparam C_SHIFT_MAX      = PRODUCT_MANTISSA_W + UPPER_SLICE_W - SIGN_BIT;
+  localparam C_SHIFT_RAW_W    = MANTISSA_OUT_W + LOWER_SLICE_W + UPPER_SLICE_W;
+  localparam C_SHIFT_MAX      = LOWER_SLICE_W + UPPER_SLICE_W - SIGN_BIT;
   localparam C_SHIFT_FACTOR_W = $clog2(C_SHIFT_RAW_W);
 
   localparam PRODUCT_ZERO_POINT_OFFSET = FRAC_IN_W;
