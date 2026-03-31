@@ -20,14 +20,14 @@ module mac_float_align_round_sum
       logic [FRAC_OUT_W-1:0] frac;
     }
 ) (
-    input  float_in_t                               float_c_i,
-    input  sum_float_flags_t                        sum_float_flags_i,
-    input  logic                                    sum_signed_i,
+    input  float_in_t                              float_c_i,
+    input  sum_float_flags_t                       sum_float_flags_i,
+    input  logic                                   sum_signed_i,
     input  logic signed      [SIGNED_EXP_IN_W-1:0] product_exp_i,
     input  logic             [     FULL_SUM_W-1:0] unsigned_mantissa_sum_i,
-    output float_out_t                              float_sum_rounded,
-    output logic                                    sum_rounded_exp_ovfl_o,
-    output logic                                    sum_rounded_exp_unfl_o
+    output float_out_t                             float_sum_rounded,
+    output logic                                   sum_rounded_exp_ovfl_o,
+    output logic                                   sum_rounded_exp_unfl_o
 );
 
   localparam PRODUCT_MANTISSA_W = MANTISSA_IN_W * 2;
@@ -45,22 +45,22 @@ module mac_float_align_round_sum
   localparam BIAS_OUT = (1 << (EXP_OUT_W - 1)) - 1;
 
 
-  logic        [  LZC_COUNT_W-1:0] mantissa_sum_lz;
-  logic        [  LZC_COUNT_W-1:0] mantissa_sum_shift;
+  logic        [   LZC_COUNT_W-1:0] mantissa_sum_lz;
+  logic        [   LZC_COUNT_W-1:0] mantissa_sum_shift;
 
-  logic signed [    EXP_OUT_W+1:0] sum_exp;
-  logic                            sum_exp_unfl;
+  logic signed [     EXP_OUT_W+1:0] sum_exp;
+  logic                             sum_exp_unfl;
 
-  logic                            sum_rounded_signed;
-  logic        [   FULL_SUM_W-1:0] normalized_mantissa;
-  logic signed [    EXP_OUT_W+1:0] sum_rounded_exp_raw;
-  logic        [   FRAC_OUT_W-1:0] sum_frac_raw;
-  logic        [ MANTISSA_OUT_W-1:0] sum_frac_carry;
-  logic        [   FRAC_OUT_W-1:0] sum_frac_rounded;
+  logic                             sum_rounded_signed;
+  logic        [    FULL_SUM_W-1:0] normalized_mantissa;
+  logic signed [     EXP_OUT_W+1:0] sum_rounded_exp_raw;
+  logic        [    FRAC_OUT_W-1:0] sum_frac_raw;
+  logic        [MANTISSA_OUT_W-1:0] sum_frac_carry;
+  logic        [    FRAC_OUT_W-1:0] sum_frac_rounded;
 
-  logic                            sticky_sum;
-  logic                            guard;
-  logic                            round_mantissa;
+  logic                             sticky_sum;
+  logic                             guard;
+  logic                             round_mantissa;
 
   leading_zero_counter_top #(
       .DATA_W          (FULL_SUM_W),
@@ -74,7 +74,7 @@ module mac_float_align_round_sum
     sum_rounded_signed = sum_signed_i;
 
     sum_exp = product_exp_i - $signed({2'b0, mantissa_sum_lz}) + (SUM_EXP_ADD_OFFSET) +
-        (MANTISSA_IN_W - FRAC_IN_W) + (BIAS_OUT - BIAS_IN);
+        (MANTISSA_OUT_W - FRAC_IN_W) + (BIAS_OUT - BIAS_IN);
 
     sum_exp_unfl = sum_exp[EXP_OVFL_IDX] && sum_exp[EXP_SIGN_IDX];
 
@@ -106,7 +106,7 @@ module mac_float_align_round_sum
     sum_rounded_exp_unfl_o = sum_rounded_exp_raw[EXP_OVFL_IDX] && sum_rounded_exp_raw[EXP_SIGN_IDX];
     sum_frac_rounded = sum_frac_carry[FRAC_OUT_W-1:0];
 
-    float_sum_rounded.exp  = sum_rounded_exp_raw[EXP_OUT_W-1:0];
+    float_sum_rounded.exp = sum_rounded_exp_raw[EXP_OUT_W-1:0];
     float_sum_rounded.sign = sum_rounded_signed;
     float_sum_rounded.frac = sum_frac_rounded;
   end
