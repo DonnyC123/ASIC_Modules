@@ -57,7 +57,7 @@ module align_addend #(
 
   always_comb begin
     c_shift_amount = c_shift_factor_t'(unpacked_c_i.exp) - c_shift_factor_t'(product_exp_i)
-        + c_shift_factor_t'(PRODUCT_ZERO_POINT_OFFSET) + c_shift_factor_t'(SHIFT_ZERO_POINT_OFFSET);
+        + c_shift_factor_t'(PRODUCT_ZERO_POINT_OFFSET) + c_shift_factor_t'(SHIFT_ZERO_POINT_OFFSET) + c_shift_factor_t'(FRAC_OUT_W - FRAC_IN_W);
 
     c_shift_unfl = &c_shift_amount.ovfl[2:1];
     c_shift_ovfl = (c_shift_amount > c_shift_factor_t'(C_SHIFT_MAX)) && !c_shift_unfl;
