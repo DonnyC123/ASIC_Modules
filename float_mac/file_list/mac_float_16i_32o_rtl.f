@@ -4,6 +4,7 @@
 ../../common/rtl/carry_save_row_adder.sv 
 
 ../rtl/mac_float_pkg.sv
+../rtl/upscale_float.sv
 ../rtl/wallace_tree_recursive.sv
 ../rtl/align_addend.sv
 ../rtl/mac_float_decode.sv

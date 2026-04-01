@@ -6,12 +6,12 @@ module mac_float #(
     localparam IN_DATA_W  = FRAC_IN_W + EXP_IN_W + 1,
     localparam OUT_DATA_W = FRAC_OUT_W + EXP_OUT_W + 1
 ) (
-    input  logic                clk,
-    input  logic                rst_n,
-    input  logic                valid_i,
-    input  logic [IN_DATA_W-1:0]  a,
-    input  logic [IN_DATA_W-1:0]  b,
-    input  logic [IN_DATA_W-1:0]  c,
+    input  logic                  clk,
+    input  logic                  rst_n,
+    input  logic                  valid_i,
+    input  logic [ IN_DATA_W-1:0] a,
+    input  logic [ IN_DATA_W-1:0] b,
+    input  logic [ IN_DATA_W-1:0] c,
     output logic                  valid_o,
     output logic [OUT_DATA_W-1:0] z
 );
@@ -47,49 +47,50 @@ module mac_float #(
     logic [FRAC_OUT_W-1:0] frac;
   } float_out_t;
 
-  float_in_t                                   float_a;
-  float_in_t                                   float_b;
-  float_in_t                                   float_c;
-  float_in_t                                   float_c_2q;
+  float_in_t                               float_a;
+  float_in_t                               float_b;
+  float_in_t                               float_c;
+  float_in_t                               float_c_2q;
+  float_in_t                               float_c_3q;
+  float_out_t                              float_c_upscaled;
+  float_out_t                              float_z;
 
-  float_out_t                                  float_z;
+  sum_float_flags_t                        sum_float_flags;
+  sum_float_flags_t                        sum_float_flags_2q;
+  sum_float_flags_t                        sum_float_flags_3q;
 
-  sum_float_flags_t                            sum_float_flags;
-  sum_float_flags_t                            sum_float_flags_2q;
-  sum_float_flags_t                            sum_float_flags_3q;
+  logic             [   MANTISSA_IN_W-1:0] norm_mant_a;
+  logic             [   MANTISSA_IN_W-1:0] norm_mant_a_q;
+  logic             [   MANTISSA_IN_W-1:0] norm_mant_b;
+  logic             [   MANTISSA_IN_W-1:0] norm_mant_b_q;
+  logic             [ C_LOWER_SLICE_W-1:0] c_lower_slice;
+  logic             [ C_LOWER_SLICE_W-1:0] c_lower_slice_q;
+  logic             [ C_UPPER_SLICE_W-1:0] c_upper_slice;
+  logic             [ C_UPPER_SLICE_W-1:0] c_upper_slice_q;
 
-  logic             [     MANTISSA_IN_W-1:0]   norm_mant_a;
-  logic             [     MANTISSA_IN_W-1:0]   norm_mant_a_q;
-  logic             [     MANTISSA_IN_W-1:0]   norm_mant_b;
-  logic             [     MANTISSA_IN_W-1:0]   norm_mant_b_q;
-  logic             [  C_LOWER_SLICE_W-1:0]    c_lower_slice;
-  logic             [  C_LOWER_SLICE_W-1:0]    c_lower_slice_q;
-  logic             [  C_UPPER_SLICE_W-1:0]    c_upper_slice;
-  logic             [  C_UPPER_SLICE_W-1:0]    c_upper_slice_q;
+  logic                                    product_sign;
+  logic                                    product_sign_2q;
+  logic signed      [    SIGNED_EXP_W-1:0] product_exp;
+  logic signed      [    SIGNED_EXP_W-1:0] product_exp_2q;
 
-  logic                                        product_sign;
-  logic                                        product_sign_2q;
-  logic signed      [      SIGNED_EXP_W-1:0]  product_exp;
-  logic signed      [      SIGNED_EXP_W-1:0]  product_exp_2q;
+  logic signed      [FULL_SUM_CARRY_W-1:0] mantissa_sum_raw;
+  logic signed      [FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_q;
+  logic             [FULL_SUM_CARRY_W-1:0] mantissa_sum_raw_neg;
+  logic             [      FULL_SUM_W-1:0] unsigned_mantissa_sum;
+  logic                                    sum_signed;
 
-  logic signed      [  FULL_SUM_CARRY_W-1:0]  mantissa_sum_raw;
-  logic signed      [  FULL_SUM_CARRY_W-1:0]  mantissa_sum_raw_q;
-  logic             [  FULL_SUM_CARRY_W-1:0]  mantissa_sum_raw_neg;
-  logic             [        FULL_SUM_W-1:0]  unsigned_mantissa_sum;
-  logic                                        sum_signed;
+  float_out_t                              float_sum_rounded;
+  float_out_t                              float_sum_rounded_q;
 
-  float_out_t                                  float_sum_rounded;
-  float_out_t                                  float_sum_rounded_q;
+  logic                                    sum_rounded_exp_ovfl;
+  logic                                    sum_rounded_exp_ovfl_q;
+  logic                                    sum_rounded_exp_unfl;
+  logic                                    sum_rounded_exp_unfl_q;
 
-  logic                                        sum_rounded_exp_ovfl;
-  logic                                        sum_rounded_exp_ovfl_q;
-  logic                                        sum_rounded_exp_unfl;
-  logic                                        sum_rounded_exp_unfl_q;
-
-  logic                                        valid_decode_q;
-  logic                                        valid_exec_q;
-  logic                                        valid_round_q;
-  logic                                        valid_final_q;
+  logic                                    valid_decode_q;
+  logic                                    valid_exec_q;
+  logic                                    valid_round_q;
+  logic                                    valid_final_q;
 
   always_comb begin
     float_a = float_in_t'(a);
@@ -98,12 +99,12 @@ module mac_float #(
   end
 
   mac_float_decode #(
-      .float_t      (float_in_t),
-      .SIGNED_EXP_W (SIGNED_EXP_W),
-      .FRAC_IN_W    (FRAC_IN_W),
-      .EXP_IN_W     (EXP_IN_W),
-      .FRAC_OUT_W   (FRAC_OUT_W),
-      .EXP_OUT_W    (EXP_OUT_W)
+      .float_t     (float_in_t),
+      .SIGNED_EXP_W(SIGNED_EXP_W),
+      .FRAC_IN_W   (FRAC_IN_W),
+      .EXP_IN_W    (EXP_IN_W),
+      .FRAC_OUT_W  (FRAC_OUT_W),
+      .EXP_OUT_W   (EXP_OUT_W)
   ) mac_float_decode_inst (
       .float_a_i        (float_a),
       .float_b_i        (float_b),
@@ -197,7 +198,7 @@ module mac_float #(
   );
 
   data_pipeline #(
-      .DATA_W    (1 + OUT_DATA_W + 1 + 1 + SUM_FLOAT_FLAGS_W),
+      .DATA_W    (1 + OUT_DATA_W + 1 + 1 + SUM_FLOAT_FLAGS_W + IN_DATA_W),
       .PIPE_DEPTH(ALGIN_OUT_PIPE_DEPTH),
       .RST_EN    (1)
   ) round_to_output_pipe (
@@ -209,20 +210,32 @@ module mac_float #(
         float_sum_rounded,
         sum_rounded_exp_ovfl,
         sum_rounded_exp_unfl,
-        sum_float_flags_2q
+        sum_float_flags_2q,
+        float_c_2q
       }),
       .data_o({
         valid_final_q,
         float_sum_rounded_q,
         sum_rounded_exp_ovfl_q,
         sum_rounded_exp_unfl_q,
-        sum_float_flags_3q
+        sum_float_flags_3q,
+        float_c_3q
+
       })
   );
+  upscale_float #(
+      .EXP_IN_W  (EXP_IN_W),
+      .FRAC_IN_W (FRAC_IN_W),
+      .EXP_OUT_W (EXP_OUT_W),
+      .FRAC_OUT_W(FRAC_OUT_W)
+  ) upscale_float_inst (
+      .float_i(float_c_3q),
+      .float_o(float_c_upscaled)
+  );
+
 
   always_comb begin
     float_z = float_sum_rounded_q;
-
     if (sum_float_flags_3q.nan) begin
       float_z.exp  = '1;
       float_z.frac = '1;
@@ -234,6 +247,8 @@ module mac_float #(
       if (sum_float_flags_3q.inf) begin
         float_z.sign = sum_float_flags_3q.sign;
       end
+    end else if (sum_float_flags_3q.c_dominates) begin
+      float_z = float_c_upscaled;
     end
   end
 

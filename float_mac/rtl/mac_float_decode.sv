@@ -29,7 +29,7 @@ module mac_float_decode
   localparam BIAS                 = (1 << (EXP_IN_W - 1)) - 1;
  
   typedef struct packed {
-    logic                  sign;
+    logic                     sign;
     logic [EXP_IN_W-1:0]      exp;
     logic [MANTISSA_IN_W-1:0] mantissa;
   } unpacked_float_t;

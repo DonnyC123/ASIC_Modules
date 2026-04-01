@@ -84,14 +84,7 @@ module mac_float_align_round_sum
     sticky_sum = |normalized_mantissa[GUARD_IDX-1:0];
     guard = normalized_mantissa[GUARD_IDX];
 
-    if (sum_float_flags_i.c_dominates) begin
-      sum_frac_raw       = FRAC_OUT_W'(float_c_i.frac) << (FRAC_OUT_W - FRAC_IN_W);
-      sticky_sum         = '0;
-      guard              = '0;
-      sum_exp            = $signed({3'b0, float_c_i.exp}) + (BIAS_OUT - BIAS_IN);
-      sum_rounded_signed = float_c_i.sign;
-
-    end else if (sum_exp_unfl || sum_exp == 0) begin
+    if (sum_exp_unfl || sum_exp == 0) begin
       sum_frac_raw = normalized_mantissa[FULL_SUM_W-1-:FRAC_OUT_W];
       sticky_sum   = |normalized_mantissa[GUARD_IDX:0];
       guard        = normalized_mantissa[GUARD_IDX+1];
