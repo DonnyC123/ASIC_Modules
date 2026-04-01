@@ -42,6 +42,9 @@ module upscale_float #(
       // Might be able to delete this line
       float_o.exp = {{EXP_OUT_W - EXP_IN_W{1'b0}}, float_i.exp} +
           EXP_OUT_W'($unsigned(BIAS_OUT - BIAS_IN)) + {{EXP_OUT_W - LZ_COUNTER_W{1'b0}}, lz_c};
+
+      float_o.frac = {{FRAC_OUT_W - FRAC_IN_W{1'b0}}, float_i.frac} << (FRAC_OUT_W - FRAC_IN_W + 1 + lz_c) ;
+
       if (float_o.frac == '0) begin
         float_o.exp  = '0;
         float_o.frac = '0;
