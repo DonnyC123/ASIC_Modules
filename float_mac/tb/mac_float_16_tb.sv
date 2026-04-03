@@ -17,9 +17,11 @@ module mac_float_tb;
   logic               valid_o;
   logic [FLOAT_W-1:0] z;
 
-  mac_float #(
-      .EXP_W (EXP_W),
-      .FRAC_W(FRAC_W)
+  mac_float_mixed #(
+      .EXP_IN_W  (EXP_IN_W),
+      .FRAC_IN_W (FRAC_IN_W),
+      .EXP_OUT_W (EXP_IN_W),
+      .FRAC_OUT_W(FRAC_IN_W)
   ) dut (
       .clk    (clk),
       .rst_n  (rst_n),
@@ -30,6 +32,7 @@ module mac_float_tb;
       .valid_o(valid_o),
       .z      (z)
   );
+
 
   logic   [FLOAT_W-1:0] expected_queue[$];
   string                name_queue    [$];
