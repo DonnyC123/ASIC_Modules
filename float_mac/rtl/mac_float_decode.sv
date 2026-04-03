@@ -184,6 +184,6 @@ module mac_float_decode
       .ignore_round_even_o(sum_float_flags_o.ignore_round_even)
   );
 
-  assign sum_float_flags_o.c_dominates = (c_dominates && !(c_flags.zero)) || product_flags.zero ;
+  assign sum_float_flags_o.c_dominates = c_dominates || product_flags.zero || !c_flags.zero;
 
 endmodule
