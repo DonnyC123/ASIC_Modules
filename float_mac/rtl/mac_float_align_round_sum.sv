@@ -62,6 +62,7 @@ module mac_float_align_round_sum
   logic                             guard;
   logic                             round_mantissa;
 
+
   leading_zero_counter_top #(
       .DATA_W          (FULL_SUM_W),
       .LZC_DATA_BLOCK_W(4)
@@ -76,7 +77,7 @@ module mac_float_align_round_sum
     sum_exp = product_exp_i - $signed({2'b0, mantissa_sum_lz}) + (SUM_EXP_ADD_OFFSET) +
         (FRAC_IN_W - FRAC_OUT_W) + (MANTISSA_IN_W - FRAC_IN_W) + (BIAS_OUT - BIAS_IN);
 
-    sum_exp_unfl = sum_exp[EXP_OVFL_IDX] && sum_exp[EXP_SIGN_IDX];
+    sum_exp_unfl = sum_exp[EXP_OVFL_IDX] && sum_exp[EXP_SIGN_IDX] && (mantissa_sum_lz == '0) && !unsigned_mantissa_sum_i[FULL_SUM_W-1];
 
     mantissa_sum_shift = mantissa_sum_lz;
     normalized_mantissa = unsigned_mantissa_sum_i << mantissa_sum_shift;
