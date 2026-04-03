@@ -42,6 +42,7 @@ module mac_float #(
   float_t                                    float_b;
   float_t                                    float_c;
   float_t                                    float_c_2q;
+  float_t                                    float_c_3q;
   float_t                                    float_z;
 
   sum_float_flags_t                          sum_float_flags;
@@ -184,7 +185,7 @@ module mac_float #(
   );
 
   data_pipeline #(
-      .DATA_W    (1 + DATA_W + 1 + 1 + SUM_FLOAT_FLAGS_W),
+      .DATA_W    (1 + DATA_W + 1 + 1 + SUM_FLOAT_FLAGS_W + DATA_W),
       .PIPE_DEPTH(ALGIN_OUT_PIPE_DEPTH),
       .RST_EN    (1)
   ) round_to_output_pipe (
@@ -196,14 +197,16 @@ module mac_float #(
         float_sum_rounded,
         sum_rounded_exp_ovfl,
         sum_rounded_exp_unfl,
-        sum_float_flags_2q
+        sum_float_flags_2q,
+        float_c_2q
       }),
       .data_o({
         valid_final_q,
         float_sum_rounded_q,
         sum_rounded_exp_ovfl_q,
         sum_rounded_exp_unfl_q,
-        sum_float_flags_3q
+        sum_float_flags_3q,
+        float_c_3q
       })
   );
 
@@ -221,6 +224,8 @@ module mac_float #(
       if (sum_float_flags_3q.inf) begin
         float_z.sign = sum_float_flags_3q.sign;
       end
+    end else if (sum_float_flags_3q.c_dominates) begin
+      float_z = float_c_3q;
     end
   end
 
