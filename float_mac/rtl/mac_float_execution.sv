@@ -1,14 +1,14 @@
 module mac_float_execution
   import mac_float_pkg::*;
 #(
-    parameter MANTISSA_W         = 11,
-    parameter PRODUCT_MANTISSA_W = 2 * MANTISSA_W,
-    parameter C_LOWER_SLICE_W    = PRODUCT_MANTISSA_W,
-    parameter FULL_SUM_W         = 3 * MANTISSA_W + SIGN_W + 2 * CARRY_W,
-    parameter FULL_SUM_CARRY_W   = FULL_SUM_W + CARRY_W,
-    parameter LOW_SUM_W          = C_LOWER_SLICE_W + CARRY_W,
-    parameter PARTIAL_SUM_LOW_W  = LOW_SUM_W + CARRY_W,
-    parameter C_UPPER_SLICE_W    = FULL_SUM_CARRY_W - PARTIAL_SUM_LOW_W + CARRY_W
+    parameter  MANTISSA_W         = 11,
+    parameter  PRODUCT_MANTISSA_W = 2 * MANTISSA_W,
+    localparam C_LOWER_SLICE_W    = PRODUCT_MANTISSA_W,
+    localparam FULL_SUM_W         = 3 * MANTISSA_W + SIGN_W + 2 * CARRY_W,
+    localparam FULL_SUM_CARRY_W   = FULL_SUM_W + CARRY_W,
+    localparam LOW_SUM_W          = C_LOWER_SLICE_W + CARRY_W,
+    localparam PARTIAL_SUM_LOW_W  = LOW_SUM_W + CARRY_W,
+    localparam C_UPPER_SLICE_W    = FULL_SUM_CARRY_W - PARTIAL_SUM_LOW_W + CARRY_W
 ) (
     input  logic        [ C_LOWER_SLICE_W-1:0] c_lower_slice_i,
     input  logic        [      MANTISSA_W-1:0] norm_mant_a_i,
