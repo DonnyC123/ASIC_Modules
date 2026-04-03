@@ -19,7 +19,7 @@ module mac_float_execution
 
   logic [PRODUCT_MANTISSA_W-1:0] mult_result;
   logic [ PARTIAL_SUM_LOW_W-1:0] mantissa_sum_lower;
-  logic [     C_UPPER_SLICE_W:0] upper_sum_temp;
+  logic [   C_UPPER_SLICE_W : 0] upper_sum_temp;
   logic [   C_UPPER_SLICE_W-1:0] mantissa_sum_upper;
 
   always_comb begin

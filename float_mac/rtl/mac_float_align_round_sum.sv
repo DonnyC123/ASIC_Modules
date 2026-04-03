@@ -102,15 +102,5 @@ module mac_float_align_round_sum
     float_sum_rounded.exp = sum_rounded_exp_raw[EXP_OUT_W-1:0];
     float_sum_rounded.sign = sum_rounded_signed;
     float_sum_rounded.frac = sum_frac_rounded;
-
-    // LZC returns 0 for all-zero input (counter overflow), causing a spuriously
-    // large sum_exp. Detect exact zero and force +0 output.
-    if (unsigned_mantissa_sum_i == '0) begin
-      sum_rounded_exp_ovfl_o = 1'b0;
-      sum_rounded_exp_unfl_o = 1'b1;
-      float_sum_rounded.sign = 1'b0;
-      float_sum_rounded.exp  = '0;
-      float_sum_rounded.frac = '0;
-    end
   end
 endmodule
