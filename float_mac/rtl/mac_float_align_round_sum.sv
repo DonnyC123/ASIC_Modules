@@ -79,7 +79,12 @@ module mac_float_align_round_sum
 
     sum_exp_unfl = sum_exp[EXP_OVFL_IDX] && sum_exp[EXP_SIGN_IDX];
 
-    mantissa_sum_shift = mantissa_sum_lz;
+    if (sum_exp_unfl) begin
+      mantissa_sum_shift = $unsigned(
+          LZC_COUNT_W'(product_exp_i + SIGNED_EXP_IN_W'(SUM_EXP_ADD_OFFSET + (FRAC_IN_W - FRAC_OUT_W) + (MANTISSA_IN_W - FRAC_IN_W) + (BIAS_OUT - BIAS_IN))));
+    end else begin
+      mantissa_sum_shift = mantissa_sum_lz;
+    end
     normalized_mantissa = unsigned_mantissa_sum_i << mantissa_sum_shift;
     sum_frac_raw = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_OUT_W];
     sticky_sum = |normalized_mantissa[GUARD_IDX-1:0];
