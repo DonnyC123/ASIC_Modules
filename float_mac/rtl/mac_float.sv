@@ -133,7 +133,7 @@ module mac_float #(
 
   mac_float_execution #(
       .MANTISSA_W(MANTISSA_W),
-      .PRODUCT_MANTISSA_W(PRODUCT_MANTISSA_W),
+      .PRODUCT_MANTISSA_W(PRODUCT_MANTISSA_W)
   ) mac_float_execution_inst (
       .c_upper_slice_i   (c_upper_slice_q),
       .c_lower_slice_i   (csa_c_q),

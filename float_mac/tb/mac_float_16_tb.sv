@@ -31,7 +31,6 @@ module mac_float_tb;
       .z      (z)
   );
 
-
   logic   [FLOAT_W-1:0] expected_queue[$];
   string                name_queue    [$];
 
