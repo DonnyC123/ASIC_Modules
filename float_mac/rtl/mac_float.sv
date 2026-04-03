@@ -216,6 +216,8 @@ module mac_float #(
     if (sum_float_flags_3q.nan) begin
       float_z.exp  = '1;
       float_z.frac = '1;
+    end else if (sum_float_flags_3q.c_dominates) begin
+      float_z = float_c_3q;
     end else if (sum_rounded_exp_unfl_q) begin
       float_z.exp = '0;
     end else if (sum_float_flags_3q.inf || sum_rounded_exp_ovfl_q || (float_sum_rounded_q.exp == '1)) begin
@@ -224,8 +226,6 @@ module mac_float #(
       if (sum_float_flags_3q.inf) begin
         float_z.sign = sum_float_flags_3q.sign;
       end
-    end else if (sum_float_flags_3q.c_dominates) begin
-      float_z = float_c_3q;
     end
   end
 
