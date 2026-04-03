@@ -77,7 +77,7 @@ module mac_float_align_round_sum
     sum_exp = product_exp_i - $signed({2'b0, mantissa_sum_lz}) + (SUM_EXP_ADD_OFFSET) +
         (FRAC_IN_W - FRAC_OUT_W) + (MANTISSA_IN_W - FRAC_IN_W) + (BIAS_OUT - BIAS_IN);
 
-    sum_exp_unfl = sum_exp[EXP_OVFL_IDX] && sum_exp[EXP_SIGN_IDX] && (mantissa_sum_lz == '0) && !unsigned_mantissa_sum_i[FULL_SUM_W-1];
+    sum_exp_unfl = sum_exp[EXP_OVFL_IDX] && sum_exp[EXP_SIGN_IDX];
 
     mantissa_sum_shift = mantissa_sum_lz;
     normalized_mantissa = unsigned_mantissa_sum_i << mantissa_sum_shift;
@@ -97,7 +97,7 @@ module mac_float_align_round_sum
     sum_rounded_exp_raw = (sum_frac_carry[MANTISSA_OUT_W-1] && !sum_exp[EXP_OVFL_IDX]) ? sum_exp + 1 : sum_exp;
 
     sum_rounded_exp_ovfl_o = sum_rounded_exp_raw[EXP_OVFL_IDX] && !sum_rounded_exp_raw[EXP_SIGN_IDX];
-    sum_rounded_exp_unfl_o = sum_rounded_exp_raw[EXP_OVFL_IDX] && sum_rounded_exp_raw[EXP_SIGN_IDX];
+    sum_rounded_exp_unfl_o = sum_rounded_exp_raw[EXP_OVFL_IDX] && sum_rounded_exp_raw[EXP_SIGN_IDX]&& (mantissa_sum_lz == '0) && !unsigned_mantissa_sum_i[FULL_SUM_W-1];
     sum_frac_rounded = sum_frac_carry[FRAC_OUT_W-1:0];
 
     float_sum_rounded.exp = sum_rounded_exp_raw[EXP_OUT_W-1:0];
