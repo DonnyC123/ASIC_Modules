@@ -28,7 +28,7 @@ module align_addend #(
     output logic                                ignore_round_even_o
 );
 
-  localparam C_SHIFT_RAW_W    = MANTISSA_OUT_W + LOWER_SLICE_W + UPPER_SLICE_W;
+  localparam C_SHIFT_RAW_W    = MANTISSA_IN_W + LOWER_SLICE_W + UPPER_SLICE_W;
   localparam C_SHIFT_MAX      = LOWER_SLICE_W + UPPER_SLICE_W - SIGN_BIT;
   localparam C_SHIFT_FACTOR_W = $clog2(C_SHIFT_RAW_W);
 
@@ -41,9 +41,9 @@ module align_addend #(
   } c_shift_factor_t;
 
   typedef struct packed {
-    logic [UPPER_SLICE_W-1:0]  upper_c;
-    logic [LOWER_SLICE_W-1:0]  product_aligned_c;
-    logic [MANTISSA_OUT_W-1:0] rounding_c;
+    logic [UPPER_SLICE_W-1:0] upper_c;
+    logic [LOWER_SLICE_W-1:0] product_aligned_c;
+    logic [MANTISSA_IN_W-1:0] rounding_c;
   } shifted_c_t;
 
   c_shift_factor_t c_shift_amount;
