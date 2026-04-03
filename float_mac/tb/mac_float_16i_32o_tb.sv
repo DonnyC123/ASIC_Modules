@@ -130,6 +130,7 @@ module mac_float_tb;
 
     send_stimulus("Previous Error 1", 16'h6B6b, 16'h0801, 16'h01AB);
     send_stimulus("Previous Error 2", 16'hEDCD, 16'h8000, 16'h0679);
+    send_stimulus("Previous Error 3", 16'hE2b0, 16'h000A, 16'h102E);
 
     $display("--- Random Stress Test (Back-to-Back) ---");
     for (i = 0; i < 100000000; i++) begin
