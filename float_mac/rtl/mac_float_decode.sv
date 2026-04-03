@@ -70,7 +70,7 @@ module mac_float_decode
     unpacked_o.mantissa = {1'b1, float_i.frac};
 
     if (exp_zero_i) begin
-      unpacked_o.exp[0]                 = 1'b1;
+      unpacked_o.exp[0]                    = 1'b1;
       unpacked_o.mantissa[MANTISSA_IN_W-1] = 1'b0;
     end
 
