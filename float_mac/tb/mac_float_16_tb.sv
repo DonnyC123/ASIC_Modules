@@ -18,10 +18,10 @@ module mac_float_tb;
   logic [FLOAT_W-1:0] z;
 
   mac_float_mixed #(
-      .EXP_IN_W  (EXP_IN_W),
-      .FRAC_IN_W (FRAC_IN_W),
-      .EXP_OUT_W (EXP_IN_W),
-      .FRAC_OUT_W(FRAC_IN_W)
+      .EXP_IN_W  (EXP_W),
+      .FRAC_IN_W (FRAC_W),
+      .EXP_OUT_W (EXP_W),
+      .FRAC_OUT_W(FRAC_W)
   ) dut (
       .clk    (clk),
       .rst_n  (rst_n),
