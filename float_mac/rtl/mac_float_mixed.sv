@@ -51,14 +51,24 @@ module mac_float_mixed #(
   float_in_t                               float_b;
   float_in_t                               float_c;
   float_in_t                               float_c_2q;
-  float_in_t                               float_c_3q;
   float_out_t                              float_c_upscaled;
+  float_out_t                              float_c_upscaled_q;
+
+  logic                                    force_nan;
+  logic                                    force_nan_q;
+  logic                                    force_inf;
+  logic                                    force_inf_q;
+  logic                                    use_c;
+  logic                                    use_c_q;
+  logic                                    force_zero;
+  logic                                    force_zero_q;
+  logic                                    inf_flag_q;
+  logic                                    inf_sign_q;
 
   float_out_t                              float_z;
 
   sum_float_flags_t                        sum_float_flags;
   sum_float_flags_t                        sum_float_flags_2q;
-  sum_float_flags_t                        sum_float_flags_3q;
 
   logic             [   MANTISSA_IN_W-1:0] norm_mant_a;
   logic             [   MANTISSA_IN_W-1:0] norm_mant_a_q;
@@ -84,9 +94,7 @@ module mac_float_mixed #(
   float_out_t                              float_sum_rounded_q;
 
   logic                                    sum_rounded_exp_ovfl;
-  logic                                    sum_rounded_exp_ovfl_q;
   logic                                    sum_rounded_exp_unfl;
-  logic                                    sum_rounded_exp_unfl_q;
 
   logic                                    valid_decode_q;
   logic                                    valid_exec_q;
@@ -198,8 +206,26 @@ module mac_float_mixed #(
       .sum_rounded_exp_unfl_o (sum_rounded_exp_unfl)
   );
 
+  upscale_float #(
+      .EXP_IN_W  (EXP_IN_W),
+      .FRAC_IN_W (FRAC_IN_W),
+      .EXP_OUT_W (EXP_OUT_W),
+      .FRAC_OUT_W(FRAC_OUT_W)
+  ) upscale_float_inst (
+      .float_i(float_c_2q),
+      .float_o(float_c_upscaled)
+  );
+
+  always_comb begin
+    force_nan  = sum_float_flags_2q.nan;
+    force_inf  = sum_float_flags_2q.inf | sum_rounded_exp_ovfl
+               | (float_sum_rounded.exp == '1);
+    use_c      = sum_float_flags_2q.c_dominates & ~force_nan & ~force_inf;
+    force_zero = sum_rounded_exp_unfl & ~force_nan & ~force_inf & ~use_c;
+  end
+
   data_pipeline #(
-      .DATA_W    (1 + DOUT_W + 1 + 1 + SUM_FLOAT_FLAGS_W + DIN_W),
+      .DATA_W    (1 + DOUT_W + DOUT_W + 4 + 1 + 1),
       .PIPE_DEPTH(ALGIN_OUT_PIPE_DEPTH),
       .RST_EN    (1)
   ) round_to_output_pipe (
@@ -209,46 +235,41 @@ module mac_float_mixed #(
       .data_i({
         valid_round_q,
         float_sum_rounded,
-        sum_rounded_exp_ovfl,
-        sum_rounded_exp_unfl,
-        sum_float_flags_2q,
-        float_c_2q
+        float_c_upscaled,
+        force_nan,
+        force_inf,
+        use_c,
+        force_zero,
+        sum_float_flags_2q.inf,
+        sum_float_flags_2q.sign
       }),
       .data_o({
         valid_final_q,
         float_sum_rounded_q,
-        sum_rounded_exp_ovfl_q,
-        sum_rounded_exp_unfl_q,
-        sum_float_flags_3q,
-        float_c_3q
+        float_c_upscaled_q,
+        force_nan_q,
+        force_inf_q,
+        use_c_q,
+        force_zero_q,
+        inf_flag_q,
+        inf_sign_q
       })
   );
 
-  upscale_float #(
-      .EXP_IN_W  (EXP_IN_W),
-      .FRAC_IN_W (FRAC_IN_W),
-      .EXP_OUT_W (EXP_OUT_W),
-      .FRAC_OUT_W(FRAC_OUT_W)
-  ) upscale_float_inst (
-      .float_i(float_c_3q),
-      .float_o(float_c_upscaled)
-  );
-
-
   always_comb begin
     float_z = float_sum_rounded_q;
-    if (sum_float_flags_3q.nan) begin
+    if (force_nan_q) begin
       float_z.exp  = '1;
       float_z.frac = '1;
-    end else if (sum_float_flags_3q.inf || sum_rounded_exp_ovfl_q || (float_sum_rounded_q.exp == '1)) begin
+    end else if (force_inf_q) begin
       float_z.exp  = '1;
       float_z.frac = '0;
-      if (sum_float_flags_3q.inf) begin
-        float_z.sign = sum_float_flags_3q.sign;
+      if (inf_flag_q) begin
+        float_z.sign = inf_sign_q;
       end
-    end else if (sum_float_flags_3q.c_dominates) begin
-      float_z = float_c_upscaled;
-    end else if (sum_rounded_exp_unfl_q) begin
+    end else if (use_c_q) begin
+      float_z = float_c_upscaled_q;
+    end else if (force_zero_q) begin
       float_z.exp = '0;
     end
   end
