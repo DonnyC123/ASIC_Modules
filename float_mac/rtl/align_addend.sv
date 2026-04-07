@@ -3,6 +3,8 @@ module align_addend #(
     parameter  EXP_IN_W           = 5,
     parameter  FRAC_OUT_W         = 10,
     parameter  EXP_OUT_W          = 8,
+    localparam SIGN_BIT           = 1,
+    localparam ROUND_BITS         = 2,
     localparam MANTISSA_IN_W      = FRAC_IN_W + 1,
     localparam MANTISSA_OUT_W     = FRAC_OUT_W + 1,
     localparam UPPER_SLICE_W      = MANTISSA_OUT_W + SIGN_BIT + ROUND_BITS,
