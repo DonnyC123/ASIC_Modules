@@ -3,8 +3,6 @@ module align_addend #(
     parameter  EXP_IN_W           = 5,
     parameter  FRAC_OUT_W         = 10,
     parameter  EXP_OUT_W          = 8,
-    localparam SIGN_BIT           = 1,
-    localparam ROUND_BITS         = 2,
     localparam MANTISSA_IN_W      = FRAC_IN_W + 1,
     localparam MANTISSA_OUT_W     = FRAC_OUT_W + 1,
     localparam UPPER_SLICE_W      = MANTISSA_OUT_W + SIGN_BIT + ROUND_BITS,
@@ -60,7 +58,7 @@ module align_addend #(
         + c_shift_factor_t'(PRODUCT_ZERO_POINT_OFFSET) + c_shift_factor_t'(SHIFT_ZERO_POINT_OFFSET) + c_shift_factor_t'(FRAC_OUT_W - FRAC_IN_W);
 
     c_shift_unfl = &c_shift_amount.ovfl[2:1];
-    c_shift_ovfl = (c_shift_amount > c_shift_factor_t'(C_SHIFT_MAX)) && !c_shift_unfl;
+    c_shift_ovfl = (c_shift_amount > c_shift_factor_t'(C_SHIFT_MAX));
 
     subtract_c = (product_sign_i ^ unpacked_c_i.sign);
     c_wide_prep = C_SHIFT_RAW_W'(unpacked_c_i.mantissa);

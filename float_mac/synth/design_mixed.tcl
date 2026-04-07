@@ -6,7 +6,7 @@ set REPO_ROOT     [file normalize $SCRIPT_DIR/../..]
 
 set DESIGN_NAME   mac_float_mixed
 set CLK_PORT      clk
-set CLK_PERIOD_NS 1.8
+set CLK_PERIOD_NS 2.0
 
 set RUN_F         [file normalize $SCRIPT_DIR/../file_list/mac_float_16i_32o_rtl.f]
 set WORK_DIR      $SCRIPT_DIR/out_mixed
