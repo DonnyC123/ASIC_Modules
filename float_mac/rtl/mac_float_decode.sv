@@ -128,12 +128,7 @@ module mac_float_decode
     unpacked_c = unpack_float(float_c_i, c_flags.exp_zero);
   end
 
-  // Lazy normalization: subnormal inputs flow through with leading-bit = 0
-  // (already produced by unpack_float) and exp field substituted with 1
-  // (also already done by unpack_float). The post-multiply LZC + shifter in
-  // mac_float_align_round_sum normalizes the product, so we don't need to
-  // pre-normalize subnormals here. IEEE 754 bit-exact: the encoded value is
-  // unchanged, only the bit position shifts.
+  // Lazy normalization: this breaks the c_dominates
   always_comb begin
     norm_mant_a_o  = unpacked_a.mantissa;
     norm_mant_b_o  = unpacked_b.mantissa;

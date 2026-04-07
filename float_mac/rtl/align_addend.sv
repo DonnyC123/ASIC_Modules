@@ -60,7 +60,12 @@ module align_addend #(
         + c_shift_factor_t'(PRODUCT_ZERO_POINT_OFFSET) + c_shift_factor_t'(SHIFT_ZERO_POINT_OFFSET) + c_shift_factor_t'(FRAC_OUT_W - FRAC_IN_W);
 
     c_shift_unfl = &c_shift_amount.ovfl[2:1];
-    c_shift_ovfl = (c_shift_amount > c_shift_factor_t'(C_SHIFT_MAX));
+    // c_shift_amount is computed in unsigned arithmetic but the underlying
+    // value can be negative (c much smaller than product). When negative, the
+    // unsigned representation wraps to a large value that would spuriously
+    // satisfy the > C_SHIFT_MAX check. Gate the overflow flag with !c_shift_unfl
+    // so c_dominates only fires when c is genuinely larger than the product.
+    c_shift_ovfl = !c_shift_unfl && (c_shift_amount > c_shift_factor_t'(C_SHIFT_MAX));
 
     subtract_c = (product_sign_i ^ unpacked_c_i.sign);
     c_wide_prep = C_SHIFT_RAW_W'(unpacked_c_i.mantissa);
