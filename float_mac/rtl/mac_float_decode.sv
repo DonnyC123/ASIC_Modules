@@ -25,7 +25,6 @@ module mac_float_decode
     output logic        [  MANTISSA_IN_W-1:0] norm_mant_b_o
 );
 
-  localparam LZ_COUNTER_W         = $clog2(MANTISSA_IN_W);
   localparam BIAS                 = (1 << (EXP_IN_W - 1)) - 1;
  
   typedef struct packed {
@@ -90,9 +89,7 @@ module mac_float_decode
 
   logic signed  [SIGNED_EXP_W-1:0] true_exp_a;
   logic signed  [SIGNED_EXP_W-1:0] true_exp_b;
-  logic         [LZ_COUNTER_W-1:0] lz_a;
-  logic         [LZ_COUNTER_W-1:0] lz_b;
- 
+
   logic                         c_dominates;
 
   always_comb begin
@@ -131,37 +128,17 @@ module mac_float_decode
     unpacked_c = unpack_float(float_c_i, c_flags.exp_zero);
   end
 
-  leading_zero_counter_top #(
-      .DATA_W(FRAC_IN_W)
-  ) leading_zero_counter_a_top_inst (
-      .data_i              (float_a_i.frac),
-      .leading_zero_count_o(lz_a)
-  );
-
-  leading_zero_counter_top #(
-      .DATA_W(FRAC_IN_W)
-  ) leading_zero_counter_b_top_inst (
-      .data_i              (float_b_i.frac),
-      .leading_zero_count_o(lz_b)
-  );
-
+  // Lazy normalization: subnormal inputs flow through with leading-bit = 0
+  // (already produced by unpack_float) and exp field substituted with 1
+  // (also already done by unpack_float). The post-multiply LZC + shifter in
+  // mac_float_align_round_sum normalizes the product, so we don't need to
+  // pre-normalize subnormals here. IEEE 754 bit-exact: the encoded value is
+  // unchanged, only the bit position shifts.
   always_comb begin
-    if (a_flags.exp_zero && !a_flags.frac_zero) begin
-      true_exp_a  = -$signed({1'b0, lz_a});
-      norm_mant_a_o = {float_a_i.frac << lz_a, 1'b0};
-    end else begin
-      true_exp_a  = a_flags.exp_zero ? $signed('0) : $signed({3'b000, unpacked_a.exp});
-      norm_mant_a_o = unpacked_a.mantissa;
-    end
-
-   if (b_flags.exp_zero && !b_flags.frac_zero) begin
-      true_exp_b    = -$signed({1'b0, lz_b});
-      norm_mant_b_o = {float_b_i.frac << lz_b, 1'b0};
-   end else begin
-      true_exp_b    = b_flags.exp_zero ? $signed('0) : $signed({3'b000, unpacked_b.exp});
-      norm_mant_b_o = unpacked_b.mantissa;
-     end
- 
+    norm_mant_a_o  = unpacked_a.mantissa;
+    norm_mant_b_o  = unpacked_b.mantissa;
+    true_exp_a     = $signed({3'b000, unpacked_a.exp});
+    true_exp_b     = $signed({3'b000, unpacked_b.exp});
     product_sign_o = unpacked_a.sign ^ unpacked_b.sign;
     product_exp_o  = true_exp_a + true_exp_b - $signed(SIGNED_EXP_W'(BIAS));
   end
