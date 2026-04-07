@@ -1,8 +1,8 @@
 module mac_float_mixed #(
     parameter  EXP_IN_W   = 5,
     parameter  FRAC_IN_W  = 10,
-    parameter  EXP_OUT_W  = 5,
-    parameter  FRAC_OUT_W = 10,
+    parameter  EXP_OUT_W  = 8,
+    parameter  FRAC_OUT_W = 23,
     localparam DIN_W      = FRAC_IN_W + EXP_IN_W + 1,
     localparam DOUT_W     = FRAC_OUT_W + EXP_OUT_W + 1
 ) (
