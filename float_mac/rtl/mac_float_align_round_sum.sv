@@ -62,15 +62,6 @@ module mac_float_align_round_sum
   logic                             guard;
   logic                             round_mantissa;
 
-  // Sticky-in-parallel: prefix-OR of the input bits at and below the round
-  // point, indexed by the shift amount. This removes the post-shift OR-tree
-  // (~6 logic levels) from the round_mantissa critical path. The prefix-OR
-  // runs in parallel with the LZC; only the variable index lookup is in
-  // series with the LZC.
-  logic [GUARD_IDX:0]               prefix_or_low;
-  logic                             sticky_normal;
-  logic                             sticky_unfl;
-
 
   leading_zero_counter_top #(
       .DATA_W          (FULL_SUM_W),
@@ -79,38 +70,6 @@ module mac_float_align_round_sum
       .data_i              (unsigned_mantissa_sum_i),
       .leading_zero_count_o(mantissa_sum_lz)
   );
-
-  // Parallel prefix-OR over the low bits of the input mantissa. The
-  // synthesizer will infer a tree (Kogge-Stone or similar) at depth
-  // ceil(log2(GUARD_IDX+1)) ~ 6 levels, which finishes in parallel with
-  // the LZC.
-  always_comb begin
-    prefix_or_low[0] = unsigned_mantissa_sum_i[0];
-    for (int i = 1; i <= GUARD_IDX; i++) begin
-      prefix_or_low[i] = prefix_or_low[i-1] | unsigned_mantissa_sum_i[i];
-    end
-  end
-
-  // Sticky lookup for both the normal-result and subnormal-result cases.
-  // After a left-shift by N, the bits strictly below the round point of the
-  // shifted result are the original bits [<round_point> - 1 - N : 0]. The
-  // OR of those is exactly prefix_or_low[<round_point> - 1 - N].
-  //
-  // Normal case:    round point at GUARD_IDX,     so use index (GUARD_IDX-1) - N
-  // Subnormal case: round point at GUARD_IDX+1,   so use index  GUARD_IDX    - N
-  always_comb begin
-    if (mantissa_sum_shift < LZC_COUNT_W'(GUARD_IDX)) begin
-      sticky_normal = prefix_or_low[(LZC_COUNT_W'(GUARD_IDX) - 1) - mantissa_sum_shift];
-    end else begin
-      sticky_normal = 1'b0;
-    end
-
-    if (mantissa_sum_shift <= LZC_COUNT_W'(GUARD_IDX)) begin
-      sticky_unfl = prefix_or_low[LZC_COUNT_W'(GUARD_IDX) - mantissa_sum_shift];
-    end else begin
-      sticky_unfl = 1'b0;
-    end
-  end
 
   always_comb begin
     sum_rounded_signed = sum_signed_i;
@@ -128,15 +87,12 @@ module mac_float_align_round_sum
     end
     normalized_mantissa = unsigned_mantissa_sum_i << mantissa_sum_shift;
     sum_frac_raw = normalized_mantissa[FULL_SUM_W-1-MANTISSA_INT_W-:FRAC_OUT_W];
-    // sticky_sum now comes from the parallel prefix-OR lookup, off the
-    // shifter critical path. guard is still tapped from the shifter (single
-    // bit, same depth as before).
-    sticky_sum = sticky_normal;
+    sticky_sum = |normalized_mantissa[GUARD_IDX-1:0];
     guard = normalized_mantissa[GUARD_IDX];
 
     if (sum_exp_unfl || sum_exp == 0) begin
       sum_frac_raw = normalized_mantissa[FULL_SUM_W-1-:FRAC_OUT_W];
-      sticky_sum   = sticky_unfl;
+      sticky_sum   = |normalized_mantissa[GUARD_IDX:0];
       guard        = normalized_mantissa[GUARD_IDX+1];
     end
 
