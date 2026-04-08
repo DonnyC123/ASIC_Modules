@@ -7,6 +7,7 @@ module mac_float_mixed #(
     localparam DOUT_W     = FRAC_OUT_W + EXP_OUT_W + 1
 ) (
     input  logic              clk,
+    input  logic              clk_en,
     input  logic              rst_n,
     input  logic              valid_i,
     input  logic [ DIN_W-1:0] a,
@@ -119,28 +120,32 @@ module mac_float_mixed #(
       .norm_mant_b_o    (norm_mant_b)
   );
 
-  data_pipeline #(
-      .DATA_W(1 + C_UPPER_SLICE_W + C_LOWER_SLICE_W + MANTISSA_IN_W + MANTISSA_IN_W),
+  data_status_pipeline #(
+      .DATA_W(C_UPPER_SLICE_W + C_LOWER_SLICE_W + MANTISSA_IN_W + MANTISSA_IN_W),
       .PIPE_DEPTH(DECODE_PIPE_DEPTH),
-      .RST_EN(1)
+      .CLK_EN(1)
   ) decode_to_execution_pipe (
-      .clk   (clk),
-      .rst_n (rst_n),
-      .clk_en('1),
-      .data_i({valid_i, c_upper_slice, c_lower_slice, norm_mant_a, norm_mant_b}),
-      .data_o({valid_decode_q, c_upper_slice_q, c_lower_slice_q, norm_mant_a_q, norm_mant_b_q})
+      .clk     (clk),
+      .clk_en  (clk_en),
+      .rst_n   (rst_n),
+      .status_i(valid_i),
+      .status_o(valid_decode_q),
+      .data_i  ({c_upper_slice, c_lower_slice, norm_mant_a, norm_mant_b}),
+      .data_o  ({c_upper_slice_q, c_lower_slice_q, norm_mant_a_q, norm_mant_b_q})
   );
 
-  data_pipeline #(
-      .DATA_W    (1 + SUM_FLOAT_FLAGS_W + 1 + SIGNED_EXP_W + DIN_W),
+  data_status_pipeline #(
+      .DATA_W    (SUM_FLOAT_FLAGS_W + 1 + SIGNED_EXP_W + DIN_W),
       .PIPE_DEPTH(DECODE_PIPE_DEPTH + EXECUTION_PIPE_DEPTH),
-      .RST_EN    (1)
+      .CLK_EN    (1)
   ) decode_to_round_pipe (
-      .clk   (clk),
-      .rst_n (rst_n),
-      .clk_en('1),
-      .data_i({valid_i, sum_float_flags, product_sign, product_exp, float_c}),
-      .data_o({valid_round_q, sum_float_flags_2q, product_sign_2q, product_exp_2q, float_c_2q})
+      .clk     (clk),
+      .clk_en  (clk_en),
+      .rst_n   (rst_n),
+      .status_i(valid_i),
+      .status_o(valid_round_q),
+      .data_i  ({sum_float_flags, product_sign, product_exp, float_c}),
+      .data_o  ({sum_float_flags_2q, product_sign_2q, product_exp_2q, float_c_2q})
   );
 
   mac_float_execution #(
@@ -157,16 +162,19 @@ module mac_float_mixed #(
       .mantissa_sum_raw_o(mantissa_sum_raw)
   );
 
-  data_pipeline #(
-      .DATA_W    (1 + FULL_SUM_CARRY_W),
+  data_status_pipeline #(
+      .DATA_W    (FULL_SUM_CARRY_W),
+      .STATUS_W  (1),
       .PIPE_DEPTH(EXECUTION_PIPE_DEPTH),
-      .RST_EN    (1)
+      .CLK_EN    (1)
   ) execution_to_round_pipe (
-      .clk   (clk),
-      .rst_n (rst_n),
-      .clk_en('1),
-      .data_i({valid_decode_q, mantissa_sum_raw}),
-      .data_o({valid_exec_q, mantissa_sum_raw_q})
+      .clk     (clk),
+      .clk_en  (clk_en),
+      .rst_n   (rst_n),
+      .status_i(valid_decode_q),
+      .status_o(valid_exec_q),
+      .data_i  (mantissa_sum_raw),
+      .data_o  (mantissa_sum_raw_q)
   );
 
   always_comb begin
@@ -198,16 +206,17 @@ module mac_float_mixed #(
       .sum_rounded_exp_unfl_o (sum_rounded_exp_unfl)
   );
 
-  data_pipeline #(
-      .DATA_W    (1 + DOUT_W + 1 + 1 + SUM_FLOAT_FLAGS_W + DIN_W),
+  data_status_pipeline #(
+      .DATA_W    (DOUT_W + 1 + 1 + SUM_FLOAT_FLAGS_W + DIN_W),
       .PIPE_DEPTH(ALGIN_OUT_PIPE_DEPTH),
-      .RST_EN    (1)
+      .CLK_EN    (1)
   ) round_to_output_pipe (
       .clk(clk),
+      .clk_en(clk_en),
       .rst_n(rst_n),
-      .clk_en('1),
+      .status_i(valid_round_q),
+      .status_o(valid_final_q),
       .data_i({
-        valid_round_q,
         float_sum_rounded,
         sum_rounded_exp_ovfl,
         sum_rounded_exp_unfl,
@@ -215,7 +224,6 @@ module mac_float_mixed #(
         float_c_2q
       }),
       .data_o({
-        valid_final_q,
         float_sum_rounded_q,
         sum_rounded_exp_ovfl_q,
         sum_rounded_exp_unfl_q,
@@ -233,7 +241,6 @@ module mac_float_mixed #(
       .float_i(float_c_3q),
       .float_o(float_c_upscaled)
   );
-
 
   always_comb begin
     float_z = float_sum_rounded_q;
@@ -253,16 +260,18 @@ module mac_float_mixed #(
     end
   end
 
-  data_pipeline #(
+  data_status_pipeline #(
       .DATA_W    (1 + DOUT_W),
       .PIPE_DEPTH(OUT_PIPE_DEPTH),
-      .RST_EN    (1)
+      .CLK_EN    (1)
   ) output_pipe (
-      .clk   (clk),
-      .rst_n (rst_n),
-      .clk_en('1),
-      .data_i({valid_final_q, DOUT_W'(float_z)}),
-      .data_o({valid_o, z})
+      .clk     (clk),
+      .clk_en  (clk_en),
+      .rst_n   (rst_n),
+      .status_i(valid_final_q),
+      .status_o(valid_o),
+      .data_i  (DOUT_W'(float_z)),
+      .data_o  (z)
   );
 
 endmodule

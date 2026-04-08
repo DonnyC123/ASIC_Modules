@@ -12,4 +12,4 @@
 ../rtl/mac_float_execution.sv
 ../rtl/mac_float_align_round_sum.sv
 ../rtl/mac_float.sv
-
+../rtl/mac_float_16.sv

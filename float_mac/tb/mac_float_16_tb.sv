@@ -16,11 +16,9 @@ module mac_float_tb;
   logic               valid_o;
   logic [FLOAT_W-1:0] z;
 
-  mac_float #(
-      .EXP_W (EXP_W),
-      .FRAC_W(FRAC_W)
-  ) dut (
+  mac_float_16_top dut (
       .clk    (clk),
+      .clk_en (1'b1),
       .rst_n  (rst_n),
       .valid_i(valid_i),
       .a      (a),

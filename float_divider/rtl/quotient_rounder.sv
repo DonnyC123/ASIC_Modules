@@ -58,9 +58,9 @@ module quotient_rounder
 
     quotient_exp_extended_unfl = quotient_exp_extended[SIGNED_EXP_W-1];
     quotient_exp_extended_ovfl = |quotient_exp_extended[SIGNED_EXP_W-2-:2];
-    quotient_extended_normalized = quotient_extended;
 
     temp_shift_reg = {quotient_extended, {QUOTIENT_EXTENDED_W{1'b0}}}  >> (1 - quotient_exp_extended);
+    quotient_extended_normalized = quotient_extended;
 
     if (quotient_exp_extended_unfl || quotient_exp_extended == '0) begin
       quotient_extended_normalized = temp_shift_reg[2*QUOTIENT_EXTENDED_W-1-:QUOTIENT_EXTENDED_W];
@@ -71,11 +71,9 @@ module quotient_rounder
 
     quotient_unrounded   = {1'b0, quotient_extended_normalized[QUOTIENT_EXTENDED_W-1:1]};
 
-    // Round via the adder's carry-in
     round_decision       = guard && (sticky || quotient_unrounded[0]);
     quotient_rounded_raw = quotient_unrounded + QUOTIENT_EXTENDED_W'(round_decision);
 
-    // Speculative exponent
     quotient_rounded     = quotient_rounded_raw[MANTISSA_W-1:0];
     quotient_exp_rounded = quotient_exp_extended;
 
@@ -96,7 +94,7 @@ module quotient_rounder
     quotient_o.frac = quotient_mantissa[FRAC_W-1:0];
     quotient_o.exp  = quotient_exp_rounded[EXP_W-1:0];
 
-    if (float_quotient_flags_i.nan) begin  // unique0?
+    if (float_quotient_flags_i.nan) begin
       quotient_o.exp  = '1;
       quotient_o.frac = '1;
     end else if (float_quotient_flags_i.zero || quotient_exp_rounded_unfl) begin

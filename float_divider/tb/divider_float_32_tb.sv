@@ -14,6 +14,7 @@ module divider_float_tb;
 
   divider_float_32_top divider_float_inst (
       .clk    (clk),
+      .clk_en (1'b1),
       .rst_n  (rst_n),
       .start_i(start),
       .a      (a),

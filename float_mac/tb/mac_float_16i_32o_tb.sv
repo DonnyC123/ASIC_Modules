@@ -22,13 +22,9 @@ module mac_float_tb;
   logic                   valid_o;
   logic [FLOAT_OUT_W-1:0] z;
 
-  mac_float_mixed #(
-      .EXP_IN_W  (EXP_IN_W),
-      .FRAC_IN_W (FRAC_IN_W),
-      .EXP_OUT_W (EXP_OUT_W),
-      .FRAC_OUT_W(FRAC_OUT_W)
-  ) dut (
+  mac_float_16i_32o_top dut (
       .clk    (clk),
+      .clk_en (clk_en),
       .rst_n  (rst_n),
       .valid_i(valid_i),
       .a      (a),
