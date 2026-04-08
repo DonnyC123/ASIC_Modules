@@ -1,6 +1,4 @@
 package mac_float_pkg;
-  import float_pkg::*;
-  export float_pkg::*;
 
   localparam CARRY_W              = 1;
   localparam SIGN_W               = 1;
