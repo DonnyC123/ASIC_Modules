@@ -52,7 +52,6 @@ module divider_float #(
   logic                                       sticky;
   logic                                       sticky_q;
 
-
   always_comb begin
     float_a = float_t'(a);
     float_b = float_t'(b);
@@ -71,7 +70,6 @@ module divider_float #(
       .float_quotient_flags_o(float_quotient_flags_d),
       .quotient_exp_o        (quotient_exp_d)
   );
-
 
   data_status_pipeline #(
       .DATA_W    (2 * MANTISSA_W + FLOAT_FLAGS_W + SIGNED_EXP_W),
