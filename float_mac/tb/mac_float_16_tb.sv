@@ -149,6 +149,10 @@ module mac_float_tb;
       c       = rc;
       valid_i = 1'b1;
 
+      input_queue_a.push_back(a);
+      input_queue_b.push_back(b);
+      input_queue_c.push_back(c);
+
       expected_queue.push_back(
           downscale_double((upscale_to_double(ra) * upscale_to_double(rb)) + upscale_to_double(rc)
           ));
