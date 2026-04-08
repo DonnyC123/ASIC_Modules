@@ -39,10 +39,10 @@ module sqrt_float_tb;
     int                timeout;
 
     @(posedge clk);
-    rad_i       = test_val;
-    rad_valid_i = 1'b1;
+    rad_i       <= test_val;
+    rad_valid_i <= 1'b1;
     @(posedge clk);
-    rad_valid_i = 1'b0;
+    rad_valid_i <= 1'b0;
 
     real_rad    = upscale_to_double(test_val);
 
