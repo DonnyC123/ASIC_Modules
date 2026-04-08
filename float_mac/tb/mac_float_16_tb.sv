@@ -109,7 +109,7 @@ module mac_float_tb;
           if (!check_pass) begin
             $error(
                 "[%s] FAIL: A=%f (0x%h),  B=%f (0x%h),  C=%f (0x%h),  DUT=%f (0x%h) REF=%f (0x%h)",
-                a_input, real_a, b_input, real_b, c_input, real_c, test_name, real_z_dut, z,
+                test_name, real_a, a_input, real_b, b_input, real_c, c_input, real_z_dut, z,
                 real_z_ref, expected_bits);
             errors++;
             $stop();
