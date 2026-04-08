@@ -238,8 +238,8 @@ module mac_float #(
       float_z.exp  = '1;
       float_z.frac = '1;
     end else if (force_inf_q) begin
-      float_z.exp  = '0;
-      float_z.frac = '1;
+      float_z.exp  = '1;
+      float_z.frac = '0;
       if (inf_flag_q) begin
         float_z.sign = inf_sign_q;
       end
