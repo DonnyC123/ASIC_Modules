@@ -26,7 +26,11 @@ module mac_float_decode
 );
 
   localparam BIAS                 = (1 << (EXP_IN_W - 1)) - 1;
- 
+  // Lazy normalization is only safe when the output mantissa window is wide
+  // enough to absorb the deferred shift.
+  localparam LAZY_NORM_SAFE       = (FRAC_OUT_W - FRAC_IN_W) >= (MANTISSA_IN_W - 1);
+  localparam LZ_COUNT_W           = $clog2(MANTISSA_IN_W + 1);
+
   typedef struct packed {
     logic                     sign;
     logic [EXP_IN_W-1:0]      exp;
@@ -128,11 +132,44 @@ module mac_float_decode
     unpacked_c = unpack_float(float_c_i, c_flags.exp_zero);
   end
 
+  generate
+    if (LAZY_NORM_SAFE) begin : g_lazy_norm
+      always_comb begin
+        norm_mant_a_o = unpacked_a.mantissa;
+        norm_mant_b_o = unpacked_b.mantissa;
+        true_exp_a    = $signed({3'b000, unpacked_a.exp});
+        true_exp_b    = $signed({3'b000, unpacked_b.exp});
+      end
+    end else begin : g_eager_norm
+      logic [LZ_COUNT_W-1:0] lz_a;
+      logic [LZ_COUNT_W-1:0] lz_b;
+
+      leading_zero_counter_top #(
+          .DATA_W          (MANTISSA_IN_W),
+          .LZC_DATA_BLOCK_W(4)
+      ) lzc_a_inst (
+          .data_i              (unpacked_a.mantissa),
+          .leading_zero_count_o(lz_a)
+      );
+
+      leading_zero_counter_top #(
+          .DATA_W          (MANTISSA_IN_W),
+          .LZC_DATA_BLOCK_W(4)
+      ) lzc_b_inst (
+          .data_i              (unpacked_b.mantissa),
+          .leading_zero_count_o(lz_b)
+      );
+
+      always_comb begin
+        norm_mant_a_o = unpacked_a.mantissa << lz_a;
+        norm_mant_b_o = unpacked_b.mantissa << lz_b;
+        true_exp_a    = $signed({3'b000, unpacked_a.exp}) - $signed({{(SIGNED_EXP_W-LZ_COUNT_W){1'b0}}, lz_a});
+        true_exp_b    = $signed({3'b000, unpacked_b.exp}) - $signed({{(SIGNED_EXP_W-LZ_COUNT_W){1'b0}}, lz_b});
+      end
+    end
+  endgenerate
+
   always_comb begin
-    norm_mant_a_o  = unpacked_a.mantissa;
-    norm_mant_b_o  = unpacked_b.mantissa;
-    true_exp_a     = $signed({3'b000, unpacked_a.exp});
-    true_exp_b     = $signed({3'b000, unpacked_b.exp});
     product_sign_o = unpacked_a.sign ^ unpacked_b.sign;
     product_exp_o  = true_exp_a + true_exp_b - $signed(SIGNED_EXP_W'(BIAS));
   end
