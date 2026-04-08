@@ -8,12 +8,11 @@ module mac_float_tb;
   localparam FRAC_W  = 10;
   localparam FLOAT_W = EXP_W + FRAC_W + 1;
 
-  localparam PIPELINE_STAGES = 4;
-
   logic clk;
   logic rst_n;
   logic valid_i;
   logic [FLOAT_W-1:0] a, b, c;
+
   logic               valid_o;
   logic [FLOAT_W-1:0] z;
 
@@ -32,6 +31,9 @@ module mac_float_tb;
   );
 
   logic   [FLOAT_W-1:0] expected_queue[$];
+  logic   [FLOAT_W-1:0] input_queue_a [$];
+  logic   [FLOAT_W-1:0] input_queue_b [$];
+  logic   [FLOAT_W-1:0] input_queue_c [$];
   string                name_queue    [$];
 
   integer               i;
@@ -53,6 +55,10 @@ module mac_float_tb;
     expected_bits = downscale_double(expected);
 
     expected_queue.push_back(expected_bits);
+    input_queue_a.push_back(test_a);
+    input_queue_b.push_back(test_b);
+    input_queue_c.push_back(test_c);
+
     name_queue.push_back(name);
 
     a       = test_a;
@@ -64,9 +70,11 @@ module mac_float_tb;
   endtask
 
   initial begin : checker_thread
+    logic [FLOAT_W-1:0] a_input, b_input, c_input;
     logic  [FLOAT_W-1:0] expected_bits;
     string               test_name;
     real real_z_dut, real_z_ref;
+    real real_a, real_b, real_c;
     bit check_pass;
 
     forever begin
@@ -77,11 +85,18 @@ module mac_float_tb;
           $error("FAIL: valid_o asserted but expected_queue is empty!");
           errors++;
         end else begin
+          a_input       = input_queue_a.pop_front();
+          b_input       = input_queue_b.pop_front();
+          c_input       = input_queue_c.pop_front();
           expected_bits = expected_queue.pop_front();
           test_name     = name_queue.pop_front();
 
           real_z_dut    = upscale_to_double(z);
           real_z_ref    = upscale_to_double(expected_bits);
+          real_a        = upscale_to_double(a_input);
+          real_b        = upscale_to_double(b_input);
+          real_c        = upscale_to_double(c_input);
+
 
           check_pass    = 0;
           if ((real_z_dut == 0.0 && real_z_ref == 0.0) || (real_z_dut == real_z_ref) || (is_nan(
@@ -136,6 +151,7 @@ module mac_float_tb;
       expected_queue.push_back(
           downscale_double((upscale_to_double(ra) * upscale_to_double(rb)) + upscale_to_double(rc)
           ));
+
       name_queue.push_back($sformatf("Rand #%0d", i));
 
       if (i % 100000 == 0) $display("Driving Test Case %0d...", i);

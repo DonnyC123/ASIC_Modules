@@ -27,7 +27,7 @@ module mac_float_decode
 
   localparam BIAS                 = (1 << (EXP_IN_W - 1)) - 1;
   // Lazy normalization is only safe when the output mantissa window is wide
-  // enough to absorb the deferred shift.
+  // enough
   localparam LAZY_NORM_SAFE       = (FRAC_OUT_W - FRAC_IN_W) >= (MANTISSA_IN_W - 1);
   localparam LZ_COUNT_W           = $clog2(MANTISSA_IN_W + 1);
 
