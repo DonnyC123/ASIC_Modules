@@ -128,7 +128,6 @@ module mac_float_decode
     unpacked_c = unpack_float(float_c_i, c_flags.exp_zero);
   end
 
-  // Lazy normalization: this breaks the c_dominates
   always_comb begin
     norm_mant_a_o  = unpacked_a.mantissa;
     norm_mant_b_o  = unpacked_b.mantissa;
