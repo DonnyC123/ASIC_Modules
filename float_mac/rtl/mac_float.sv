@@ -192,14 +192,9 @@ module mac_float #(
       .sum_rounded_exp_unfl_o (sum_rounded_exp_unfl)
   );
 
-  // Precompute the special-case selects pre-pipe so the final mux is a flat
-  // 4:1 instead of a priority chain over registered values, and the wide
-  // (float_sum_rounded.exp == '1) comparator runs once before the pipe rather
-  // than after. Priority order matches the original: nan > c_dominates >
-  // underflow > inf.
   always_comb begin
-    force_nan  = sum_float_flags_2q.nan;
-    use_c      = sum_float_flags_2q.c_dominates & ~force_nan;
+    force_nan = sum_float_flags_2q.nan;
+    use_c = sum_float_flags_2q.c_dominates & ~force_nan;
     force_zero = sum_rounded_exp_unfl & ~force_nan & ~use_c;
     force_inf  = (sum_float_flags_2q.inf | sum_rounded_exp_ovfl
                   | (float_sum_rounded.exp == '1))

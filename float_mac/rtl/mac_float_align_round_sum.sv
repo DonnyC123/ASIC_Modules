@@ -1,12 +1,19 @@
 module mac_float_align_round_sum
-  import float_pkg::*;
   import mac_float_pkg::*;
 #(
-    parameter       FULL_SUM_W      = 62,
+
+
     parameter       EXP_IN_W        = 5,
+    parameter       FRAC_IN_W       = 10,
+    parameter       EXP_OUT_W       = 8,
+    parameter       FRAC_OUT_W      = 23,
+    parameter       FULL_SUM_W      = 62,
     parameter  type float_in_t      = float_16_t,
     parameter  type float_out_t     = float_32_t,
-    localparam      SIGNED_EXP_IN_W = EXP_IN_W + 3
+    localparam      SIGNED_EXP_IN_W = EXP_IN_W + 3,
+    localparam      MANTISSA_IN_W   = FRAC_IN_W + 1,
+    localparam      MANTISSA_OUT_W  = FRAC_OUT_W + 1
+
 ) (
     input  float_in_t                              float_c_i,
     input  sum_float_flags_t                       sum_float_flags_i,
@@ -17,12 +24,7 @@ module mac_float_align_round_sum
     output logic                                   sum_rounded_exp_ovfl_o,
     output logic                                   sum_rounded_exp_unfl_o
 );
-  localparam FRAC_IN_W      = $bits(float_c_i.frac);
-  localparam FRAC_OUT_W     = $bits(float_sum_rounded.frac);
-  localparam MANTISSA_IN_W  = FRAC_IN_W + 1;
-  localparam MANTISSA_OUT_W = FRAC_OUT_W + 1;
 
-  localparam EXP_OUT_W          = $bits(float_sum_rounded.exp) + 1;
   localparam PRODUCT_MANTISSA_W = MANTISSA_IN_W * 2;
 
   localparam LZC_COUNT_W        = $clog2(FULL_SUM_W + 1);

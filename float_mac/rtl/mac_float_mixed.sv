@@ -180,8 +180,12 @@ module mac_float_mixed #(
   end
 
   mac_float_align_round_sum #(
-      .FULL_SUM_W (FULL_SUM_W),
-      .float_in_t (float_in_t),
+      .EXP_IN_W(EXP_IN_W),
+      .FRAC_IN_W(FRAC_IN_W),
+      .EXP_OUT_W(EXP_OUT_W),
+      .FRAC_OUT_W(FRAC_OUT_W),
+      .FULL_SUM_W(FULL_SUM_W),
+      .float_in_t(float_in_t),
       .float_out_t(float_out_t)
   ) mac_float_align_round_sum_inst (
       .float_c_i              (float_c_2q),
