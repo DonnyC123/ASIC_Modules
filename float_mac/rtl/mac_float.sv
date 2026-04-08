@@ -1,3 +1,4 @@
+
 module mac_float #(
     parameter  EXP_W  = 5,
     parameter  FRAC_W = 10,
@@ -193,12 +194,10 @@ module mac_float #(
   );
 
   always_comb begin
-    force_nan = sum_float_flags_2q.nan;
-    use_c = sum_float_flags_2q.c_dominates & ~force_nan;
-    force_zero = sum_rounded_exp_unfl & ~force_nan & ~use_c;
-    force_inf  = (sum_float_flags_2q.inf | sum_rounded_exp_ovfl
-                  | (float_sum_rounded.exp == '1))
-               & ~force_nan;
+    force_nan  = sum_float_flags_2q.nan;
+    use_c      = sum_float_flags_2q.c_dominates;
+    force_zero = sum_rounded_exp_unfl;
+    force_inf  = (sum_float_flags_2q.inf | sum_rounded_exp_ovfl | (float_sum_rounded.exp == '1));
   end
 
   data_pipeline #(
