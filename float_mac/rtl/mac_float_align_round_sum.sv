@@ -14,7 +14,6 @@ module mac_float_align_round_sum
     localparam      SIGNED_EXP_IN_W = EXP_IN_W + 3,
     localparam      MANTISSA_IN_W   = FRAC_IN_W + 1,
     localparam      MANTISSA_OUT_W  = FRAC_OUT_W + 1
-
 ) (
     input  float_in_t                              float_c_i,
     input  sum_float_flags_t                       sum_float_flags_i,

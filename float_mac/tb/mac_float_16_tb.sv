@@ -97,7 +97,6 @@ module mac_float_tb;
           real_b        = upscale_to_double(b_input);
           real_c        = upscale_to_double(c_input);
 
-
           check_pass    = 0;
           if ((real_z_dut == 0.0 && real_z_ref == 0.0) || (real_z_dut == real_z_ref) || (is_nan(
                   real_z_dut
@@ -108,8 +107,10 @@ module mac_float_tb;
           end
 
           if (!check_pass) begin
-            $error("[%s] FAIL: DUT=%f (0x%h) REF=%f (0x%h)", test_name, real_z_dut, z, real_z_ref,
-                   expected_bits);
+            $error(
+                "[%s] FAIL: A=%f (0x%h),  B=%f (0x%h),  C=%f (0x%h),  DUT=%f (0x%h) REF=%f (0x%h)",
+                a_input, real_a, b_input, real_b, c_input, real_c, test_name, real_z_dut, z,
+                real_z_ref, expected_bits);
             errors++;
             $stop();
           end
