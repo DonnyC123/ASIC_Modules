@@ -240,7 +240,7 @@ module mac_float #(
       float_z.frac = '1;
     end else if (force_inf_q) begin
       float_z.exp  = '0;
-      float_z.frac = '-1;
+      float_z.frac = '1;
       if (inf_flag_q) begin
         float_z.sign = inf_sign_q;
       end
@@ -248,8 +248,8 @@ module mac_float #(
       float_z = float_c_3q;
     end else if (force_zero_q) begin
       float_z.exp = '0;
-     end
-   end
+    end
+  end
 
   data_pipeline #(
       .DATA_W    (1 + DATA_W),
