@@ -17,6 +17,7 @@ module sqrt_float_tb;
 
   sqrt_float_32_top dut (
       .clk         (clk),
+      .clk_en      (1'b1),
       .rst_n       (rst_n),
       .rad_valid_i (rad_valid_i),
       .rad_i       (rad_i),
