@@ -141,15 +141,19 @@ module mac_float_decode
         true_exp_b    = $signed({3'b000, unpacked_b.exp});
       end
     end else begin : g_eager_norm
+      logic [LZ_COUNT_W-1:0] lz_a_raw;
+      logic [LZ_COUNT_W-1:0] lz_b_raw;
       logic [LZ_COUNT_W-1:0] lz_a;
       logic [LZ_COUNT_W-1:0] lz_b;
+      logic                  mant_a_zero;
+      logic                  mant_b_zero;
 
       leading_zero_counter_top #(
           .DATA_W          (MANTISSA_IN_W),
           .LZC_DATA_BLOCK_W(4)
       ) lzc_a_inst (
           .data_i              (unpacked_a.mantissa),
-          .leading_zero_count_o(lz_a)
+          .leading_zero_count_o(lz_a_raw)
       );
 
       leading_zero_counter_top #(
@@ -157,12 +161,19 @@ module mac_float_decode
           .LZC_DATA_BLOCK_W(4)
       ) lzc_b_inst (
           .data_i              (unpacked_b.mantissa),
-          .leading_zero_count_o(lz_b)
+          .leading_zero_count_o(lz_b_raw)
       );
 
       always_comb begin
-        norm_mant_a_o = unpacked_a.mantissa << lz_a;
-        norm_mant_b_o = unpacked_b.mantissa << lz_b;
+        // leading_zero_counter_top returns an out-of-range index for an
+        // all-zero input; gate it to 0 (zero mantissa needs no normalization
+        // and the product path will produce zero anyway).
+        mant_a_zero   = (unpacked_a.mantissa == '0);
+        mant_b_zero   = (unpacked_b.mantissa == '0);
+        lz_a          = mant_a_zero ? '0 : lz_a_raw;
+        lz_b          = mant_b_zero ? '0 : lz_b_raw;
+        norm_mant_a_o = mant_a_zero ? '0 : (unpacked_a.mantissa << lz_a);
+        norm_mant_b_o = mant_b_zero ? '0 : (unpacked_b.mantissa << lz_b);
         true_exp_a    = $signed({3'b000, unpacked_a.exp}) - $signed({{(SIGNED_EXP_W-LZ_COUNT_W){1'b0}}, lz_a});
         true_exp_b    = $signed({3'b000, unpacked_b.exp}) - $signed({{(SIGNED_EXP_W-LZ_COUNT_W){1'b0}}, lz_b});
       end
