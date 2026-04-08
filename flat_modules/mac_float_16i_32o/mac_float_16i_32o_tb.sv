@@ -24,7 +24,7 @@ module mac_float_tb;
 
   mac_float_16i_32o_top dut (
       .clk    (clk),
-      .clk_en (clk_en),
+      .clk_en (1'b1),
       .rst_n  (rst_n),
       .valid_i(valid_i),
       .a      (a),
