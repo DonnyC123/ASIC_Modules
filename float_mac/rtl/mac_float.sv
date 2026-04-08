@@ -194,11 +194,11 @@ module mac_float #(
 
   always_comb begin
     force_nan = sum_float_flags_2q.nan;
-    use_c = sum_float_flags_2q.c_dominates & ~force_nan;
-    force_zero = sum_rounded_exp_unfl & ~force_nan & ~use_c;
     force_inf  = (sum_float_flags_2q.inf | sum_rounded_exp_ovfl
                   | (float_sum_rounded.exp == '1))
-               & ~force_nan & ~use_c & ~force_zero;
+               & ~force_nan;
+    use_c = sum_float_flags_2q.c_dominates & ~force_nan & ~force_inf;
+    force_zero = sum_rounded_exp_unfl & ~force_nan & ~force_inf & ~use_c;
   end
 
   data_pipeline #(
@@ -235,18 +235,18 @@ module mac_float #(
 
   always_comb begin
     float_z = float_sum_rounded_q;
-    if (sum_float_flags_3q.nan) begin
+    if (force_nan_q) begin
       float_z.exp  = '1;
       float_z.frac = '1;
-    end else if (sum_float_flags_3q.inf || sum_rounded_exp_ovfl_q || (float_sum_rounded_q.exp == '1)) begin
+    end else if (force_inf_q) begin
       float_z.exp  = '1;
       float_z.frac = '0;
-      if (sum_float_flags_3q.inf) begin
-        float_z.sign = sum_float_flags_3q.sign;
+      if (inf_flag_q) begin
+        float_z.sign = inf_sign_q;
       end
-    end else if (sum_float_flags_3q.c_dominates) begin
+    end else if (use_c_q) begin
       float_z = float_c_3q;
-    end else if (sum_rounded_exp_unfl_q) begin
+    end else if (force_zero_q) begin
       float_z.exp = '0;
     end
   end
