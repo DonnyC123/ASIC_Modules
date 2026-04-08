@@ -235,19 +235,19 @@ module mac_float #(
 
   always_comb begin
     float_z = float_sum_rounded_q;
-    if (force_nan_q) begin
+    if (sum_float_flags_3q.nan) begin
       float_z.exp  = '1;
       float_z.frac = '1;
-    end else if (use_c_q) begin
-      float_z = float_c_3q;
-    end else if (force_zero_q) begin
-      float_z.exp = '0;
-    end else if (force_inf_q) begin
+    end else if (sum_float_flags_3q.inf || sum_rounded_exp_ovfl_q || (float_sum_rounded_q.exp == '1)) begin
       float_z.exp  = '1;
       float_z.frac = '0;
-      if (inf_flag_q) begin
-        float_z.sign = inf_sign_q;
+      if (sum_float_flags_3q.inf) begin
+        float_z.sign = sum_float_flags_3q.sign;
       end
+    end else if (sum_float_flags_3q.c_dominates) begin
+      float_z = float_c_upscaled;
+    end else if (sum_rounded_exp_unfl_q) begin
+      float_z.exp = '0;
     end
   end
 
