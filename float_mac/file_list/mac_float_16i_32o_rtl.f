@@ -2,6 +2,7 @@
 ../../common/rtl/leading_zero_counter.sv     
 ../../common/rtl/leading_zero_counter_top.sv 
 ../../common/rtl/carry_save_row_adder.sv 
+../../common/rtl/float_pkg.sv
 
 ../rtl/mac_float_pkg.sv
 ../rtl/upscale_float.sv

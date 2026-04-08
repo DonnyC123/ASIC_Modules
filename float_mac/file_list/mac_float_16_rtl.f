@@ -1,5 +1,6 @@
 ../../common/rtl/data_pipeline.sv
-../../common/rtl/leading_zero_counter.sv     
+../../common/rtl/float_pkg.sv
+../../common/rtl/leading_zero_counter.sv
 ../../common/rtl/leading_zero_counter_top.sv 
 ../../common/rtl/carry_save_row_adder.sv 
 
