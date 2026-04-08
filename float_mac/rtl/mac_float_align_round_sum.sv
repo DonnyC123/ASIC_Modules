@@ -1,4 +1,5 @@
 module mac_float_align_round_sum
+  import float_pkg::*;
   import mac_float_pkg::*;
 #(
 
