@@ -5,6 +5,7 @@ module sqrt_float #(
 ) (
     input  logic              clk,
     input  logic              rst_n,
+    input  logic              clk_en,
     input  logic              rad_valid_i,
     input  logic [DATA_W-1:0] rad_i,
     output logic [DATA_W-1:0] root_o,
@@ -12,6 +13,8 @@ module sqrt_float #(
 );
 
   import sqrt_float_pkg::*;
+
+  localparam OUT_PIPE_DEPTH = 1;
 
   localparam GUARD_W         = 1;
   localparam SIGN_W          = 1;
@@ -48,7 +51,7 @@ module sqrt_float #(
       .root_exp_o     (root_exp_signed)
   );
 
-  sqrt_srt_mantissa #(
+  sqrt_mantissa #(
       .MANTISSA_W     (MANTISSA_W),
       .ROOT_EXTENDED_W(ROOT_EXTENDED_W)
   ) sqrt_mantissa_inst (
@@ -73,10 +76,19 @@ module sqrt_float #(
       .root_o            (float_root)
   );
 
-
-  always_comb begin
-    root_o       = float_root;
-    root_valid_o = rad_valid_i;
-  end
+  data_status_pipeline #(
+      .DATA_W    (DATA_W),
+      .STATUS_W  (1),
+      .PIPE_DEPTH(OUT_PIPE_DEPTH),
+      .CLK_EN    (1)
+  ) round_to_out_pipe (
+      .clk     (clk),
+      .clk_en  (clk_en),
+      .rst_n   (rst_n),
+      .data_i  (float_root),
+      .status_i(rad_valid_i),
+      .data_o  (root_o),
+      .status_o(root_valid_o)
+  );
 
 endmodule

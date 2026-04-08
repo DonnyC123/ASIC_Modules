@@ -25,6 +25,7 @@ module quotient_rounder
   logic        [  QUOTIENT_EXTENDED_W-1:0] quotient_extended;
   logic        [  QUOTIENT_EXTENDED_W-1:0] quotient_extended_normalized;
   logic        [  QUOTIENT_EXTENDED_W-1:0] quotient_unrounded;
+  logic                                    round_decision;
   logic        [  QUOTIENT_EXTENDED_W-1:0] quotient_rounded_raw;
   logic        [           MANTISSA_W-1:0] quotient_rounded;
   logic        [           MANTISSA_W-1:0] quotient_mantissa;
@@ -32,6 +33,7 @@ module quotient_rounder
   logic        [2*QUOTIENT_EXTENDED_W-1:0] temp_shift_reg;
 
   logic signed [         SIGNED_EXP_W-1:0] quotient_exp_extended;
+  logic signed [         SIGNED_EXP_W-1:0] quotient_exp_extended_p1;
   logic signed [         SIGNED_EXP_W-1:0] quotient_exp_rounded;
 
   logic                                    quotient_exp_extended_unfl;
@@ -42,9 +44,6 @@ module quotient_rounder
 
   logic                                    guard;
   logic                                    sticky;
-
-  // Might be able to check if we will round and then do one add instead of
-  // mutliple
 
   always_comb begin
     quotient_exp_extended = quotient_exp_i;
@@ -59,27 +58,28 @@ module quotient_rounder
 
     quotient_exp_extended_unfl = quotient_exp_extended[SIGNED_EXP_W-1];
     quotient_exp_extended_ovfl = |quotient_exp_extended[SIGNED_EXP_W-2-:2];
-    quotient_extended_normalized = quotient_extended;
 
     temp_shift_reg = {quotient_extended, {QUOTIENT_EXTENDED_W{1'b0}}}  >> (1 - quotient_exp_extended);
+    quotient_extended_normalized = quotient_extended;
 
     if (quotient_exp_extended_unfl || quotient_exp_extended == '0) begin
       quotient_extended_normalized = temp_shift_reg[2*QUOTIENT_EXTENDED_W-1-:QUOTIENT_EXTENDED_W];
       sticky                       = sticky || (|temp_shift_reg[QUOTIENT_EXTENDED_W-1:0]);
     end
 
-    guard = quotient_extended_normalized[0];
+    guard                = quotient_extended_normalized[0];
 
-    quotient_unrounded = {1'b0, quotient_extended_normalized[QUOTIENT_EXTENDED_W-1:1]};
+    quotient_unrounded   = {1'b0, quotient_extended_normalized[QUOTIENT_EXTENDED_W-1:1]};
 
-    quotient_rounded_raw   = guard && (sticky || quotient_unrounded[0]) ? quotient_unrounded + 1 : quotient_unrounded;
+    round_decision       = guard && (sticky || quotient_unrounded[0]);
+    quotient_rounded_raw = quotient_unrounded + QUOTIENT_EXTENDED_W'(round_decision);
 
-    quotient_rounded = quotient_rounded_raw[MANTISSA_W-1:0];
+    quotient_rounded     = quotient_rounded_raw[MANTISSA_W-1:0];
     quotient_exp_rounded = quotient_exp_extended;
 
     if (quotient_rounded_raw[QUOTIENT_EXTENDED_W-1]) begin
       quotient_rounded     = quotient_rounded_raw[QUOTIENT_EXTENDED_W-1:1];
-      quotient_exp_rounded = quotient_exp_extended + 1;
+      quotient_exp_rounded = quotient_exp_extended_p1;
     end
 
     quotient_exp_rounded_unfl = quotient_exp_rounded[SIGNED_EXP_W-1];
@@ -94,7 +94,7 @@ module quotient_rounder
     quotient_o.frac = quotient_mantissa[FRAC_W-1:0];
     quotient_o.exp  = quotient_exp_rounded[EXP_W-1:0];
 
-    if (float_quotient_flags_i.nan) begin  // unique0?
+    if (float_quotient_flags_i.nan) begin
       quotient_o.exp  = '1;
       quotient_o.frac = '1;
     end else if (float_quotient_flags_i.zero || quotient_exp_rounded_unfl) begin

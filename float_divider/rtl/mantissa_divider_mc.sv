@@ -26,6 +26,7 @@ module mantissa_divider_mc
   logic                    [    MANTISSA_W-1:0] divisor_q;
   logic                    [     COUNTER_W-1:0] counter_d;
   logic                    [     COUNTER_W-1:0] counter_q;
+
   mantissa_divider_state_t                      state_d;
   mantissa_divider_state_t                      state_q;
 
@@ -82,7 +83,7 @@ module mantissa_divider_mc
     endcase
   end
 
-  assign quotient_raw_o = quotient_d;
+  assign quotient_raw_o = $unsigned(quotient_d);
 
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin

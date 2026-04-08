@@ -1,34 +1,42 @@
 module mac_float_decode
   import mac_float_pkg::*;
 #(
-    parameter type float_t            = struct packed {logic sign; logic [5:0] exp; logic [9:0] frac;},
-    parameter      SIGNED_EXP_W       = 9,
-    parameter      MANTISSA_W         = 11,
-    parameter      EXP_W              = 5,
-    parameter      PARTIAL_SUM_HIGH_W = 14,
-    parameter      PRODUCT_MANTISSA_W = 2 * (MANTISSA_W)
+    parameter type float_t                      = struct packed {logic sign; logic [5:0] exp; logic [9:0] frac;},
+    parameter      SIGNED_EXP_W                 = 9,
+    parameter      FRAC_IN_W                    = 10,
+    parameter      EXP_IN_W                     = 5,
+    parameter      FRAC_OUT_W                   = 10,
+    parameter      EXP_OUT_W                    = 8,
+    localparam     MANTISSA_IN_W                = FRAC_IN_W + 1,
+    localparam     MANTISSA_OUT_W               = FRAC_OUT_W + 1,
+    localparam     C_UPPER_SLICE_W              = MANTISSA_OUT_W + 3,
+    localparam     PRODUCT_MANTISSA_W           = 2 * MANTISSA_IN_W,
+    localparam     C_LOWER_SLICE_W              = PRODUCT_MANTISSA_W + FRAC_OUT_W - FRAC_IN_W
 ) (
-    input  float_t                          float_a_i,
-    input  float_t                          float_b_i,
-    input  float_t                          float_c_i,
-    output sum_float_flags_t                sum_float_flags_o,
-    output logic                            product_sign_o,
-    output logic signed [SIGNED_EXP_W-1:0]  product_exp_o,
-    output logic [PARTIAL_SUM_HIGH_W-1:0]   c_upper_slice_o,
-    output logic [PRODUCT_MANTISSA_W-1:0]   csa_c_o,
-    output logic         [  MANTISSA_W-1:0] norm_mant_a_o,
-    output logic         [  MANTISSA_W-1:0] norm_mant_b_o
+    input  float_t                            float_a_i,
+    input  float_t                            float_b_i,
+    input  float_t                            float_c_i,
+    output sum_float_flags_t                  sum_float_flags_o,
+    output logic                              product_sign_o,
+    output logic signed [   SIGNED_EXP_W-1:0] product_exp_o,
+    output logic        [C_UPPER_SLICE_W-1:0] c_upper_slice_o,
+    output logic        [C_LOWER_SLICE_W-1:0] c_lower_slice_o,
+    output logic        [  MANTISSA_IN_W-1:0] norm_mant_a_o,
+    output logic        [  MANTISSA_IN_W-1:0] norm_mant_b_o
 );
 
-  localparam LZ_COUNTER_W         = $clog2(MANTISSA_W);
-  localparam BIAS                 = (1 << (EXP_W - 1)) - 1;
- 
+  localparam BIAS                 = (1 << (EXP_IN_W - 1)) - 1;
+  // Lazy normalization is only safe when the output mantissa window is wide
+  // enough
+  localparam LAZY_NORM_SAFE       = (FRAC_OUT_W - FRAC_IN_W) >= (MANTISSA_IN_W - 1);
+  localparam LZ_COUNT_W           = $clog2(MANTISSA_IN_W + 1);
+
   typedef struct packed {
-    logic                  sign;
-    logic [EXP_W-1:0]      exp;
-    logic [MANTISSA_W-1:0] mantissa;
+    logic                     sign;
+    logic [EXP_IN_W-1:0]      exp;
+    logic [MANTISSA_IN_W-1:0] mantissa;
   } unpacked_float_t;
-  
+ 
   typedef struct {
     logic sign;
     logic inf;
@@ -37,7 +45,6 @@ module mac_float_decode
     logic frac_zero;
     logic exp_zero;
   } float_flags_t;
-
 
   function automatic float_flags_t deduce_float_flags(input float_t float_i);
     float_flags_t flags_o;
@@ -66,8 +73,8 @@ module mac_float_decode
     unpacked_o.mantissa = {1'b1, float_i.frac};
 
     if (exp_zero_i) begin
-      unpacked_o.exp[0]                 = 1'b1;
-      unpacked_o.mantissa[MANTISSA_W-1] = 1'b0;
+      unpacked_o.exp[0]                    = 1'b1;
+      unpacked_o.mantissa[MANTISSA_IN_W-1] = 1'b0;
     end
 
     return unpacked_o;
@@ -86,9 +93,7 @@ module mac_float_decode
 
   logic signed  [SIGNED_EXP_W-1:0] true_exp_a;
   logic signed  [SIGNED_EXP_W-1:0] true_exp_b;
-  logic         [LZ_COUNTER_W-1:0] lz_a;
-  logic         [LZ_COUNTER_W-1:0] lz_b;
- 
+
   logic                         c_dominates;
 
   always_comb begin
@@ -127,55 +132,65 @@ module mac_float_decode
     unpacked_c = unpack_float(float_c_i, c_flags.exp_zero);
   end
 
-  leading_zero_counter_top #(
-      .DATA_W(MANTISSA_W-1)
-  ) leading_zero_counter_a_top_inst (
-      .data_i              (float_a_i.frac),
-      .leading_zero_count_o(lz_a)
-  );
+  generate
+    if (LAZY_NORM_SAFE) begin : g_lazy_norm
+      always_comb begin
+        norm_mant_a_o = unpacked_a.mantissa;
+        norm_mant_b_o = unpacked_b.mantissa;
+        true_exp_a    = $signed({3'b000, unpacked_a.exp});
+        true_exp_b    = $signed({3'b000, unpacked_b.exp});
+      end
+    end else begin : g_eager_norm
+      logic [LZ_COUNT_W-1:0] lz_a;
+      logic [LZ_COUNT_W-1:0] lz_b;
 
-  leading_zero_counter_top #(
-      .DATA_W(MANTISSA_W-1)
-  ) leading_zero_counter_b_top_inst (
-      .data_i              (float_b_i.frac),
-      .leading_zero_count_o(lz_b)
-  );
+      leading_zero_counter_top #(
+          .DATA_W          (MANTISSA_IN_W),
+          .LZC_DATA_BLOCK_W(4)
+      ) lzc_a_inst (
+          .data_i              (unpacked_a.mantissa),
+          .leading_zero_count_o(lz_a)
+      );
+
+      leading_zero_counter_top #(
+          .DATA_W          (MANTISSA_IN_W),
+          .LZC_DATA_BLOCK_W(4)
+      ) lzc_b_inst (
+          .data_i              (unpacked_b.mantissa),
+          .leading_zero_count_o(lz_b)
+      );
+
+      always_comb begin
+        norm_mant_a_o = unpacked_a.mantissa << lz_a;
+        norm_mant_b_o = unpacked_b.mantissa << lz_b;
+        true_exp_a    = $signed({3'b000, unpacked_a.exp}) - $signed({{(SIGNED_EXP_W-LZ_COUNT_W){1'b0}}, lz_a});
+        true_exp_b    = $signed({3'b000, unpacked_b.exp}) - $signed({{(SIGNED_EXP_W-LZ_COUNT_W){1'b0}}, lz_b});
+      end
+    end
+  endgenerate
 
   always_comb begin
-    if (a_flags.exp_zero && !a_flags.frac_zero) begin
-      true_exp_a  = -$signed({1'b0, lz_a});
-      norm_mant_a_o = {float_a_i.frac << lz_a, 1'b0};
-    end else begin
-      true_exp_a  = a_flags.exp_zero ? $signed('0) : $signed({3'b000, unpacked_a.exp});
-      norm_mant_a_o = unpacked_a.mantissa;
-    end
-
-   if (b_flags.exp_zero && !b_flags.frac_zero) begin
-      true_exp_b    = -$signed({1'b0, lz_b});
-      norm_mant_b_o = {float_b_i.frac << lz_b, 1'b0};
-   end else begin
-      true_exp_b    = b_flags.exp_zero ? $signed('0) : $signed({3'b000, unpacked_b.exp});
-      norm_mant_b_o = unpacked_b.mantissa;
-     end
- 
     product_sign_o = unpacked_a.sign ^ unpacked_b.sign;
     product_exp_o  = true_exp_a + true_exp_b - $signed(SIGNED_EXP_W'(BIAS));
   end
 
     align_addend #(
-      .EXP_W (EXP_W),
-      .FRAC_W(MANTISSA_W-1),
+      .EXP_IN_W (EXP_IN_W),
+      .FRAC_IN_W(FRAC_IN_W),
+      .EXP_OUT_W (EXP_OUT_W),
+      .FRAC_OUT_W(FRAC_OUT_W),
       .unpacked_float_t(unpacked_float_t)
   ) align_addend_inst (
       .unpacked_c_i       (unpacked_c),
       .product_exp_i      (product_exp_o),
       .product_sign_i     (product_sign_o),
       .c_upper_slice_o    (c_upper_slice_o),
-      .csa_c_o            (csa_c_o),
+      .c_lower_slice_o    (c_lower_slice_o),
       .c_lower_sticky_o   (sum_float_flags_o.sticky_c),
       .c_dominates_o      (c_dominates),
       .ignore_round_even_o(sum_float_flags_o.ignore_round_even)
   );
-  assign sum_float_flags_o.c_dominates = c_dominates || product_flags.zero;
+
+  assign sum_float_flags_o.c_dominates = (c_dominates && !c_flags.zero)|| product_flags.zero;
 
 endmodule

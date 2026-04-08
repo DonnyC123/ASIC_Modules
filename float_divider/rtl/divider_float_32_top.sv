@@ -4,6 +4,7 @@ module divider_float_32_top #(
     localparam DATA_W = FRAC_W + EXP_W + 1
 ) (
     input  logic              clk,
+    input  logic              clk_en,
     input  logic              rst_n,
     input  logic              start_i,
     input  logic [DATA_W-1:0] a,
@@ -17,6 +18,7 @@ module divider_float_32_top #(
       .FRAC_W(FRAC_W)
   ) divider_float32_inst (
       .clk    (clk),
+      .clk_en (clk_en),
       .rst_n  (rst_n),
       .start_i(start_i),
       .a      (a),

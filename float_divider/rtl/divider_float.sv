@@ -4,6 +4,7 @@ module divider_float #(
     localparam DATA_W = FRAC_W + EXP_W + 1
 ) (
     input  logic              clk,
+    input  logic              clk_en,
     input  logic              rst_n,
     input  logic              start_i,
     input  logic [DATA_W-1:0] a,
@@ -51,7 +52,6 @@ module divider_float #(
   logic                                       sticky;
   logic                                       sticky_q;
 
-
   always_comb begin
     float_a = float_t'(a);
     float_b = float_t'(b);
@@ -71,13 +71,14 @@ module divider_float #(
       .quotient_exp_o        (quotient_exp_d)
   );
 
-
   data_status_pipeline #(
       .DATA_W    (2 * MANTISSA_W + FLOAT_FLAGS_W + SIGNED_EXP_W),
       .STATUS_W  (1),
-      .PIPE_DEPTH(DECODE_PIPE_DEPTH)
+      .PIPE_DEPTH(DECODE_PIPE_DEPTH),
+      .CLK_EN    (1)
   ) decode_to_divider_pipe (
       .clk     (clk),
+      .clk_en  (clk_en),
       .rst_n   (rst_n),
       .data_i  ({norm_mant_a, norm_mant_b, float_quotient_flags_d, quotient_exp_d}),
       .status_i(start_i),
@@ -97,9 +98,11 @@ module divider_float #(
   data_status_pipeline #(
       .DATA_W    (QUOTIENT_RAW_W + 1),
       .STATUS_W  (1),
-      .PIPE_DEPTH(DIVIDER_PIPE_DEPTH)
+      .PIPE_DEPTH(DIVIDER_PIPE_DEPTH),
+      .CLK_EN    (1)
   ) divider_to_round_pipe (
       .clk     (clk),
+      .clk_en  (clk_en),
       .rst_n   (rst_n),
       .data_i  ({quotient_raw, sticky}),
       .status_i(start_divider_q),
@@ -123,9 +126,11 @@ module divider_float #(
   data_status_pipeline #(
       .DATA_W    (DATA_W),
       .STATUS_W  (1),
-      .PIPE_DEPTH(OUT_PIPE_DEPTH)
+      .PIPE_DEPTH(OUT_PIPE_DEPTH),
+      .CLK_EN    (1)
   ) round_to_out_pipe (
       .clk     (clk),
+      .clk_en  (clk_en),
       .rst_n   (rst_n),
       .data_i  (float_quotient),
       .status_i(divider_done_q),

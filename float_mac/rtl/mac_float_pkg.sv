@@ -1,8 +1,7 @@
 package mac_float_pkg;
 
-  localparam CARRY_W = 1;
-  localparam SIGN_W  = 1;
- 
+  localparam CARRY_W              = 1;
+  localparam SIGN_W               = 1;
   localparam MANTISSA_INT_W       = 1;
  
   typedef struct packed {
