@@ -198,7 +198,7 @@ module mac_float #(
     force_zero = sum_rounded_exp_unfl & ~force_nan & ~use_c;
     force_inf  = (sum_float_flags_2q.inf | sum_rounded_exp_ovfl
                   | (float_sum_rounded.exp == '1))
-               & ~force_nan & ~use_c & ~force_zero;
+               & ~force_nan;
   end
 
   data_pipeline #(
