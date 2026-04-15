@@ -1,7 +1,6 @@
-module sqrt_restoring_stage #(
+module sqrt_restoring_step #(
     parameter DIN_W       = 64,
-    parameter SQRT_STEPS  = 16,
-    parameter DOUT_W      = DIN_W / 2,      // I could make these marcos
+    parameter DOUT_W      = DIN_W / 2,      // I could make these marcos                   
     parameter REMAINDER_W = 2 * DIN_W + 1,
     parameter TEST_SUB_W  = DIN_W + 1
 ) (
@@ -22,17 +21,15 @@ module sqrt_restoring_stage #(
     T  = T_i;
     Q  = Q_i;
 
-    for (int i = 0; i < SQRT_STEPS; i++) begin
-      AX = AX << 2;
-      T  = AX[REMAINDER_W-1-:TEST_SUB_W] - {{(TEST_SUB_W - DOUT_W - 2) {1'b0}}, Q, 2'b01};
-      Q  = Q << 1;
+    AX = AX << 2;
+    T  = AX[REMAINDER_W-1-:TEST_SUB_W] - {{(TEST_SUB_W - DOUT_W - 2) {1'b0}}, Q, 2'b01};
+    Q  = Q << 1;
 
-      if (T[TEST_SUB_W-1] == 1'b0) begin
-        AX[REMAINDER_W-1-:TEST_SUB_W] = T;
-        Q[0]                          = 1'b1;
-      end
-
+    if (T[TEST_SUB_W-1] == 1'b0) begin
+      AX[REMAINDER_W-1-:TEST_SUB_W] = T;
+      Q[0]                          = 1'b1;
     end
+
     AX_o = AX;
     T_o  = T;
     Q_o  = Q;

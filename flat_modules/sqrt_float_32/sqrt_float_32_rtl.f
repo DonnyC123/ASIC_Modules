@@ -9,7 +9,7 @@ srt_sqrt_pkg.sv
 srt_radix4_qds.sv
 srt_radix4_seed.sv
 srt_sqrt_stage.sv
-sqrt_restoring_stage.sv
+sqrt_restoring_step.sv
 sqrt_float_pkg.sv
 sqrt_float_decoder.sv
 sqrt_mantissa.sv
