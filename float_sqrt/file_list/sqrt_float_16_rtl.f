@@ -12,7 +12,7 @@
 ../../uint64_sqrt/srt_sqrt_rtl/srt_radix4_seed.sv            
 ../../uint64_sqrt/srt_sqrt_rtl/srt_sqrt_stage.sv             
 
-../../uint64_sqrt/restoring_sqrt_rtl/sqrt_restoring_stage.sv 
+../../uint64_sqrt/restoring_sqrt_rtl/sqrt_restoring_step.sv 
 
 ../rtl/sqrt_float_pkg.sv
 ../rtl/sqrt_float_decoder.sv
