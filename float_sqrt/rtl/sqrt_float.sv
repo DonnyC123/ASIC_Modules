@@ -14,7 +14,8 @@ module sqrt_float #(
 
   import sqrt_float_pkg::*;
 
-  localparam OUT_PIPE_DEPTH = 1;
+  localparam MANTISSA_PIPE_DEPTH = 1;  // This can be more than one stages
+  localparam OUT_PIPE_DEPTH      = 1;
 
   localparam GUARD_W         = 1;
   localparam SIGN_W          = 1;
@@ -39,6 +40,9 @@ module sqrt_float #(
   logic         [ROOT_EXTENDED_W-1:0] root_extended;
   logic                               sticky_rem;
 
+  logic                               mantissa_valid;
+
+
   assign float_rad = float_t'(rad_i);
 
   sqrt_float_decoder #(
@@ -53,13 +57,17 @@ module sqrt_float #(
 
   sqrt_mantissa #(
       .MANTISSA_W     (MANTISSA_W),
-      .ROOT_EXTENDED_W(ROOT_EXTENDED_W)
+      .ROOT_EXTENDED_W(ROOT_EXTENDED_W),
+      .PIPELINE_STAGES(MANTISSA_PIPE_DEPTH)
   ) sqrt_mantissa_inst (
       .clk            (clk),
+      .clk_en         (clk_en),
       .rst_n          (rst_n),
       .mantissa_rad_i (norm_mant_rad),
+      .valid_i        (rad_valid_i),
       .root_extended_o(root_extended),
-      .sticky_rem_o   (sticky_rem)
+      .sticky_rem_o   (sticky_rem),
+      .valid_o        (mantissa_valid)
   );
 
   root_rounder #(
@@ -86,7 +94,7 @@ module sqrt_float #(
       .clk_en  (clk_en),
       .rst_n   (rst_n),
       .data_i  (float_root),
-      .status_i(rad_valid_i),
+      .status_i(mantissa_valid),
       .data_o  (root_o),
       .status_o(root_valid_o)
   );
