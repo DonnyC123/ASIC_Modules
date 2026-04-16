@@ -19,7 +19,7 @@ module sqrt_srt_mantissa #(
   localparam SEED_ROOT_BITS      = 4;
   localparam REMAINING_ROOT_BITS = ROOT_EXTENDED_W - SEED_ROOT_BITS;
   localparam ITERATIONS          = (REMAINING_ROOT_BITS + (RADIX_W - 1)) / RADIX_W;
-  localparam STAGE_STEPS         = ITERATIONS / (PIPELINE_STAGES + 1);
+  localparam STAGE_STEPS         = ITERATIONS + 1 / (PIPELINE_STAGES + 1);
 
   localparam FRAC_BITS = MANTISSA_W + RADIX_W;
   localparam DATA_W    = INT_W + FRAC_BITS;
@@ -46,7 +46,7 @@ module sqrt_srt_mantissa #(
   logic signed [  DATA_W-1:0] root_q_stage_next   [ITERATIONS];
   logic signed [  DATA_W-1:0] root_qm_stage_next  [ITERATIONS];
 
-  logic                        valid              [ITERATIONS];
+  logic                       valid               [ITERATIONS];
 
   logic signed [  DATA_W-1:0] full_final_rem;
   logic signed [  DATA_W-1:0] final_root_vec;
