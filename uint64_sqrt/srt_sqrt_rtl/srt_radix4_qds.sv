@@ -2,7 +2,12 @@ module srt_radix4_qds
   import srt_sqrt_pkg::*;
 #(
     parameter int DATA_W = 72,
-    parameter int RAD_W  = 64
+    parameter int RAD_W  = 64,
+    // Carry-free digit selection: inspect only the QDS_W highest bits of the
+    // redundant remainder. Truncation error is bounded and absorbed by the
+    // radix-4 digit-set redundancy (rho = 2/3). QDS_W = 9 keeps TABLE_SHIFT
+    // at 0 for both FP16 and FP32 instantiations.
+    parameter int QDS_W  = 9
 ) (
     input  logic signed [   DATA_W-1:0] rem_sum_shift_i,
     input  logic signed [   DATA_W-1:0] rem_carry_shift_i,
@@ -10,39 +15,29 @@ module srt_radix4_qds
     output logic signed [Q_DIGIT_W-1:0] q_digit_o
 );
 
-  localparam ESTIMATE_CS_LSB = RAD_W - RADIX_W - 1;
-  localparam ESTIMATE_CS_W   = DATA_W - ESTIMATE_CS_LSB;
-  localparam ESTIMATE_W      = ESTIMATE_CS_W + 1;
+  localparam int ESTIMATE_CS_LSB = RAD_W - RADIX_W - 1;
+  localparam int FULL_CS_W       = DATA_W - ESTIMATE_CS_LSB;
+  localparam int TRUNC_LSB       = FULL_CS_W - QDS_W;
+  localparam int ESTIMATE_W      = QDS_W + 1;
+  localparam int TABLE_SHIFT     = (RAD_W - 1 - ESTIMATE_CS_LSB) - TRUNC_LSB;
 
-  localparam TABLE_SHIFT = (RAD_W - 1 - ESTIMATE_CS_LSB);
+  logic        [       QDS_W-1:0] sum_trunc;
+  logic        [       QDS_W-1:0] carry_trunc;
 
-  logic signed [   ESTIMATE_W-1:0] estimate_rem_raw;
-  logic signed [   ESTIMATE_W-1:0] estimate_rem;
-  logic signed [   ESTIMATE_W-1:0] lower_sel_const;
-  logic signed [   ESTIMATE_W-1:0] upper_sel_const;
+  logic signed [  ESTIMATE_W-1:0] estimate_rem;
+  logic signed [  ESTIMATE_W-1:0] lower_sel_const;
+  logic signed [  ESTIMATE_W-1:0] upper_sel_const;
 
-  logic        [ESTIMATE_CS_W-1:0] carry_estimate;
-  logic        [ESTIMATE_CS_W-1:0] sum_estimate;
-
-  assign sum_estimate   = rem_sum_shift_i[DATA_W-1-:ESTIMATE_CS_W];
-  assign carry_estimate = rem_carry_shift_i[DATA_W-1-:ESTIMATE_CS_W];
-
-  always_comb begin
-    estimate_rem_raw = $signed({sum_estimate[ESTIMATE_CS_W-1], sum_estimate}) +
-        $signed({carry_estimate[ESTIMATE_CS_W-1], carry_estimate});
-
-    estimate_rem = estimate_rem_raw;
-    if (estimate_rem_raw < -ESTIMATE_W'($signed(1 << (ESTIMATE_W - 3)))) begin
-      estimate_rem = estimate_rem_raw ^ (ESTIMATE_W'(1) << (ESTIMATE_W - 1));
-    end
-  end
+  assign sum_trunc   = rem_sum_shift_i  [DATA_W-1 -: QDS_W];
+  assign carry_trunc = rem_carry_shift_i[DATA_W-1 -: QDS_W];
 
   always_comb begin
-    lower_sel_const = $signed(LOWER_SEL_CONST_TABLE[q_idx_i]) << TABLE_SHIFT;
-    upper_sel_const = $signed(UPPER_SEL_CONST_TABLE[q_idx_i]) << TABLE_SHIFT;
-  end
+    estimate_rem    = $signed({sum_trunc[QDS_W-1], sum_trunc}) +
+                      $signed({carry_trunc[QDS_W-1], carry_trunc});
 
-  always_comb begin
+    lower_sel_const = ESTIMATE_W'($signed({1'b0, LOWER_SEL_CONST_TABLE[q_idx_i]})) <<< TABLE_SHIFT;
+    upper_sel_const = ESTIMATE_W'($signed({1'b0, UPPER_SEL_CONST_TABLE[q_idx_i]})) <<< TABLE_SHIFT;
+
     q_digit_o = 3'sd0;
     if (estimate_rem >= lower_sel_const) begin
       q_digit_o = 3'sd1;
