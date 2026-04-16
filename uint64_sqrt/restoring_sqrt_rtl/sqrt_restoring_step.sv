@@ -1,14 +1,12 @@
 module sqrt_restoring_step #(
     parameter DIN_W       = 64,
-    parameter DOUT_W      = DIN_W / 2,      // I could make these marcos                   
+    parameter DOUT_W      = DIN_W / 2,
     parameter REMAINDER_W = 2 * DIN_W + 1,
     parameter TEST_SUB_W  = DIN_W + 1
 ) (
     input  logic [REMAINDER_W-1:0] AX_i,
-    input  logic [ TEST_SUB_W-1:0] T_i,
     input  logic [     DOUT_W-1:0] Q_i,
     output logic [REMAINDER_W-1:0] AX_o,
-    output logic [ TEST_SUB_W-1:0] T_o,
     output logic [     DOUT_W-1:0] Q_o
 );
 
@@ -18,7 +16,6 @@ module sqrt_restoring_step #(
 
   always_comb begin
     AX = AX_i;
-    T  = T_i;
     Q  = Q_i;
 
     AX = AX << 2;
@@ -31,7 +28,6 @@ module sqrt_restoring_step #(
     end
 
     AX_o = AX;
-    T_o  = T;
     Q_o  = Q;
   end
 

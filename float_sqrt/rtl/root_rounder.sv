@@ -26,25 +26,14 @@ module root_rounder
   logic        [           FRAC_W-1:0] root_frac;
   logic signed [     SIGNED_EXP_W-1:0] root_exp_rounded;
 
-  logic        [2*ROOT_EXTENDED_W-1:0] temp_shift_reg;
-
   logic                                guard;
   logic                                sticky;
   logic                                lsb;
   logic                                round_up;
 
-  logic                                final_sticky;
-
   always_comb begin
-    temp_shift_reg = {root_raw_i, {ROOT_EXTENDED_W{1'b0}}} >> (1 - root_exp_i);
-
-    if (root_exp_i < 1) begin
-      root_normalized = temp_shift_reg[2*ROOT_EXTENDED_W-1 : ROOT_EXTENDED_W];
-      sticky          = sticky_i || (|temp_shift_reg[ROOT_EXTENDED_W-1:0]);
-    end else begin
-      root_normalized = root_raw_i;
-      sticky          = sticky_i;
-    end
+    root_normalized  = root_raw_i;
+    sticky           = sticky_i;
 
     guard            = root_normalized[0];
     lsb              = root_normalized[1];
@@ -56,10 +45,10 @@ module root_rounder
 
     if (root_rounded_raw[MANTISSA_W-1]) begin
       root_frac        = root_rounded_raw[MANTISSA_W-1:1];
-      root_exp_rounded = (root_exp_i < 1) ? 1 : root_exp_i + 1;
+      root_exp_rounded = root_exp_i + 1;
     end else begin
       root_frac        = root_rounded_raw[FRAC_W-1:0];
-      root_exp_rounded = (root_exp_i < 1) ? 0 : root_exp_i;
+      root_exp_rounded = root_exp_i;
     end
 
   end
