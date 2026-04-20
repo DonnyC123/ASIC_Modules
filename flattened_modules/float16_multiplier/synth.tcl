@@ -1,7 +1,7 @@
-set_attribute lib_search_path { /path/to/lib }
-set_attribute library         { your_stdcells.lib }
+set_db lib_search_path { /path/to/lib }
+set_db library         { your_stdcells.lib }
 
-set_attribute hdl_search_path { . }
+set_db hdl_search_path { . }
 read_hdl -v2005 [list \
     float16_decoder.v \
     leading_zero_counter.v \
