@@ -29,17 +29,43 @@ module float16_multiplier_tb;
     reg [63:0] double_bits;
     reg [10:0] double_exp;
     reg [51:0] double_frac;
+
+    reg [ 9:0] denorm_shifted_frac;
+    integer    denorm_lz;
+    integer    denorm_true_exp;
+    integer    k;
+    reg        denorm_found;
     begin
       float_sign = float_i[15];
       float_exp  = float_i[14:10];
       float_frac = float_i[9:0];
 
+      // zero
       if (float_exp == 5'd0 && float_frac == 10'd0) begin
         double_bits = {float_sign, 63'd0};
+        // inf / nan
       end else if (float_exp == 5'd31) begin
-        double_exp  = 11'd2047;  // all ones exponent 
+        double_exp  = 11'd2047;
         double_frac = {float_frac, 42'd0};
         double_bits = {float_sign, double_exp, double_frac};
+        // denormal: find leading one of the fraction and renormalize into
+        // the double format (which always has an implicit leading one)
+      end else if (float_exp == 5'd0) begin
+        denorm_lz    = 0;
+        denorm_found = 1'b0;
+        for (k = 9; k >= 0; k = k - 1) begin
+          if (!denorm_found && float_frac[k]) denorm_found = 1'b1;
+          else if (!denorm_found)             denorm_lz    = denorm_lz + 1;
+        end
+
+        // true exp: leading-one position is (9 - denorm_lz), value scales as
+        // 2^(pos - 24)
+        denorm_true_exp     = (9 - denorm_lz) - 24;
+        denorm_shifted_frac = float_frac << (denorm_lz + 1);
+        double_exp          = denorm_true_exp + DOUBLE_BIAS;
+        double_frac         = {denorm_shifted_frac, 42'd0};
+        double_bits         = {float_sign, double_exp, double_frac};
+        // normal
       end else begin
         double_exp  = float_exp - FLOAT_BIAS + DOUBLE_BIAS;
         double_frac = {float_frac, 42'd0};
