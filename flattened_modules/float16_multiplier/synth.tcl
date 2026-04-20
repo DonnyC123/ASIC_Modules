@@ -1,6 +1,13 @@
+set FREEPDK45 /vol/eecs391/FreePDK45
+set_db lib_search_path [list $FREEPDK45/osu_soc/lib/files]
+set_db library         [list gscl45nm.lib]
+
+# set_db syn_generic_effort high
+# set_db syn_map_effort     high
+# set_db syn_opt_effort     high
 
 set_db hdl_search_path { . }
-read_hdl  [list \
+read_hdl [list \
     float16_decoder.v \
     leading_zero_counter.v \
     product_normalizer.v \
@@ -11,8 +18,10 @@ read_hdl  [list \
 elaborate float16_multiplier
 check_design -unresolved
 
+# --- constraints: combinational, bound input-to-output delay ---
 set_max_delay 5.0 -from [all_inputs] -to [all_outputs]
 
+# --- synthesize ---
 syn_generic
 syn_map
 syn_opt
