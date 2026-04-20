@@ -16,6 +16,7 @@ module product_rounder (
   wire [ 5:0] product_exp;
 
   wire        round_ovfl;
+  wire        denorm_promote;
   wire        product_inf;
 
   // add 1 to the mantissa, keeping a 12th bit to catch rounding overflow
@@ -23,12 +24,22 @@ module product_rounder (
 
   assign round_ovfl = product_mantissa_rounded_raw[11];
 
+  // denormal promoted to smallest normal: pre-round bit 10 was zero and
+  // rounding set it, but the add didn't carry past bit 11
+  assign denorm_promote = round_product_i
+                       && ~product_mantissa_unrouned_i[10]
+                       &&  product_mantissa_rounded_raw[10]
+                       && ~round_ovfl;
+
   // on overflow, shift right by 1 and bump the exponent
   assign product_mantissa_rounded     = round_ovfl ?
                                         product_mantissa_rounded_raw[11:1] :
                                         product_mantissa_rounded_raw[10:0];
 
-  assign product_exp_rounded = round_ovfl ? product_exp_unrouned_i + 1 : product_exp_unrouned_i;
+  // bump the exponent on rounding overflow or on denormal promotion
+  assign product_exp_rounded = (round_ovfl || denorm_promote) ?
+                               product_exp_unrouned_i + 1 :
+                               product_exp_unrouned_i;
 
   // pick rounded or unrounded value based on the normalizer's decision
   assign product_mantissa = round_product_i ? product_mantissa_rounded : product_mantissa_unrouned_i;
