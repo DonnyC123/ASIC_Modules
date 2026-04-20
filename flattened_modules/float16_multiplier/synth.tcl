@@ -1,5 +1,3 @@
-set_db lib_search_path { /path/to/lib }
-set_db library         { your_stdcells.lib }
 
 set_db hdl_search_path { . }
 read_hdl -v2005 [list \
