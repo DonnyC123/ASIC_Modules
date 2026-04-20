@@ -164,6 +164,11 @@ module float16_multiplier_tb;
       if ((is_nan(double_actual) && is_nan(double_expected)) || double_actual == double_expected) begin
         pass_count = pass_count + 1;
       end else begin
+        $display("  lzc_input     = %h", dut.product_mantissa_raw);
+        $display("  raw exp       = %0d", dut.product_exp_raw);
+        $display("  unrounded mnt = %h", dut.product_mantissa_unrounded);
+        $display("  unrounded exp = %0d", dut.product_exp_unrounded);
+        $display("  round_product = %b", dut.round_product);
         fail_count = fail_count + 1;
         $fatal(1, "Expected and actual don't match");
       end
@@ -179,7 +184,7 @@ module float16_multiplier_tb;
     pass_count = 0;
     fail_count = 0;
 
-    // directed tests (float16 hex encodings)
+    // directed tests 
     check(16'h3C00, 16'h3C00);  // 1.0   * 1.0
     check(16'h3E00, 16'h3E00);  // 1.5   * 1.5
     check(16'h4000, 16'h3800);  // 2.0   * 0.5

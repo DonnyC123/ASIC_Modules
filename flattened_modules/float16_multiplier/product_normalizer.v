@@ -40,30 +40,25 @@ module product_normalizer (
 
   // denormal output when the biased exp would be zero or negative
   // right-shift by (1 - exp) so the effective true exp becomes -14
-  assign is_denormal         = (unrounded_product_exp <= 0);
+  assign is_denormal = (unrounded_product_exp <= 0);
   assign denorm_shift_amount = 7'sd1 - unrounded_product_exp;
-  assign denorm_shift        = is_denormal ?
-                               ((denorm_shift_amount > 7'sd21) ? 5'd21 : denorm_shift_amount[4:0]) :
-                               5'd0;
+  assign denorm_shift = is_denormal ? ((denorm_shift_amount > 7'sd21) ? 5'd21 : denorm_shift_amount[4:0]) : 5'd0;
 
   assign shifted_product_mantissa = normalized_mantissa >> denorm_shift;
 
   // bits that fell off the bottom of the denormal right-shift still
   // contribute to sticky for rounding
   assign denorm_shift_mask = (22'd1 << denorm_shift) - 22'd1;
-  assign denorm_sticky     = |(normalized_mantissa & denorm_shift_mask);
+  assign denorm_sticky = |(normalized_mantissa & denorm_shift_mask);
 
-  // top 11 bits of the shifted mantissa; leading zero appears naturally
-  // for denormal results
   assign unrounded_product_mantissa_o = shifted_product_mantissa[21:11];
 
-  // exponent saturates at zero for denormal (and total) underflow
   assign unrounded_product_exp_o = is_denormal ? 6'd0 : unrounded_product_exp[5:0];
 
   // guard, sticky, and mantissa lsb for round-to-nearest-even
   assign mantissa_lsb = shifted_product_mantissa[11];
-  assign guard        = shifted_product_mantissa[10];
-  assign sticky       = |shifted_product_mantissa[9:0] | denorm_sticky;
+  assign guard = shifted_product_mantissa[10];
+  assign sticky = |shifted_product_mantissa[9:0] | denorm_sticky;
 
   // round up when guard is set and either the lsb or sticky forces it
   assign round_product_o = guard && (mantissa_lsb || sticky);
