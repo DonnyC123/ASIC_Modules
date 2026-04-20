@@ -208,12 +208,14 @@ module float16_multiplier_tb;
       float16_actual            = float_product;
       double_actual             = float_to_real(float16_actual);
 
-      $display("Computing %f * %f: Expected %f (%h), Actual %f (%h)", double_a, double_b, double_expected,
-               float16_expected, double_actual, float16_actual);
+      // $display("Computing %f * %f: Expected %f (%h), Actual %f (%h)", double_a, double_b, double_expected,
+      //          float16_expected, double_actual, float16_actual);
 
       if ((is_nan(double_actual) && is_nan(double_expected)) || double_actual == double_expected) begin
         pass_count = pass_count + 1;
       end else begin
+        $display("Computing %f * %f: Expected %f (%h), Actual %f (%h)", double_a, double_b, double_expected,
+                 float16_expected, double_actual, float16_actual);
         fail_count = fail_count + 1;
         $fatal(1, "Expected and actual don't match");
       end
@@ -239,7 +241,7 @@ module float16_multiplier_tb;
     check(16'h5640, 16'h5640);  // 100.0 * 100.0
 
     // random tests
-    $display("Starting 10,000,000 random tests");
+    $display("Starting 100,000,000 random tests");
     for (i = 0; i < 100000000; i = i + 1) begin
       rand_a = $random;
       rand_b = $random;
