@@ -26,8 +26,8 @@ module float16_multiplier (
   wire        product_nan;
   wire        product_zero;
 
-  wire [21:0] product_mantissa_raw;
-  wire [ 5:0] product_exp_raw;
+  wire        [21:0] product_mantissa_raw;
+  wire signed [ 6:0] product_exp_raw;
 
   // normalizer outputs going into the rounder
   wire [10:0] product_mantissa_unrounded;
@@ -72,9 +72,11 @@ module float16_multiplier (
   // zero if either operand is zero
   assign product_zero = float_a_zero || float_b_zero;
 
-  // multiply full mantissas and add exponents (subtract bias once)
+  // multiply full mantissas and add exponents (subtract bias once);
+  // keep the exponent 7-bit signed so an underflowing sum survives into
+  // the normalizer's denormal path instead of wrapping
   assign product_mantissa_raw = float_a_mantissa * float_b_mantissa;
-  assign product_exp_raw = float_a_exp + float_b_exp - BIAS;
+  assign product_exp_raw = $signed({2'b0, float_a_exp}) + $signed({2'b0, float_b_exp}) - 7'sd15;
 
 
   // shift the raw product to align the leading one, extract the top 10 bits

@@ -3,11 +3,11 @@
 // when the exponent would underflow, and produces a round-to-nearest
 // even decision from guard/sticky bits
 module product_normalizer (
-  input  wire [21:0] product_i,
-  input  wire [ 5:0] product_exp_i,
-  output wire [10:0] unrounded_product_mantissa_o,
-  output wire [ 5:0] unrounded_product_exp_o,
-  output wire        round_product_o
+  input  wire        [21:0] product_i,
+  input  wire signed [ 6:0] product_exp_i,
+  output wire        [10:0] unrounded_product_mantissa_o,
+  output wire        [ 5:0] unrounded_product_exp_o,
+  output wire               round_product_o
 );
 
   wire        [ 4:0] leading_zero_count;
@@ -33,7 +33,7 @@ module product_normalizer (
 
   // adjust the exponent: +1 for the extra integer bit from the mantissa
   // multiply, then subtract the amount the mantissa needs to be left-shifted
-  assign unrounded_product_exp = $signed({1'b0, product_exp_i}) + 7'sd1 - $signed({2'b00, leading_zero_count});
+  assign unrounded_product_exp = product_exp_i + 7'sd1 - $signed({2'b00, leading_zero_count});
 
   // left-shift the product so the leading one lands in bit 21
   assign normalized_mantissa = product_i << leading_zero_count;
