@@ -165,7 +165,7 @@ module float16_multiplier_tb;
         pass_count = pass_count + 1;
       end else begin
         fail_count = fail_count + 1;
-        $error("Expected and actual don't match");
+        $fatal(1, "Expected and actual don't match");
       end
     end
   endtask
