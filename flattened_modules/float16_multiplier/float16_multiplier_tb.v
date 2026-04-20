@@ -1,5 +1,3 @@
-// Testbench for float16_multiplier.
-
 `timescale 1ns / 1ps
 
 module float16_multiplier_tb;
@@ -19,8 +17,8 @@ module float16_multiplier_tb;
 
   // Convert float16 to real
   // 1. Pull out the sign, exponent, and fraction fields
-  // 2. Handle the special cases (zero, inf/nan) directly
-  // 3. For a normal number, shift the fields into the 64-bit
+  // 2. Handle the special cases (zero, inf, nan)
+  // 3. For a regular number, shift the fields into the 64-bit
   // double format and return the value as a real
 
   function real float_to_real(input [15:0] float_i);
@@ -52,13 +50,11 @@ module float16_multiplier_tb;
     end
   endfunction
 
-
-
   // Convert real to float16
   // 1. Pull out its sign, exponent, and fraction from double
   // 2. Re-bias the exponent for float16
-  // 3. If it overflows the 5-bit exponent range, return +/- inf.
-  // If it underflows, return +/- zero (no denormal support here
+  // 3. If it overflows the 5-bit exponent range, return inf.
+  // If it underflows, return zero (no denormal support here
   // to keep the function simple for class use).
   // 4. Otherwise take the top 10 bits of the double's fraction and
   // do a simple round-to-nearest using the 11th bit as the
@@ -71,23 +67,27 @@ module float16_multiplier_tb;
     reg     [10:0] double_exp;
     reg     [51:0] double_frac;
 
-    integer        float_new_exp;  // may go negative -> use integer
+    integer        float_new_exp;
     reg     [ 4:0] float_exp;
     reg     [ 9:0] float_frac;
     reg            float_guard;
-    reg     [10:0] float_frac_rounded;  // 11 bits to catch round-up overflow
+    reg     [10:0] float_frac_rounded;
     begin
       double_bits = $realtobits(double_i);
       double_sign = double_bits[63];
       double_exp  = double_bits[62:52];
       double_frac = double_bits[51:0];
 
+      // Zero in the input
       if (double_exp == 11'd0 && double_frac == 52'd0) begin
         real_to_float = {double_sign, 15'd0};
-      end  // NaN or infinity in the input
-      else if (double_exp == 11'd2047) begin
-        if (double_frac == 52'd0) real_to_float = {double_sign, 5'b11111, 10'd0};  // inf
-        else real_to_float = {double_sign, 5'b11111, 10'h3FF};  // NaN
+        // NaN or inf in the input
+      end else if (double_exp == 11'd2047) begin
+        if (double_frac == 52'd0) begin
+          real_to_float = {double_sign, 5'b11111, 10'd0};  // inf 
+        end else begin
+          real_to_float = {double_sign, 5'b11111, 10'h3FF};  // NaN
+        end
       end else begin
         float_new_exp = double_exp - DOUBLE_BIAS + FLOAT_BIAS;
 
@@ -123,35 +123,80 @@ module float16_multiplier_tb;
     end
   endfunction
 
+  function automatic logic is_nan(input real val);
+    return (val != val);
+  endfunction
+
+  integer pass_count;
+  integer fail_count;
+
   task check;
-    input real double_a;
-    input real double_b;
+    input reg [15:0] float16_a;
+    input reg [15:0] float16_b;
+
+    real        double_a;
+    real        double_b;
+
+    real        double_expected_unrounded;
     real        double_expected;
-    real        double_got;
-    reg  [15:0] float_got;
+    reg  [15:0] float16_expected;
+    real        double_actual;
+    reg  [15:0] float16_actual;
+
     begin
-      float_a = real_to_float(double_a);
-      float_b = real_to_float(double_b);
-      #1;
-      float_got       = float_product;
-      double_got      = float_to_real(float_got);
-      double_expected = double_a * double_b;
-      $display("%f * %f = %f (expected %f, bits=%h)", double_a, double_b, double_got, double_expected, float_got);
+      float_a = float16_a;
+      float_b = float16_b;
+
+      #2.5;
+
+      double_a                  = float_to_real(float16_a);
+      double_b                  = float_to_real(float16_b);
+      double_expected_unrounded = double_a * double_b;
+      float16_expected          = real_to_float(double_expected_unrounded);
+      double_expected           = float_to_real(float16_expected);
+
+      float16_actual            = float_product;
+      double_actual             = float_to_real(float16_actual);
+
+      $display("Computing %f * %f: Expected %f (%h), Actual %f (%h)", double_a, double_b, double_expected,
+               float16_expected, double_actual, float16_actual);
+
+      if ((is_nan(double_actual) && is_nan(double_expected)) || double_actual == double_expected) begin
+        pass_count = pass_count + 1;
+      end else begin
+        fail_count = fail_count + 1;
+        $error("Expected and actual don't match");
+      end
     end
   endtask
 
+  integer        i;
+  reg     [15:0] rand_a;
+  reg     [15:0] rand_b;
+
   initial begin
     $display("Starting float16_multiplier testbench");
+    pass_count = 0;
+    fail_count = 0;
 
-    check(1.0, 1.0);
-    check(1.5, 1.5);
-    check(2.0, 0.5);
-    check(-3.0, 2.0);
-    check(0.25, 4.0);
-    check(0.0, 7.0);
-    check(100.0, 100.0);
+    // directed tests (float16 hex encodings)
+    check(16'h3C00, 16'h3C00);  // 1.0   * 1.0
+    check(16'h3E00, 16'h3E00);  // 1.5   * 1.5
+    check(16'h4000, 16'h3800);  // 2.0   * 0.5
+    check(16'hC200, 16'h4000);  // -3.0  * 2.0
+    check(16'h3400, 16'h4400);  // 0.25  * 4.0
+    check(16'h0000, 16'h4700);  // 0.0   * 7.0
+    check(16'h5640, 16'h5640);  // 100.0 * 100.0
 
-    $display("Done");
+    // random tests
+    $display("Starting 1000000 random tests");
+    for (i = 0; i < 1000000; i = i + 1) begin
+      rand_a = $random;
+      rand_b = $random;
+      check(rand_a, rand_b);
+    end
+
+    $display("Finished Testing: %0d passed, %0d failed", pass_count, fail_count);
     $finish;
   end
 
