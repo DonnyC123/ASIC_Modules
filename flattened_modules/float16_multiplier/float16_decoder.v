@@ -22,16 +22,16 @@ module float16_decoder (
   // denormal when the stored exponent field is zero
   assign float_denorm     = float_i[14:10] == 5'b0 ? 1'b1 : 1'b0;
 
-  // force exp to 1 for denormals so downstream math sees the correct bias
+  // force exp to 1 for denormals
   assign float_exp_o      = float_denorm ? 5'b1 : float_i[14:10];
-  // prepend the implicit leading bit (0 for denorms, 1 for normals)
+
+  // prepend the leading bit (0 for denorms, 1 for normals)
   assign float_mantissa_o = float_denorm ? {1'b0, float_frac} : {1'b1, float_frac};
 
-  // Check if exp is all ones
+  // check if exp is all ones
   assign float_exp_ones   = float_i[14:10] == 5'b11111;
-
   assign float_exp_zeros  = float_i[14:10] == 5'b0;
-  // Check if float frac is all zeros
+  // check if float frac is all zeros
   assign float_frac_zeros = float_frac == 10'b0;
 
   // exp all ones with zero frac -> inf

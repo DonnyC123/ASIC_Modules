@@ -48,8 +48,7 @@ module float16_multiplier_tb;
         double_exp  = 11'd2047;
         double_frac = {float_frac, 42'd0};
         double_bits = {float_sign, double_exp, double_frac};
-        // denormal: find leading one of the fraction and renormalize into
-        // the double format (which always has an implicit leading one)
+        // handle denormal case
       end else if (float_exp == 5'd0) begin
         denorm_lz    = 0;
         denorm_found = 1'b0;
@@ -58,13 +57,12 @@ module float16_multiplier_tb;
           else if (!denorm_found) denorm_lz = denorm_lz + 1;
         end
 
-        // true exp: leading-one position is (9 - denorm_lz), value scales as
-        // 2^(pos - 24)
         denorm_true_exp     = (9 - denorm_lz) - 24;
         denorm_shifted_frac = float_frac << (denorm_lz + 1);
         double_exp          = denorm_true_exp + DOUBLE_BIAS;
         double_frac         = {denorm_shifted_frac, 42'd0};
         double_bits         = {float_sign, double_exp, double_frac};
+
         // normal
       end else begin
         double_exp  = float_exp - FLOAT_BIAS + DOUBLE_BIAS;
@@ -119,7 +117,7 @@ module float16_multiplier_tb;
         if (double_frac == 52'd0) begin
           real_to_float = {double_sign, 5'b11111, 10'd0};  // inf
         end else begin
-          real_to_float = {double_sign, 5'b11111, 10'h3FF};  // NaN
+          real_to_float = {double_sign, 5'b11111, 10'h3FF};  // nan 
         end
       end else begin
         float_new_exp = double_exp - DOUBLE_BIAS + FLOAT_BIAS;
@@ -128,10 +126,6 @@ module float16_multiplier_tb;
         // saturate to inf
         if (float_new_exp >= 31) begin
           real_to_float = {double_sign, 5'b11111, 10'd0};
-
-          // denormal range: right-shift full_frac by (1 - new_exp) so the
-          // effective exponent reaches the denormal encoding, capturing
-          // sticky from bits that drop off
         end else if (float_new_exp <= 0) begin
           float_exp  = 5'd0;
           shift_dist = 1 - float_new_exp;
@@ -145,18 +139,16 @@ module float16_multiplier_tb;
             sticky        = (|shifted_frac[40:0]) | (|(full_frac << (53 - shift_dist)));
           end
 
-          // round-to-nearest-even using guard, kept lsb, and sticky
+          // round to nearest even
           round_up         = rounding_frac[0] & (rounding_frac[1] | sticky);
           frac_carry_adder = {1'b0, rounding_frac[10:1]} + round_up;
           float_frac       = frac_carry_adder[9:0];
 
-          // rounding overflow promotes denormal to smallest normal
           if (frac_carry_adder[10]) float_exp = 5'd1;
 
           real_to_float = {double_sign, float_exp, float_frac};
 
-          // normal range: top 11 bits of double frac are {kept, guard},
-          // everything below contributes to sticky
+          // normal range: top 11 bits of double frac
         end else begin
           float_exp        = float_new_exp[4:0];
           rounding_frac    = double_frac[51:41];
@@ -166,7 +158,6 @@ module float16_multiplier_tb;
           frac_carry_adder = {1'b0, rounding_frac[10:1]} + round_up;
           float_frac       = frac_carry_adder[9:0];
 
-          // rounding carried past the mantissa top -> bump the exponent
           if (frac_carry_adder[10]) begin
             float_exp = float_exp + 5'd1;
             if (float_exp == 5'b11111) begin
@@ -217,14 +208,12 @@ module float16_multiplier_tb;
       float16_actual            = float_product;
       double_actual             = float_to_real(float16_actual);
 
-      // $display("Computing %f * %f: Expected %f (%h), Actual %f (%h)", double_a, double_b, double_expected,
-      //          float16_expected, double_actual, float16_actual);
+      $display("Computing %f * %f: Expected %f (%h), Actual %f (%h)", double_a, double_b, double_expected,
+               float16_expected, double_actual, float16_actual);
 
       if ((is_nan(double_actual) && is_nan(double_expected)) || double_actual == double_expected) begin
         pass_count = pass_count + 1;
       end else begin
-        $display("Computing %f * %f: Expected %f (%h), Actual %f (%h)", double_a, double_b, double_expected,
-                 float16_expected, double_actual, float16_actual);
         fail_count = fail_count + 1;
         $fatal(1, "Expected and actual don't match");
       end
@@ -250,7 +239,7 @@ module float16_multiplier_tb;
     check(16'h5640, 16'h5640);  // 100.0 * 100.0
 
     // random tests
-    $display("Starting 1,00,000,000 random tests");
+    $display("Starting 10,000,000 random tests");
     for (i = 0; i < 100000000; i = i + 1) begin
       rand_a = $random;
       rand_b = $random;

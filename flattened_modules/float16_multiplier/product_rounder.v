@@ -1,5 +1,4 @@
-// Applies the normalizer's round decision, handles the carry-out when
-// rounding overflows the mantissa, and packs the final 16-bit float
+// applys rounding decision to the product 
 module product_rounder (
   input  wire        product_sign_unrouned_i,
   input  wire [ 5:0] product_exp_unrouned_i,
@@ -19,7 +18,7 @@ module product_rounder (
   wire        denorm_promote;
   wire        product_inf;
 
-  // add 1 to the mantissa, keeping a 12th bit to catch rounding overflow
+  // add 1 to the mantissa, using msb to catch rounding overflow
   assign product_mantissa_rounded_raw = product_mantissa_unrouned_i + 1;
 
   assign round_ovfl = product_mantissa_rounded_raw[11];
@@ -31,21 +30,18 @@ module product_rounder (
                        &&  product_mantissa_rounded_raw[10]
                        && ~round_ovfl;
 
-  // on overflow, shift right by 1 and bump the exponent
+  // on overflow, shift right by 1 and increment exponent
   assign product_mantissa_rounded     = round_ovfl ?
                                         product_mantissa_rounded_raw[11:1] :
                                         product_mantissa_rounded_raw[10:0];
 
-  // bump the exponent on rounding overflow or on denormal promotion
-  assign product_exp_rounded = (round_ovfl || denorm_promote) ?
-                               product_exp_unrouned_i + 1 :
-                               product_exp_unrouned_i;
+  assign product_exp_rounded = (round_ovfl || denorm_promote) ? product_exp_unrouned_i + 1 : product_exp_unrouned_i;
 
-  // pick rounded or unrounded value based on the normalizer's decision
+  // pick rounded or unrounded value
   assign product_mantissa = round_product_i ? product_mantissa_rounded : product_mantissa_unrouned_i;
   assign product_exp = round_product_i ? product_exp_rounded : product_exp_unrouned_i;
 
-  // inf if the exponent overflowed past 5 bits or saturated at all ones
+  // check for inf
   assign product_inf = product_exp[5] || product_exp[4:0] == 5'h1F;
 
   // pack sign, exponent, and mantissa (force inf encoding when overflowed)

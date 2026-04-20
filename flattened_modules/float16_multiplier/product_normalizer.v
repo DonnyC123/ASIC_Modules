@@ -1,7 +1,6 @@
-// Aligns the 22-bit raw mantissa product so the msb is a one, adjusts
-// the exponent by the same amount, right-shifts into the denormal range
-// when the exponent would underflow, and produces a round-to-nearest
-// even decision from guard/sticky bits
+// Aligns the 22-bit raw mantissa product in to an unrounded fraction
+// when the exponent would underflow, and produces flag if mantissa should be
+// rounded up
 module product_normalizer (
   input  wire        [21:0] product_i,
   input  wire signed [ 6:0] product_exp_i,
