@@ -1,6 +1,6 @@
 
 set_db hdl_search_path { . }
-read_hdl -v2005 [list \
+read_hdl -v [list \
     float16_decoder.v \
     leading_zero_counter.v \
     product_normalizer.v \
