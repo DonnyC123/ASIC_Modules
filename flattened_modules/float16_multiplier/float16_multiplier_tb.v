@@ -67,11 +67,18 @@ module float16_multiplier_tb;
     reg     [10:0] double_exp;
     reg     [51:0] double_frac;
 
+    reg     [52:0] full_frac;
+    reg     [52:0] shifted_frac;
+    integer        shift_dist;
+
     integer        float_new_exp;
     reg     [ 4:0] float_exp;
     reg     [ 9:0] float_frac;
-    reg            float_guard;
-    reg     [10:0] float_frac_rounded;
+
+    reg     [10:0] rounding_frac;
+    reg            sticky;
+    reg            round_up;
+    reg     [10:0] frac_carry_adder;
     begin
       double_bits = $realtobits(double_i);
       double_sign = double_bits[63];
@@ -84,38 +91,64 @@ module float16_multiplier_tb;
         // NaN or inf in the input
       end else if (double_exp == 11'd2047) begin
         if (double_frac == 52'd0) begin
-          real_to_float = {double_sign, 5'b11111, 10'd0};  // inf 
+          real_to_float = {double_sign, 5'b11111, 10'd0};  // inf
         end else begin
           real_to_float = {double_sign, 5'b11111, 10'h3FF};  // NaN
         end
       end else begin
         float_new_exp = double_exp - DOUBLE_BIAS + FLOAT_BIAS;
+        full_frac     = (double_exp == 11'd0) ? {1'b0, double_frac} : {1'b1, double_frac};
 
         // saturate to inf
         if (float_new_exp >= 31) begin
           real_to_float = {double_sign, 5'b11111, 10'd0};
 
-          // flush to zero
+          // denormal range: right-shift full_frac by (1 - new_exp) so the
+          // effective exponent reaches the denormal encoding, capturing
+          // sticky from bits that drop off
         end else if (float_new_exp <= 0) begin
-          real_to_float = {double_sign, 15'd0};
-          // convert to float16
+          float_exp  = 5'd0;
+          shift_dist = 1 - float_new_exp;
+
+          if (shift_dist > 53) begin
+            rounding_frac = 11'd0;
+            sticky        = 1'b1;
+          end else begin
+            shifted_frac  = full_frac >> shift_dist;
+            rounding_frac = shifted_frac[51:41];
+            sticky        = (|shifted_frac[40:0]) | (|(full_frac << (53 - shift_dist)));
+          end
+
+          // round-to-nearest-even using guard, kept lsb, and sticky
+          round_up         = rounding_frac[0] & (rounding_frac[1] | sticky);
+          frac_carry_adder = {1'b0, rounding_frac[10:1]} + round_up;
+          float_frac       = frac_carry_adder[9:0];
+
+          // rounding overflow promotes denormal to smallest normal
+          if (frac_carry_adder[10]) float_exp = 5'd1;
+
+          real_to_float = {double_sign, float_exp, float_frac};
+
+          // normal range: top 11 bits of double frac are {kept, guard},
+          // everything below contributes to sticky
         end else begin
-          float_frac         = double_frac[51:42];
-          float_guard        = double_frac[41];
+          float_exp        = float_new_exp[4:0];
+          rounding_frac    = double_frac[51:41];
+          sticky           = |double_frac[40:0];
 
-          float_frac_rounded = {1'b0, float_frac} + float_guard;
+          round_up         = rounding_frac[0] & (rounding_frac[1] | sticky);
+          frac_carry_adder = {1'b0, rounding_frac[10:1]} + round_up;
+          float_frac       = frac_carry_adder[9:0];
 
-          if (float_frac_rounded[10]) begin
-            float_exp  = float_new_exp[4:0] + 5'd1;
-            float_frac = 10'd0;
+          // rounding carried past the mantissa top -> bump the exponent
+          if (frac_carry_adder[10]) begin
+            float_exp = float_exp + 5'd1;
             if (float_exp == 5'b11111) begin
               real_to_float = {double_sign, 5'b11111, 10'd0};  // rounded up to inf
             end else begin
-              real_to_float = {double_sign, float_exp, float_frac};
+              real_to_float = {double_sign, float_exp, 10'd0};
             end
           end else begin
-            float_exp     = float_new_exp[4:0];
-            float_frac    = float_frac_rounded[9:0];
             real_to_float = {double_sign, float_exp, float_frac};
           end
         end
