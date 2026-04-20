@@ -22,19 +22,19 @@ module float16_multiplier_tb;
   // double format and return the value as a real
 
   function real float_to_real(input [15:0] float_i);
-    reg        float_sign;
-    reg [ 4:0] float_exp;
-    reg [ 9:0] float_frac;
+    reg            float_sign;
+    reg     [ 4:0] float_exp;
+    reg     [ 9:0] float_frac;
 
-    reg [63:0] double_bits;
-    reg [10:0] double_exp;
-    reg [51:0] double_frac;
+    reg     [63:0] double_bits;
+    reg     [10:0] double_exp;
+    reg     [51:0] double_frac;
 
-    reg [ 9:0] denorm_shifted_frac;
-    integer    denorm_lz;
-    integer    denorm_true_exp;
-    integer    k;
-    reg        denorm_found;
+    reg     [ 9:0] denorm_shifted_frac;
+    integer        denorm_lz;
+    integer        denorm_true_exp;
+    integer        k;
+    reg            denorm_found;
     begin
       float_sign = float_i[15];
       float_exp  = float_i[14:10];
@@ -55,7 +55,7 @@ module float16_multiplier_tb;
         denorm_found = 1'b0;
         for (k = 9; k >= 0; k = k - 1) begin
           if (!denorm_found && float_frac[k]) denorm_found = 1'b1;
-          else if (!denorm_found)             denorm_lz    = denorm_lz + 1;
+          else if (!denorm_found) denorm_lz = denorm_lz + 1;
         end
 
         // true exp: leading-one position is (9 - denorm_lz), value scales as
@@ -217,17 +217,14 @@ module float16_multiplier_tb;
       float16_actual            = float_product;
       double_actual             = float_to_real(float16_actual);
 
-      $display("Computing %f * %f: Expected %f (%h), Actual %f (%h)", double_a, double_b, double_expected,
-               float16_expected, double_actual, float16_actual);
+      // $display("Computing %f * %f: Expected %f (%h), Actual %f (%h)", double_a, double_b, double_expected,
+      //          float16_expected, double_actual, float16_actual);
 
       if ((is_nan(double_actual) && is_nan(double_expected)) || double_actual == double_expected) begin
         pass_count = pass_count + 1;
       end else begin
-        $display("  lzc_input     = %h", dut.product_mantissa_raw);
-        $display("  raw exp       = %0d", dut.product_exp_raw);
-        $display("  unrounded mnt = %h", dut.product_mantissa_unrounded);
-        $display("  unrounded exp = %0d", dut.product_exp_unrounded);
-        $display("  round_product = %b", dut.round_product);
+        $display("Computing %f * %f: Expected %f (%h), Actual %f (%h)", double_a, double_b, double_expected,
+                 float16_expected, double_actual, float16_actual);
         fail_count = fail_count + 1;
         $fatal(1, "Expected and actual don't match");
       end
@@ -253,8 +250,8 @@ module float16_multiplier_tb;
     check(16'h5640, 16'h5640);  // 100.0 * 100.0
 
     // random tests
-    $display("Starting 1000000 random tests");
-    for (i = 0; i < 1000000; i = i + 1) begin
+    $display("Starting 1,00,000,000 random tests");
+    for (i = 0; i < 100000000; i = i + 1) begin
       rand_a = $random;
       rand_b = $random;
       check(rand_a, rand_b);
