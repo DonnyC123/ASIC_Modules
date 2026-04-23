@@ -31,7 +31,7 @@ module data_status_pipeline #(
       data_pipeline #(
           .DATA_W    (DATA_W),
           .PIPE_DEPTH(PIPE_DEPTH),
-          .RST_EN    (0),
+          .RST_EN    (1),
           .CLK_EN    (0)
       ) data_pipeline_inst (
           .clk   (clk),
@@ -58,7 +58,7 @@ module data_status_pipeline #(
       data_pipeline #(
           .DATA_W    (DATA_W),
           .PIPE_DEPTH(PIPE_DEPTH),
-          .RST_EN    (0),
+          .RST_EN    (1),
           .CLK_EN    (1)
       ) data_pipeline_inst (
           .clk   (clk),
