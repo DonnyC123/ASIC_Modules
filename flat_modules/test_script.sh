@@ -23,14 +23,24 @@ run_one() {
 
   local rtl_f="${mod}_rtl.f"
   local tb_f="${mod}_tb.f"
-  local tb_top="${mod}_tb"
+  local tb_sv="${mod}_tb.sv"
 
-  for f in "$rtl_f" "$tb_f" "${tb_top}.sv"; do
+  for f in "$rtl_f" "$tb_f" "$tb_sv"; do
     if [[ ! -f "$dir/$f" ]]; then
       echo "ERROR: missing $f in $dir" >&2
       return 1
     fi
   done
+
+  # TB module name is declared inside the tb .sv file and doesn't
+  # necessarily match the filename, so grep it out.
+  local tb_top
+  tb_top="$(grep -oE '^[[:space:]]*module[[:space:]]+[A-Za-z_][A-Za-z0-9_]*' "$dir/$tb_sv" \
+            | head -1 | awk '{print $2}')"
+  if [[ -z "$tb_top" ]]; then
+    echo "ERROR: could not find 'module <name>' in $tb_sv" >&2
+    return 1
+  fi
 
   local xrun_args=(
     -sv
