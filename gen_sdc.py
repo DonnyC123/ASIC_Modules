@@ -8,14 +8,17 @@ Usage:
 """
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent
 MODULES_DIR = REPO_ROOT / "flat_modules"
+# SDCs live next to synth outputs. Match syn_script.sh default; honor SYN_WORK_ROOT.
+SDC_OUT_ROOT = Path(os.environ.get("SYN_WORK_ROOT", REPO_ROOT / "genus"))
 
-# Defaults — tweak here to re-characterize every module at once.
+# Defaults
 CLK_PERIOD_NS = 2.0
 CLK_DUTY_HIGH_NS = 0.9
 IN_DELAY_MAX_NS = 0.2
@@ -34,11 +37,11 @@ RSTN_PORT = "rst_n"
 
 
 PORT_RE = re.compile(
-    r"\b(input|output|inout)\b"  # direction
-    r"(?:\s+(?:logic|wire|reg|bit))?"  # optional type
+    r"\b(input|output|inout)\b"
+    r"(?:\s+(?:logic|wire|reg|bit))?"
     r"(?:\s+(?:signed|unsigned))?"
-    r"(?:\s*\[[^\]]+\])?"  # optional packed dim
-    r"\s*([A-Za-z_][A-Za-z0-9_]*)"  # name
+    r"(?:\s*\[[^\]]+\])?"
+    r"\s*([A-Za-z_][A-Za-z0-9_]*)"
 )
 
 
@@ -46,7 +49,6 @@ def parse_ports(top_sv: Path):
     """Return (inputs, outputs) as lists of port names, in declaration order."""
     text = top_sv.read_text()
 
-    # Grab the top header up to the first line ending in ");".
     header_end = text.find(");")
     if header_end == -1:
         raise RuntimeError(f"Could not find end of port list in {top_sv}")
@@ -62,7 +64,6 @@ def parse_ports(top_sv: Path):
 
 
 def build_sdc(module: str, inputs, outputs) -> str:
-    # Partition inputs.
     if CLK_PORT not in inputs:
         raise RuntimeError(f"{module}: no '{CLK_PORT}' input found")
 
@@ -132,7 +133,9 @@ def gen_for_module(module: str, stdout: bool) -> bool:
     if stdout:
         print(sdc)
     else:
-        out = mod_dir / f"{module}.sdc"
+        out_dir = SDC_OUT_ROOT / module
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out = out_dir / f"{module}.sdc"
         out.write_text(sdc)
         print(f"wrote {out}")
     return True

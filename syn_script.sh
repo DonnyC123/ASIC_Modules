@@ -25,6 +25,7 @@ run_one() {
   local lvt="$3"
   local mod_dir="$MODULES_DIR/$mod"
   local rtl_f="$mod_dir/${mod}_rtl.f"
+  local sdc_file="$SYN_WORK_ROOT/$mod/${mod}.sdc"
   local top="${mod}${TOP_SUFFIX}"
 
   local template variant
@@ -42,6 +43,10 @@ run_one() {
   fi
   if [[ ! -f "$rtl_f" ]]; then
     echo "ERROR: missing RTL file list: $rtl_f" >&2
+    return 1
+  fi
+  if [[ ! -f "$sdc_file" ]]; then
+    echo "ERROR: missing SDC: $sdc_file  (run: ./gen_sdc.py $mod)" >&2
     return 1
   fi
   if [[ ! -f "$template" ]]; then
@@ -70,6 +75,7 @@ run_one() {
       SYN_MODULE="$mod" \
         SYN_MODULE_DIR="$mod_dir" \
         SYN_RTL_F="$rtl_f" \
+        SYN_SDC="$sdc_file" \
         SYN_TOP="$top" \
         genus "${args[@]}"
   )
