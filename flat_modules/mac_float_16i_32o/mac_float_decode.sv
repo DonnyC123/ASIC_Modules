@@ -92,7 +92,7 @@ module mac_float_decode
   logic signed  [SIGNED_EXP_W-1:0] true_exp_a;
   logic signed  [SIGNED_EXP_W-1:0] true_exp_b;
 
-  logic                         c_dominates;
+  logic                           c_dominates;
 
   always_comb begin
     a_flags = deduce_float_flags(float_a_i);
