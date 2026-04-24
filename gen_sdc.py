@@ -13,10 +13,10 @@ import re
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent
+REPO_ROOT = Path(__file__).resolve().parent.parent
 MODULES_DIR = REPO_ROOT / "flat_modules"
 # SDCs live next to synth outputs. Match syn_script.sh default; honor SYN_WORK_ROOT.
-SDC_OUT_ROOT = Path(os.environ.get("SYN_WORK_ROOT", REPO_ROOT / "genus"))
+SDC_OUT_ROOT = Path(os.environ.get("SYN_WORK_ROOT", REPO_ROOT / "syn"))
 
 # Defaults
 CLK_PERIOD_NS = 2.0

@@ -16,7 +16,7 @@ module divider_float #(
   import divider_float_pkg::*;
 
   localparam DECODE_PIPE_DEPTH  = 0;
-  localparam DIVIDER_PIPE_DEPTH = 0;
+  localparam DIVIDER_PIPE_DEPTH = 1;
   localparam OUT_PIPE_DEPTH     = 1;
 
   localparam MANTISSA_W     = FRAC_W + 1;

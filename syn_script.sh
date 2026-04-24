@@ -11,13 +11,13 @@ set -u
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MODULES_DIR="$SCRIPT_DIR/flat_modules"
-TEMPLATE_DEFAULT="$SCRIPT_DIR/syn_template.tcl"
-TEMPLATE_LVT="$SCRIPT_DIR/syn_template_lvt.tcl"
+TEMPLATE_DEFAULT="$SCRIPT_DIR/../syn/no_lvt.tcl"
+TEMPLATE_LVT="$SCRIPT_DIR/../syn/lvt.tcl"
 TOP_SUFFIX="${SYN_TOP_SUFFIX:-_top}"
 
 # Default output root is the sibling 'genus/' dir next to flat_modules/.
 # Override with:  SYN_WORK_ROOT=/some/other/path ./syn_script.sh <module>
-: "${SYN_WORK_ROOT:=$SCRIPT_DIR/genus}"
+: "${SYN_WORK_ROOT:=$SCRIPT_DIR/../syn}"
 
 run_one() {
   local mod="$1"
