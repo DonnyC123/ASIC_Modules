@@ -47,9 +47,7 @@ module divider_float #(
   logic                                       start_divider_q;
   logic                                       divider_done_q;
 
-  logic                  [QUOTIENT_RAW_W-1:0] quotient_raw;
   logic                  [QUOTIENT_RAW_W-1:0] quotient_raw_q;
-  logic                                       sticky;
   logic                                       sticky_q;
 
   always_comb begin
@@ -71,6 +69,9 @@ module divider_float #(
       .quotient_exp_o        (quotient_exp_d)
   );
 
+  logic [FLOAT_FLAGS_W-1:0] float_quotient_flags_aligned;
+  logic signed [SIGNED_EXP_W-1:0] quotient_exp_aligned;
+
   data_status_pipeline #(
       .DATA_W    (2 * MANTISSA_W + FLOAT_FLAGS_W + SIGNED_EXP_W),
       .STATUS_W  (1),
@@ -87,27 +88,35 @@ module divider_float #(
   );
 
   mantissa_divider_pipe #(
-      .MANTISSA_W(MANTISSA_W)
+      .MANTISSA_W     (MANTISSA_W),
+      .PIPELINE_STAGES(DIVIDER_PIPE_DEPTH)
   ) mantissa_divider_inst (
+      .clk           (clk),
+      .clk_en        (clk_en),
+      .rst_n         (rst_n),
       .dividend_i    (norm_mant_a_q),
       .divisor_i     (norm_mant_b_q),
-      .quotient_raw_o(quotient_raw),
-      .sticky_o      (sticky)
+      .valid_i       (start_divider_q),
+      .quotient_raw_o(quotient_raw_q),
+      .sticky_o      (sticky_q),
+      .valid_o       (divider_done_q)
   );
 
+  // Parallel delay-match pipe for side-band signals (flags/exp) so they
+  // arrive at the rounder aligned with the divider's output.
   data_status_pipeline #(
-      .DATA_W    (QUOTIENT_RAW_W + 1),
+      .DATA_W    (FLOAT_FLAGS_W + SIGNED_EXP_W),
       .STATUS_W  (1),
       .PIPE_DEPTH(DIVIDER_PIPE_DEPTH),
       .CLK_EN    (1)
-  ) divider_to_round_pipe (
+  ) divider_sideband_pipe (
       .clk     (clk),
       .clk_en  (clk_en),
       .rst_n   (rst_n),
-      .data_i  ({quotient_raw, sticky}),
+      .data_i  ({float_quotient_flags_q, quotient_exp_q}),
       .status_i(start_divider_q),
-      .data_o  ({quotient_raw_q, sticky_q}),
-      .status_o(divider_done_q)
+      .data_o  ({float_quotient_flags_aligned, quotient_exp_aligned}),
+      .status_o()
   );
 
   quotient_rounder #(
@@ -116,8 +125,8 @@ module divider_float #(
       .SIGNED_EXP_W(SIGNED_EXP_W),
       .float_t     (float_t)
   ) quotient_rounder_inst (
-      .float_quotient_flags_i(float_quotient_flags_q),
-      .quotient_exp_i        (quotient_exp_q),
+      .float_quotient_flags_i(float_quotient_flags_aligned),
+      .quotient_exp_i        (quotient_exp_aligned),
       .quotient_raw_i        (quotient_raw_q),
       .sticky_i              (sticky_q),
       .quotient_o            (float_quotient)
