@@ -37,12 +37,11 @@ module mac_float_decode
     logic [MANTISSA_IN_W-1:0] mantissa;
   } unpacked_float_t;
  
-  typedef struct {
+  typedef struct packed {
     logic sign;
     logic inf;
     logic nan;
     logic zero;
-    logic frac_zero;
     logic exp_zero;
   } float_flags_t;
 
@@ -56,12 +55,11 @@ module mac_float_decode
     exp_zero          = float_i.exp == '0;
     frac_zero         = float_i.frac == '0;
 
-    flags_o.inf       = exp_max && frac_zero;
-    flags_o.nan       = exp_max && !frac_zero;
-    flags_o.frac_zero = frac_zero;
-    flags_o.exp_zero  = exp_zero;
-    flags_o.zero      = exp_zero && frac_zero;
-    flags_o.sign      = float_i.sign;
+    flags_o.inf      = exp_max && frac_zero;
+    flags_o.nan      = exp_max && !frac_zero;
+    flags_o.exp_zero = exp_zero;
+    flags_o.zero     = exp_zero && frac_zero;
+    flags_o.sign     = float_i.sign;
 
     return flags_o;
   endfunction
@@ -106,7 +104,6 @@ module mac_float_decode
     product_flags.nan = (a_flags.zero && b_flags.inf) || (a_flags.inf && b_flags.zero);
     product_flags.sign = a_flags.sign ^ b_flags.sign;
 
-    sum_flags.zero = product_flags.zero && c_flags.zero;
     sum_flags.inf  = (product_flags.inf && c_flags.inf && (product_flags.sign == c_flags.sign))
                    ||product_flags.inf ^ c_flags.inf;
 

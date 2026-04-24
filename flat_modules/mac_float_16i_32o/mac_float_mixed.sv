@@ -6,33 +6,33 @@ module mac_float_mixed #(
     localparam DIN_W      = FRAC_IN_W + EXP_IN_W + 1,
     localparam DOUT_W     = FRAC_OUT_W + EXP_OUT_W + 1
 ) (
-    input  logic              clk,
-    input  logic              clk_en,
-    input  logic              rst_n,
-    input  logic              valid_i,
-    input  logic [ DIN_W-1:0] a,
-    input  logic [ DIN_W-1:0] b,
-    input  logic [ DIN_W-1:0] c,
-    output logic              valid_o,
-    output logic [DOUT_W-1:0] z
+  input  logic              clk,
+  input  logic              clk_en,
+  input  logic              rst_n,
+  input  logic              valid_i,
+  input  logic [ DIN_W-1:0] a,
+  input  logic [ DIN_W-1:0] b,
+  input  logic [ DIN_W-1:0] c,
+  output logic              valid_o,
+  output logic [DOUT_W-1:0] z
 );
 
   import mac_float_pkg::*;
 
-  localparam DECODE_PIPE_DEPTH    = 0;
+  localparam DECODE_PIPE_DEPTH = 0;
   localparam EXECUTION_PIPE_DEPTH = 0;
   localparam ALGIN_OUT_PIPE_DEPTH = 0;
-  localparam OUT_PIPE_DEPTH       = 1;
+  localparam OUT_PIPE_DEPTH = 1;
 
-  localparam MANTISSA_IN_W  = FRAC_IN_W + MANTISSA_INT_W;
+  localparam MANTISSA_IN_W = FRAC_IN_W + MANTISSA_INT_W;
   localparam MANTISSA_OUT_W = FRAC_OUT_W + MANTISSA_INT_W;
 
   localparam PRODUCT_MANTISSA_W = 2 * MANTISSA_IN_W;
-  localparam C_LOWER_SLICE_W    = PRODUCT_MANTISSA_W + FRAC_OUT_W - FRAC_IN_W;
-  localparam C_UPPER_SLICE_W    = MANTISSA_OUT_W + 3;
-  localparam FULL_SUM_CARRY_W   = C_LOWER_SLICE_W + MANTISSA_OUT_W + 4;
-  localparam FULL_SUM_W         = FULL_SUM_CARRY_W - 1;
-  localparam SIGNED_EXP_W       = EXP_IN_W + SIGN_W + 2 * CARRY_W;
+  localparam C_LOWER_SLICE_W = PRODUCT_MANTISSA_W + FRAC_OUT_W - FRAC_IN_W;
+  localparam C_UPPER_SLICE_W = MANTISSA_OUT_W + 3;
+  localparam FULL_SUM_CARRY_W = C_LOWER_SLICE_W + MANTISSA_OUT_W + 4;
+  localparam FULL_SUM_W = FULL_SUM_CARRY_W - 1;
+  localparam SIGNED_EXP_W = EXP_IN_W + SIGN_W + 2 * CARRY_W;
 
   localparam SUM_FLOAT_FLAGS_W = $bits(sum_float_flags_t);
 
@@ -121,9 +121,9 @@ module mac_float_mixed #(
   );
 
   data_status_pipeline #(
-      .DATA_W(C_UPPER_SLICE_W + C_LOWER_SLICE_W + MANTISSA_IN_W + MANTISSA_IN_W),
+      .DATA_W    (C_UPPER_SLICE_W + C_LOWER_SLICE_W + MANTISSA_IN_W + MANTISSA_IN_W),
       .PIPE_DEPTH(DECODE_PIPE_DEPTH),
-      .CLK_EN(1)
+      .CLK_EN    (1)
   ) decode_to_execution_pipe (
       .clk     (clk),
       .clk_en  (clk_en),
@@ -188,12 +188,12 @@ module mac_float_mixed #(
   end
 
   mac_float_align_round_sum #(
-      .EXP_IN_W(EXP_IN_W),
-      .FRAC_IN_W(FRAC_IN_W),
-      .EXP_OUT_W(EXP_OUT_W),
-      .FRAC_OUT_W(FRAC_OUT_W),
-      .FULL_SUM_W(FULL_SUM_W),
-      .float_in_t(float_in_t),
+      .EXP_IN_W   (EXP_IN_W),
+      .FRAC_IN_W  (FRAC_IN_W),
+      .EXP_OUT_W  (EXP_OUT_W),
+      .FRAC_OUT_W (FRAC_OUT_W),
+      .FULL_SUM_W (FULL_SUM_W),
+      .float_in_t (float_in_t),
       .float_out_t(float_out_t)
   ) mac_float_align_round_sum_inst (
       .float_c_i              (float_c_2q),
@@ -211,25 +211,13 @@ module mac_float_mixed #(
       .PIPE_DEPTH(ALGIN_OUT_PIPE_DEPTH),
       .CLK_EN    (1)
   ) round_to_output_pipe (
-      .clk(clk),
-      .clk_en(clk_en),
-      .rst_n(rst_n),
+      .clk     (clk),
+      .clk_en  (clk_en),
+      .rst_n   (rst_n),
       .status_i(valid_round_q),
       .status_o(valid_final_q),
-      .data_i({
-        float_sum_rounded,
-        sum_rounded_exp_ovfl,
-        sum_rounded_exp_unfl,
-        sum_float_flags_2q,
-        float_c_2q
-      }),
-      .data_o({
-        float_sum_rounded_q,
-        sum_rounded_exp_ovfl_q,
-        sum_rounded_exp_unfl_q,
-        sum_float_flags_3q,
-        float_c_3q
-      })
+      .data_i  ({float_sum_rounded, sum_rounded_exp_ovfl, sum_rounded_exp_unfl, sum_float_flags_2q, float_c_2q}),
+      .data_o  ({float_sum_rounded_q, sum_rounded_exp_ovfl_q, sum_rounded_exp_unfl_q, sum_float_flags_3q, float_c_3q})
   );
 
   upscale_float #(
@@ -261,7 +249,7 @@ module mac_float_mixed #(
   end
 
   data_status_pipeline #(
-      .DATA_W    (1 + DOUT_W),
+      .DATA_W    (DOUT_W),
       .PIPE_DEPTH(OUT_PIPE_DEPTH),
       .CLK_EN    (1)
   ) output_pipe (
